@@ -20,7 +20,7 @@
   - `game.js`: ランダムTP・投票UI・game4/10/12/17/22/24 の補助。`ranking` を 1 にするとチャットに point の順位を出す。
   - 設定: スコア `setting`(round, round-auto, testmode 等)、レベル `level game`(1〜5)。
 - ゲーム一覧(selectgame): 1 Escape Lava / 2 熱帯魚相撲 / 3 High and Low / 4 TNT RUN / 5 Adventure PVP / 6 TNT TAG / 7 Drop PVP / 8 降下デスマッチ / 9 逆らえ！ / 10 金床避け / 11 読みぶろぱ / 12 TNT避け / 13 アスレチック / 14 どうぶつリレー / 15 Block Party / 16 鉱石バトル / 17 崩れる床で生き延びろ / 18 穴落とし / 19 色塗りバトル / 20 クラフトマスター / 21 Warden Escape / 22 マグマノックバック / 23 村人数え / 24 モンスターバトル
-- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v2。
+- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v3。
 - 改変(v1、ゲーム内は未確認):
   - 追加パック `mmg_plus`(BP、scripts/main.js)+ `mmg_plus_r`(RP、掲示板の見えないエンティティ)。
   - 抽選をスクリプトへ: `select_game` → `scriptevent mmgplus:select`(OFFを除いて抽選、同じゲームの連続なし)→ `select_game_body`(元の残り+25〜27の説明)。
@@ -29,4 +29,8 @@
   - ランキング: point の増加を見張って累計・ゲーム別勝利(ポイントを取った回数)、試合終了(playing 1→0)で優勝・最下位・0pt、死亡数、記録(25 最速回答、26 最長)。掲示板は OP が置いた場所に 8秒ごとにページ切替。kill 文に `type=!mmgplus:board` を追加。
   - 改変したパックはバージョンを上げた(main 0.1.5、k-behavior_ 0.1.2)。
 - v2(未確認): 28 宝探しプール / 29 ジャンプ縄跳び / 30 ボートレース / 31 ピッタリ止め / 32 ニワトリ集め を追加。mmg_plus 1.0.1。
+- v3(未確認): BOT。BP `mmg_bot`(scripts/bot.js、@minecraft/server-gametest 1.0.0-beta の spawnSimulatedPlayer)。**Beta APIs が要る**ので build_mmg.py が level.dat の experiments.gametest=1 を立てる。ワールドは 1.26.52 で保存されていた。ベータは版ごとに変わるので、マイクラ更新で動かなくなったら manifest の版を合わせる(npm の @minecraft/server-gametest の 1.0.0-beta.<版>-stable を確認)。
+  - BOT はダミーのプレイヤーなので元のゲームの @a にそのまま入る。タグ `mmgbot`。設定メニュー「BOT」で人数(0〜12)と強さ(よわい/ふつう/つよい、setting の bot_strength にも入れる)。ワールドを開き直すと前の人数を出し直す。
+  - 動き: 攻撃系(2,5,7,8,22,24)は近くの相手を追ってなぐる、TNT TAG は鬼なら追う/ちがえば逃げる、Escape Lava はダイヤへ、鉱石バトルは近くの鉱石を掘る、椅子取りは空いたトロッコへ、宝探しは金ブロックへ、ニワトリ集めはたねを持って往復、ほかは歩き回る。
+  - mmg_plus 側: 計算早押し・ピッタリ止めは BOT の答えを作る(フォームを出さない)、色の記憶は床へ飛ばす、縄跳びは `scriptevent mmgbot:jump <名前>` でジャンプさせる、ボートレースはボートを押して角をめざす。BOT はランキングに入れない。
 - 次の候補: 記録系を既存ゲーム(アスレのタイム等)にも広げる。

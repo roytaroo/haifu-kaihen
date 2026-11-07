@@ -36,6 +36,11 @@ function score(objective, name) {
 const setScore = (objective, name, v) => obj(objective)?.setScore(name, v);
 const level = () => Math.min(5, Math.max(1, score("game", "level") ?? 1));
 const playing = () => world.getPlayers({ tags: ["playing"] });
+// BOT(mmg_bot パック)。強さ 0〜2 は mmg_bot が setting の bot_strength に入れる
+const isBot = (p) => p.hasTag("mmgbot");
+const botNames = new Set();
+const botStr = () => score("setting", "bot_strength") ?? 1;
+const chance = (weak, normal, strong) => Math.random() < [weak, normal, strong][botStr()];
 
 // ===== 抽選(OFFのゲームを除く) =====
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
@@ -179,12 +184,9 @@ async function gameQuiz() {
         cmd("playsound random.orb @a");
         await wait(20);
         const asked = Date.now();
-        for (const p of players) {
-            const form = new ActionFormData().title(`計算早押し Q${q}/${QUESTIONS}`).body(`§l${Q.text} = ?`);
-            Q.choices.forEach((c) => form.button(`§l${c}`));
-            form.show(p).then((res) => {
-                if (res.canceled || winner || aborted()) return;
-                if (Q.choices[res.selection] === Q.ans) {
+        const answer = (p, choice) => {
+                if (winner || aborted()) return;
+                if (choice === Q.ans) {
                     winner = p;
                     const sec = (Date.now() - asked) / 1000;
                     correct.set(p.name, (correct.get(p.name) ?? 0) + 1);
@@ -196,14 +198,27 @@ async function gameQuiz() {
                     p.sendMessage("§cざんねん！この問題はもう答えられません");
                     cmd(`playsound note.bass "${p.name}"`);
                 }
-            }).catch(() => {});
+        };
+        for (const p of players) {
+            if (isBot(p)) {
+                // BOT は少し待ってから答える(強いほど早くて正確)
+                const delay = rand(...[[60, 160], [40, 110], [25, 70]][botStr()]);
+                const ok = chance(0.55, 0.75, 0.9);
+                system.runTimeout(() => answer(p, ok ? Q.ans : Q.choices.find((c) => c !== Q.ans)), delay);
+                continue;
+            }
+            const form = new ActionFormData().title(`計算早押し Q${q}/${QUESTIONS}`).body(`§l${Q.text} = ?`);
+            Q.choices.forEach((c) => form.button(`§l${c}`));
+            form.show(p).then((res) => { if (!res.canceled) answer(p, Q.choices[res.selection]); }).catch(() => {});
         }
         for (let t = 0; t < LIMIT && !winner && !aborted(); t += 5) {
             actionbar(`§b計算早押し §fQ${q}/${QUESTIONS}  §7残り ${Math.ceil((LIMIT - t) / 20)}秒`);
             await wait(5);
         }
         players.forEach((p) => { try { uiManager.closeAllForms(p); } catch {} });
-        if (!winner) world.sendMessage(`§7時間切れ！ 答え: ${Q.ans}`);
+        const timedOut = !winner;
+        winner ??= "時間切れ"; // あとから届いた BOT の答えを受けつけない
+        if (timedOut) world.sendMessage(`§7時間切れ！ 答え: ${Q.ans}`);
         await wait(40);
     }
     const best = Math.max(0, ...correct.values());
@@ -264,6 +279,17 @@ async function gameSimon() {
                 const s = state.get(p.id);
                 if (!s || s.idx >= seq.length) continue;
                 left++;
+                if (isBot(p)) {
+                    // BOT は一定の間かくで次の床へ飛ぶ。長くなるほどまちがえやすい
+                    if (t % [16, 12, 8][botStr()] !== 0) continue;
+                    const miss = [0.08, 0.04, 0.015][botStr()] + seq.length * [0.012, 0.006, 0.003][botStr()];
+                    const i = Math.random() < miss ? (seq[s.idx] + rand(1, 3)) % 4 : seq[s.idx];
+                    const pad = PADS[i];
+                    p.teleport({ x: (pad.x[0] + pad.x[1]) / 2 + 0.5, y: 1, z: (pad.z[0] + pad.z[1]) / 2 + 0.5 });
+                    if (i === seq[s.idx]) { s.idx++; if (s.idx >= seq.length) left--; }
+                    else { out(p, `§cまちがえた！ §7(${seq.length}個のラウンド)`); left--; }
+                    continue;
+                }
                 const pad = padAt(p);
                 if (pad && pad !== s.prev) {
                     if (PADS.indexOf(pad) === seq[s.idx]) {
@@ -391,6 +417,7 @@ async function gamePool() {
 // ===== 29. ジャンプ縄跳び =====
 // 半径7の丸い床。中心から伸びる棒(ハーフブロック)が回るのでジャンプでよける
 const ROPE_R = 7;
+const lastJump = new Map();
 function buildRope() {
     clearArena();
     for (let x = -ROPE_R - 1; x <= ROPE_R + 1; x++) for (let z = -ROPE_R - 1; z <= ROPE_R + 1; z++) {
@@ -426,6 +453,13 @@ async function gameRope() {
             if (d <= step + 0.6 / Math.max(r, 1)) out(p, "§c棒に当たった！");
         }
         for (const b of bar) cmd(`setblock ${b[0]} 1 ${b[1]} crimson_slab`);
+        // BOT は棒が近づいたらジャンプ(たまに失敗)
+        for (const p of alive()) {
+            if (!isBot(p) || p.location.y > 1.05 || (lastJump.get(p.name) ?? 0) > system.currentTick - 12) continue;
+            let d = Math.atan2(p.location.z - 0.5, p.location.x - 0.5) - theta;
+            d = ((d % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+            if (d <= step * 2.5) { lastJump.set(p.name, system.currentTick); if (chance(0.75, 0.88, 0.96)) cmd(`scriptevent mmgbot:jump ${p.name}`); }
+        }
         swept += step;
         if (swept >= Math.PI * 2) { swept = 0; omega = Math.min(omega * 1.08, (Math.PI * 2) / 24); cmd("playsound note.hat @a 0 2 0 1 1.5"); }
         const sec = (Date.now() - t0) / 1000;
@@ -490,6 +524,7 @@ async function gameRace() {
             }
             // ボートから降りたら1秒後に乗せ直す
             const riding = p.getComponent("minecraft:riding")?.entityRidingOn;
+            if (riding && isBot(p)) steerBot(riding, s);
             if (riding) s.off = 0; else if (++s.off >= 10) { s.off = 0; boatFor(p); }
             if (t % 10 === 0) p.onScreenDisplay.setActionBar(`§bボートレース §f${Math.max(1, lap)}/${LAPS}周  §7${((Date.now() - t0) / 1000).toFixed(0)}秒`);
         }
@@ -500,6 +535,18 @@ async function gameRace() {
     cmd("ride @a stop_riding");
     const n = players.length === 1 ? 1 : Math.min(3, players.length - 1);
     return order.slice(0, n);
+}
+
+// BOT のボート: コースの真ん中の線の角を左回りに順にめざして押す
+const RACE_WP = [[-14.5, 6.5], [-14.5, -6.5], [14.5, -6.5], [14.5, 6.5]];
+function steerBot(boat, s) {
+    s.wp ??= 0;
+    const [wx, wz] = RACE_WP[s.wp], l = boat.location;
+    const dx = wx - l.x, dz = wz - l.z, d = Math.hypot(dx, dz);
+    if (d < 3.5) { s.wp = (s.wp + 1) % RACE_WP.length; return; }
+    const v = boat.getVelocity(), max = [0.45, 0.6, 0.75][botStr()];
+    if (Math.hypot(v.x, v.z) < max) boat.applyImpulse({ x: (dx / d) * 0.08, y: 0, z: (dz / d) * 0.08 });
+    boat.setRotation({ x: 0, y: (Math.atan2(-dx, dz) * 180) / Math.PI });
 }
 
 // ===== 31. ピッタリ止め =====
@@ -513,7 +560,8 @@ async function gameStop() {
     const res = new Map();
     const t0 = Date.now();
     const players = playing();
-    const forms = Promise.all(players.map((p) =>
+    for (const p of players.filter(isBot)) res.set(p.name, Math.max(0.5, target + (Math.random() * 2 - 1) * [1.6, 0.9, 0.35][botStr()]));
+    const forms = Promise.all(players.filter((p) => !isBot(p)).map((p) =>
         new ActionFormData().title("ピッタリ止め").body(`§l${target}.00秒§r ぴったりで押そう！\n§7(頭の中で数えてね)`).button("§l§cストップ！").show(p)
             .then((r) => { if (!r.canceled && !aborted()) res.set(p.name, (Date.now() - t0) / 1000); }).catch(() => {})));
     await Promise.race([forms, wait(target * 20 + 200)]);
@@ -610,12 +658,13 @@ system.runInterval(() => {
     const isPlaying = score("game", "playing") === 1;
     const sg = score("game", "selectgame") ?? 0;
     if (isPlaying) {
-        for (const p of playing()) matchPlayers.add(p.name);
+        for (const p of playing()) (isBot(p) ? botNames : matchPlayers).add(p.name);
         const o = obj("point");
         if (o) {
             for (const part of o.getParticipants()) {
                 let v; try { v = o.getScore(part); } catch { continue; }
                 const name = part.displayName, prev = lastPts[name] ?? 0;
+                if (botNames.has(name)) continue;
                 if (v > prev) {
                     const s = st(name);
                     s.pt += v - prev;
@@ -648,7 +697,7 @@ function endMatch() {
 
 world.afterEvents.entityDie.subscribe((ev) => {
     const p = ev.deadEntity;
-    if (p.typeId === "minecraft:player" && p.hasTag("playing")) { st(p.name).death++; dirty = true; }
+    if (p.typeId === "minecraft:player" && p.hasTag("playing") && !isBot(p)) { st(p.name).death++; dirty = true; }
 });
 
 // ===== ランキング掲示板 =====

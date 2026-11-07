@@ -1,12 +1,23 @@
 # mmg/src のパックで MMG のワールドを作り直す
 #   python3 tools/build_mmg.py <タグ> → dist/MMG-<タグ>.mcworld
 # 原本(mmg/original/MMG.mcworld)の地形・level.dat はそのまま、パックと適用リストだけ差し替える。ワールド名にタグを付ける
-import json, os, sys, zipfile
+import json, os, sys, tempfile, zipfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import nbt
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'mmg', 'src')
 tag = sys.argv[1] if len(sys.argv) > 1 else 'dev'
 out = os.path.join(ROOT, 'dist', f'MMG-{tag}.mcworld'); os.makedirs(os.path.dirname(out), exist_ok=True)
+
+def with_beta_api(data):
+    # BOT(mmg_bot)は Beta APIs の実験機能が要る → level.dat の experiments に gametest を立てる
+    with tempfile.TemporaryDirectory() as d:
+        p = os.path.join(d, 'level.dat'); open(p, 'wb').write(data)
+        ver, name, root = nbt.read(p)
+        ex = root['experiments'][1]
+        ex.update({'gametest': (1, 1), 'experiments_ever_used': (1, 1), 'saved_with_toggled_experiments': (1, 1)})
+        nbt.write(p, ver, name, root)
+        return open(p, 'rb').read()
 
 def packs(kind, order):
     # order: 上ほど優先。リストにないパックは後ろに足す
@@ -23,12 +34,13 @@ with zipfile.ZipFile(os.path.join(ROOT, 'mmg', 'original', 'MMG.mcworld')) as zi
         top = item.filename.split('/')[0]
         if top in ('behavior_packs', 'resource_packs', 'world_behavior_packs.json', 'world_resource_packs.json', 'levelname.txt'):
             continue
-        z.writestr(item, zin.read(item.filename))
+        data = zin.read(item.filename)
+        z.writestr(item, with_beta_api(data) if item.filename == 'level.dat' else data)
     for kind in ('behavior_packs', 'resource_packs'):
         for r, _, fs in os.walk(os.path.join(SRC, kind)):
             for f in fs:
                 full = os.path.join(r, f); z.write(full, os.path.relpath(full, SRC))
-    z.writestr('world_behavior_packs.json', json.dumps(packs('behavior_packs', ['mmg_plus', 'mmg-user-setting', 'k-behavior_', 'main']), indent=2))
+    z.writestr('world_behavior_packs.json', json.dumps(packs('behavior_packs', ['mmg_bot', 'mmg_plus', 'mmg-user-setting', 'k-behavior_', 'main']), indent=2))
     z.writestr('world_resource_packs.json', json.dumps(packs('resource_packs', ['mmg_plus_r', 'mmg-r', 'k-resource_']), indent=2))
     z.writestr('levelname.txt', f'megami MMG Plus {tag}')
 print('->', out)

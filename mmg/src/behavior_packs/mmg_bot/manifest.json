@@ -1,0 +1,18 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "MMG Bot",
+        "description": "BOTと遊べるようにする(Beta APIs が必要)",
+        "uuid": "f6effde6-5d34-470c-babd-64ec73be5145",
+        "version": [1, 0, 0],
+        "min_engine_version": [1, 21, 20]
+    },
+    "modules": [
+        { "type": "script", "language": "javascript", "uuid": "c99dd8a7-8a41-4e8a-92e0-db181e5adde7", "version": [1, 0, 0], "entry": "scripts/bot.js" }
+    ],
+    "dependencies": [
+        { "module_name": "@minecraft/server", "version": "2.0.0" },
+        { "module_name": "@minecraft/server-ui", "version": "2.1.0" },
+        { "module_name": "@minecraft/server-gametest", "version": "1.0.0-beta" }
+    ]
+}
