@@ -1,0 +1,18 @@
+{
+    "format_version": 2,
+    "header": {
+        "description": "琥珀が作ったゲームに共通して入っているものです",
+        "name": "kohaku resource pack",
+        "uuid": "13f149f2-c5c0-4421-aed7-ff6986a3a54f",
+        "version": [0, 0, 1],
+        "min_engine_version": [ 1, 21, 2 ]
+    },
+    "modules": [
+        {
+            "description": "kohaku resource pack",
+            "type": "resources",
+            "uuid": "ddd958e6-c77e-4798-99e9-e45f37f4b477",
+            "version": [0, 0, 1]
+        }
+    ]
+}

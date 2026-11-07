@@ -1,0 +1,12 @@
+{
+  "resource_pack_name": "kohaku-rp",
+  "texture_name": "atlas.items",
+  "texture_data": {
+    "setting": {
+      "textures": "textures/items/setting"
+    },
+    "setting2": {
+      "textures": "textures/items/setting2"
+    }
+  }
+}

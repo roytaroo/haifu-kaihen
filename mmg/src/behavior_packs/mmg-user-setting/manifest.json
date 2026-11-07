@@ -1,0 +1,30 @@
+{
+    "format_version": 2,
+    "header": {
+        "description": "Many Mini Games 専用",
+        "name": "MMG OreUI",
+        "uuid": "7532b1d4-7bf3-4027-b1ff-4c115540ec81",
+        "version": [0, 1, 0],
+        "min_engine_version": [1, 21, 80]
+    },
+    "modules": [
+        {
+            "type": "script",
+            "language": "javascript",
+            "uuid": "d7216b22-647c-4f6e-b1c8-7e9bcf95252c",
+            "entry": "scripts/main.js",
+            "version": [0, 1, 0]
+        }
+    ],
+    "capabilities": ["script_eval"],
+    "dependencies": [
+        {
+            "module_name": "@minecraft/server",
+            "version": "2.9.0"
+        },
+        {
+            "module_name": "@minecraft/server-ui",
+            "version": "2.2.0"
+        }
+    ]
+}

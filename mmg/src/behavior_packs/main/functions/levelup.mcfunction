@@ -1,0 +1,1 @@
+scoreboard players set level game 1

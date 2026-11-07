@@ -1,0 +1,18 @@
+{
+    "format_version": 2,
+    "header": {
+        "description": "Many mini games!!",
+        "name": "MMG resource pack",
+        "uuid": "4f8f2aef-1161-453a-bc1a-3297053ab2f6",
+        "version": [0, 1, 2],
+        "min_engine_version": [ 1, 21, 2 ]
+    },
+    "modules": [
+        {
+            "description": "MMG resource pack",
+            "type": "resources",
+            "uuid": "d8648048-bfd6-472c-802e-66d6e3af8b18",
+            "version": [0, 0, 1]
+        }
+    ]
+}

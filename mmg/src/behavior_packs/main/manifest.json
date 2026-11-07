@@ -1,0 +1,36 @@
+{
+    "format_version": 2,
+    "header": {
+        "description": "Many mini games!!",
+        "name": "Many mini game behavior pack",
+        "uuid": "88f32602-a809-4f55-ba3d-30c03231fb05",
+        "version": [0, 1, 4],
+        "min_engine_version": [1, 21, 20]
+    },
+    "modules": [
+        {
+            "description": "Many mini games!!",
+            "type": "data",
+            "uuid": "8901ef59-766b-45f9-9f8a-de79dea90862",
+            "version": [0, 0, 5]
+        },
+        {
+            "description": "Many mini games script",
+            "type": "script",
+            "language": "javascript",
+            "uuid": "8ab9c496-1d41-4801-9f93-4173ffafcf6a",
+            "entry": "scripts/game.js",
+            "version": [0, 0, 5]
+        }
+    ],
+    "dependencies": [
+        {
+            "module_name": "@minecraft/server",
+            "version": "2.0.0"
+        },
+        {
+            "module_name": "@minecraft/server-ui",
+            "version": "2.1.0"
+        }
+    ]
+}

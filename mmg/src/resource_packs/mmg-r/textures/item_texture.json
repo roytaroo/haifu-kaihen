@@ -1,0 +1,15 @@
+{
+  "resource_pack_name": "kohaku-rp",
+  "texture_name": "atlas.items",
+  "texture_data": {
+    "vote": {
+      "textures": "textures/items/vote"
+    },
+    "up": {
+      "textures": "textures/items/up"
+    },
+    "down": {
+      "textures": "textures/items/down"
+    }
+  }
+}

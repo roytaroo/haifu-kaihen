@@ -1,0 +1,36 @@
+{
+    "format_version": 2,
+    "header": {
+        "description": "琥珀が作ったゲームに共通して入っているものです",
+        "name": "kohaku behavior pack",
+        "uuid": "20d9aab3-dcd1-4f4a-a18a-cdddfd1a7df8",
+        "version": [ 0, 1, 1 ],
+        "min_engine_version": [ 1, 21, 20 ]
+    },
+    "modules": [
+        {
+            "description": "Kohaku ゲーム共通",
+            "type": "data",
+            "uuid": "426d2888-b98f-4654-b4e9-487e91490416",
+            "version": [0, 0, 1]
+        },
+        {
+        "type": "script",
+        "language": "javascript",
+        "uuid": "4e9cc7ea-cbe9-464e-bb1b-a49ee9f51883",
+        "entry": "scripts/gameee.js",
+        "version": [0, 1, 0]
+      }
+    ],
+    "capabilities": ["script_eval"],
+    "dependencies": [
+      {
+        "module_name": "@minecraft/server",
+        "version": "1.10.0"
+      },
+      {
+        "module_name": "@minecraft/server-ui",
+        "version": "1.2.0"
+      }
+  ]
+}

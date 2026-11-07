@@ -1,0 +1,14 @@
+execute unless entity @e[name=game1_lava] run summon armor_stand "game1_lava" 2 -13 -2
+execute unless entity @e[name=game5_a] run summon armor_stand "game5_a" 2 -13 -2
+execute unless entity @e[name=game5_b] run summon armor_stand "game5_b" 2 -13 -2
+execute unless entity @e[name=game5_c] run summon armor_stand "game5_c" 2 -13 -2
+execute unless entity @e[name=game5_d] run summon armor_stand "game5_d" 2 -13 -2
+execute unless entity @e[name=game10_random] run summon armor_stand "game10_random" 2 -13 -2
+execute unless entity @e[name=game12_random] run summon armor_stand "game12_random" 2 -13 -2
+execute unless entity @e[name=game17_random] run summon armor_stand "game17_random" 2 -13 -2
+execute unless entity @e[name=game19_syukei] run summon armor_stand "game19_syukei" 2 -13 -2
+execute unless entity @e[name=game_mapmake] run summon armor_stand "game_mapmake" 2 -13 -2
+execute unless entity @e[name=game_mapmake2] run summon armor_stand "game_mapmake2" 2 -13 -2
+execute unless entity @e[name=game_mapdemolition] run summon armor_stand "game_mapdemolition" 2 -13 -2
+execute unless entity @e[name=game22_random] run summon armor_stand "game22_random" -1 -13 -3
+execute unless entity @e[name=game24_random] run summon armor_stand "game24_random" 2 -13 -3
