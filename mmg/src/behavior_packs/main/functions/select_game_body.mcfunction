@@ -56,6 +56,11 @@ execute if score selectgame game matches 24 run tellraw @a {"rawtext":[{"text":"
 execute if score selectgame game matches 25 run tellraw @a {"rawtext":[{"text":"次のゲーム: §b計算早押し\n§r出された計算の答えを、だれよりも早く選ぼう！正解数がいちばん多い人が勝利。§r\n§7全5問"}]}
 execute if score selectgame game matches 26 run tellraw @a {"rawtext":[{"text":"次のゲーム: §d色の記憶\n§r光った色の順番をおぼえて、同じ順に床をふもう！まちがえたら脱落。最後まで残った人が勝利。"}]}
 execute if score selectgame game matches 27 run tellraw @a {"rawtext":[{"text":"次のゲーム: §e椅子取りゲーム\n§r音楽が止まったら、出てきたトロッコに乗ろう！乗れなかったら脱落。最後まで残った人が勝利。"}]}
+execute if score selectgame game matches 28 run tellraw @a {"rawtext":[{"text":"次のゲーム: §6宝探しプール\n§rプールにしずんだ金ブロックを泳いで集めよう！いちばん多く集めた人が勝利。§r\n§7制限時間: 60秒"}]}
+execute if score selectgame game matches 29 run tellraw @a {"rawtext":[{"text":"次のゲーム: §aジャンプ縄跳び\n§r中心から回ってくる棒をジャンプでよけよう！当たったら脱落。最後まで残った人が勝利。"}]}
+execute if score selectgame game matches 30 run tellraw @a {"rawtext":[{"text":"次のゲーム: §bボートレース\n§r氷のコースをボートで2周！1〜3位がポイント。"}]}
+execute if score selectgame game matches 31 run tellraw @a {"rawtext":[{"text":"次のゲーム: §eピッタリ止め\n§r目標の秒数ぴったりで「ストップ！」を押そう。いちばん近い人が勝利。"}]}
+execute if score selectgame game matches 32 run tellraw @a {"rawtext":[{"text":"次のゲーム: §aニワトリ集め\n§rたねを持ってニワトリを自分の囲いに連れていこう！最後に囲いの中にいる数で勝負。§r\n§7制限時間: 60秒"}]}
 
 scoreboard players set game_next_ready game 0
 scoreboard players set game_ready game 0
