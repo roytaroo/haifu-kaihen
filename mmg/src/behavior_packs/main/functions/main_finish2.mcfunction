@@ -41,7 +41,7 @@ gamerule naturalRegeneration true
 
 fill -24 0 50 25 0 -49 black_concrete
 
-kill @e[type=!player,type=!armor_stand,type=!painting]
+kill @e[type=!player,type=!armor_stand,type=!painting,type=!mmgplus:board]
 
 tp @a 48 13 1.0 facing 0 13 1.0
 spawnpoint @a 47.99 13.00 0.92

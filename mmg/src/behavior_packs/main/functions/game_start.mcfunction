@@ -158,3 +158,5 @@ setblock -83 32 32 air
 scoreboard players set stopgame game 0
 
 spawnpoint @a[tag=playing] 0 20 0
+
+execute if score start_countdown game < constant2 constant if score selectgame game matches 25.. run scriptevent mmgplus:start

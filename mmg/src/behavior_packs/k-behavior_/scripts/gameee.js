@@ -219,7 +219,9 @@ function settingUI_main(player) {
         .title("設定")
         .button("ゲームを開始")
         .button("プレイヤーの設定")
-        .button("ゲーム設定");
+        .button("ゲーム設定")
+        .button("ミニゲームのON/OFF")
+        .button("ランキング掲示板");
 
     gui.show(player).then((result) => {
         if (result.canceled) return;
@@ -244,6 +246,15 @@ function settingUI_main(player) {
                     return;
                 }
                 settingUI_2(player);
+                break;
+            case 3:
+            case 4:
+                // mmg_plus パックの画面を開く
+                if (!hasPermission(player, "admin_game-setting")) {
+                    player.sendMessage("§cあなたはこれを編集する権限がありません！");
+                    return;
+                }
+                player.runCommand(result.selection === 3 ? "scriptevent mmgplus:games_ui" : "scriptevent mmgplus:board_ui");
                 break;
         }
     });
@@ -454,4 +465,4 @@ function settingUI_3(player) {
     }).catch((err) => {
         console.error(err);
     });
-}
+}

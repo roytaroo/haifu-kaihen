@@ -268,10 +268,10 @@ gamerule naturalRegeneration true
 
 fill -24 0 50 25 0 -49 black_concrete
 
-kill @e[type=!player,type=!armor_stand,type=!painting,type=!cushion]
+kill @e[type=!player,type=!armor_stand,type=!painting,type=!mmgplus:board,type=!cushion]
 
 tp @e[name=game17_random] 0 -13 -2
 
 camera @a clear
 
-scoreboard players set navi_message game 0
+scoreboard players set navi_message game 0
