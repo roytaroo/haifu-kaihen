@@ -4,7 +4,7 @@
         "name": "MMG Plus Resources",
         "description": "ランキング掲示板の見えないエンティティ",
         "uuid": "627ebf8f-14a5-4355-9f42-7c71d249e04c",
-        "version": [1, 0, 1],
+        "version": [1, 0, 2],
         "min_engine_version": [1, 21, 20]
     },
     "modules": [

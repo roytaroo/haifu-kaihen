@@ -1,0 +1,50 @@
+{
+  "format_version": "1.21.20",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "mmgplus:chair",
+      "is_spawnable": false,
+      "is_summonable": true
+    },
+    "components": {
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "all",
+            "deals_damage": "no"
+          }
+        ]
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:collision_box": {
+        "width": 0.9,
+        "height": 0.7
+      },
+      "minecraft:physics": {},
+      "minecraft:rideable": {
+        "seat_count": 1,
+        "family_types": [
+          "player"
+        ],
+        "interact_text": "座る",
+        "pull_in_entities": false,
+        "seats": {
+          "position": [
+            0,
+            0.45,
+            0
+          ]
+        }
+      },
+      "minecraft:type_family": {
+        "family": [
+          "mmgplus_chair",
+          "inanimate"
+        ]
+      }
+    }
+  }
+}

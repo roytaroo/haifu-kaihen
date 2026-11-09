@@ -20,7 +20,7 @@
   - `game.js`: ランダムTP・投票UI・game4/10/12/17/22/24 の補助。`ranking` を 1 にするとチャットに point の順位を出す。
   - 設定: スコア `setting`(round, round-auto, testmode 等)、レベル `level game`(1〜5)。
 - ゲーム一覧(selectgame): 1 Escape Lava / 2 熱帯魚相撲 / 3 High and Low / 4 TNT RUN / 5 Adventure PVP / 6 TNT TAG / 7 Drop PVP / 8 降下デスマッチ / 9 逆らえ！ / 10 金床避け / 11 読みぶろぱ / 12 TNT避け / 13 アスレチック / 14 どうぶつリレー / 15 Block Party / 16 鉱石バトル / 17 崩れる床で生き延びろ / 18 穴落とし / 19 色塗りバトル / 20 クラフトマスター / 21 Warden Escape / 22 マグマノックバック / 23 村人数え / 24 モンスターバトル
-- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v3。
+- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v4。
 - 改変(v1、ゲーム内は未確認):
   - 追加パック `mmg_plus`(BP、scripts/main.js)+ `mmg_plus_r`(RP、掲示板の見えないエンティティ)。
   - 抽選をスクリプトへ: `select_game` → `scriptevent mmgplus:select`(OFFを除いて抽選、同じゲームの連続なし)→ `select_game_body`(元の残り+25〜27の説明)。
@@ -33,4 +33,9 @@
   - BOT はダミーのプレイヤーなので元のゲームの @a にそのまま入る。タグ `mmgbot`。設定メニュー「BOT」で人数(0〜12)と強さ(よわい/ふつう/つよい、setting の bot_strength にも入れる)。ワールドを開き直すと前の人数を出し直す。
   - 動き: 攻撃系(2,5,7,8,22,24)は近くの相手を追ってなぐる、TNT TAG は鬼なら追う/ちがえば逃げる、Escape Lava はダイヤへ、鉱石バトルは近くの鉱石を掘る、椅子取りは空いたトロッコへ、宝探しは金ブロックへ、ニワトリ集めはたねを持って往復、ほかは歩き回る。
   - mmg_plus 側: 計算早押し・ピッタリ止めは BOT の答えを作る(フォームを出さない)、色の記憶は床へ飛ばす、縄跳びは `scriptevent mmgbot:jump <名前>` でジャンプさせる、ボートレースはボートを押して角をめざす。BOT はランキングに入れない。
+- v4(未確認): 文句ボード(https://claude.ai/artifact/8kwXB8zc3jXF9kogUtkjTV、db の complaints)の18件に対応。
+  - 削除: 3 High and Low / 8 降下デスマッチ / 10 金床避け / 11 読みぶろぱ / 12 TNT避け / 16 鉱石バトル / 17 崩れる床(main.js の REMOVED。抽選・ON/OFF・掲示板から外す)。
+  - TNT TAG: 生き残りが参加人数の1/3以下で終了(mmg_plus が stopgame=1 と元の終了回路 29 -14 17 を叩く)。村人数え: 時間 60/50/42/36/30秒。逆らえ！: 命令18種(9〜18 の判定は mmg_plus、game9_1/game9_2 にも追加)。
+  - 追加ゲーム作り直し: 計算早押し(むずかしく)、色の記憶(5色・五角形・光る柱・判定を厳しく)、椅子取り(イスのモデル mmgplus:chair・曲)、宝探し(29x29・浮く宝 mmgplus:treasure_*、金1/ダイヤ3/エメ5点、**砂を使わない**: v1〜v3 は y=0 に砂を置いてコマンド部屋に落ちた)、29 はファイアバー(mmgplus:fireball 2本)、ボートレース(z -46→46 の一本道)、ピッタリ止め(よーい→スタートの合図)、ニワトリ集め(半径20・エサやり禁止)。
+  - 会場の片付けは field 全体(x -24〜25, z -49〜50, y 1〜8)。
 - 次の候補: 記録系を既存ゲーム(アスレのタイム等)にも広げる。

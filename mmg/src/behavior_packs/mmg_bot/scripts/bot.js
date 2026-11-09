@@ -76,8 +76,8 @@ async function botUI(player) {
 
 // ===== 動き =====
 // ゲームの種類ごとにざっくり動かす。細かい判断がいるゲーム(投票・数え・クラフト)は歩き回るだけ
-const ATTACK = new Set([2, 5, 7, 8, 22]); // 近くの相手をなぐる
-const KEEP_MOVING = new Set([4, 10, 12, 15, 17, 18, 19, 21, 29]); // 止まらずに動く
+const ATTACK = new Set([2, 5, 7, 22]); // 近くの相手をなぐる
+const KEEP_MOVING = new Set([4, 15, 18, 19, 21, 29]); // 止まらずに動く
 const IN_ARENA = (l) => l.x > -24 && l.x < 25 && l.z > -49 && l.z < 50;
 
 function nearest(p, list) {
@@ -157,21 +157,22 @@ function think(p, b, sg, players) {
         if (ore) { p.lookAtBlock(ore); p.breakBlock(ore); return; }
     }
     if (sg === 27) {
-        // 椅子取り: 空いているトロッコへ
-        const free = dim().getEntities({ type: "minecraft:minecart", tags: ["mmgplus_chair"] }).filter((c) => !c.getComponent("minecraft:rideable")?.getRiders().length);
+        // 椅子取り: 空いているイスへ
+        const free = dim().getEntities({ type: "mmgplus:chair" }).filter((c) => !c.getComponent("minecraft:rideable")?.getRiders().length);
         const t = nearest(p, free);
         if (t) { p.moveToLocation(t.e.location, { speed: speed() }); if (t.d < 2.5 && Math.random() < [0.3, 0.5, 0.8][strength()]) p.interactWithEntity(t.e); return; }
     }
     if (sg === 28) {
-        const gold = findBlock(p, ["minecraft:gold_block"], 8, [-3, -2, -1, 0, 1]);
-        if (gold) { p.moveToLocation({ x: gold.x + 0.5, y: gold.y, z: gold.z + 0.5 }, { speed: speed() }); if (p.location.y > gold.y + 1) p.stopSwimming(); return; }
+        // 宝探し: 近くの宝へ泳ぐ(下にあればもぐる)
+        const t = nearest(p, ["gold", "diamond", "emerald"].flatMap((k) => dim().getEntities({ type: `mmgplus:treasure_${k}` })));
+        if (t) { p.moveToLocation(t.e.location, { speed: speed() }); if (t.e.location.y < p.location.y - 0.5) p.stopSwimming(); else p.swim(); return; }
     }
     if (sg === 32) return farm(p, b);
     roam(p, b, KEEP_MOVING.has(sg) ? 5 : 8);
 }
 
 // ニワトリ集め: たねを持ってニワトリに近づき、自分の囲いへ戻る(囲いの位置は mmg_plus と同じ並び)
-const PENS = [[0, -10], [10, -10], [10, 0], [10, 10], [0, 10], [-10, 10], [-10, 0], [-10, -10]];
+const PENS = [[0, -16], [12, -12], [16, 0], [12, 12], [0, 16], [-12, 12], [-16, 0], [-12, -12]];
 function farm(p, b) {
     if (!b.seeded) { p.setItem(new ItemStack("minecraft:wheat_seeds", 1), 0, true); b.seeded = true; }
     const players = world.getPlayers({ tags: ["playing"] });
