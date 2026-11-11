@@ -9,6 +9,11 @@
       0,
       "q.life_time * 240",
       0
+     ],
+     "position": [
+      0,
+      "math.sin(q.life_time * 200) * 0.8",
+      0
      ]
     }
    }

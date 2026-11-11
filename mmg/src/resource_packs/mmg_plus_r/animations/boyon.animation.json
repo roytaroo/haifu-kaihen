@@ -5,10 +5,10 @@
    "loop": true,
    "bones": {
     "root": {
-     "rotation": [
-      "q.life_time * 200",
-      "q.life_time * 90",
-      0
+     "scale": [
+      "1 + math.abs(math.sin(q.life_time * 400)) * 0.08",
+      "1 - math.abs(math.sin(q.life_time * 400)) * 0.1",
+      "1 + math.abs(math.sin(q.life_time * 400)) * 0.08"
      ]
     }
    }
