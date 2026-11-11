@@ -4,8 +4,8 @@
   {
    "description": {
     "identifier": "geometry.mmgplus.bigball",
-    "texture_width": 128,
-    "texture_height": 128
+    "texture_width": 256,
+    "texture_height": 64
    },
    "bones": [
     {
@@ -44,8 +44,8 @@
         24
        ],
        "uv": [
-        0,
-        32
+        80,
+        0
        ]
       },
       {
@@ -60,8 +60,8 @@
         20
        ],
        "uv": [
-        0,
-        80
+        160,
+        0
        ]
       }
      ]

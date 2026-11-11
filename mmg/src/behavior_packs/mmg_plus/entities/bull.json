@@ -20,7 +20,7 @@
   "components": {
    "minecraft:collision_box": {
     "width": 1.0,
-    "height": 1.4
+    "height": 1.5
    },
    "minecraft:physics": {},
    "minecraft:damage_sensor": {
@@ -51,7 +51,7 @@
     "seats": {
      "position": [
       0,
-      1.45,
+      1.55,
       0
      ]
     }
