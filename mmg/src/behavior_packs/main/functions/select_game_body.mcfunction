@@ -68,6 +68,25 @@ execute if score selectgame game matches 36 run tellraw @a {"rawtext":[{"text":"
 execute if score selectgame game matches 37 run tellraw @a {"rawtext":[{"text":"次のゲーム: §6押し寄せる壁\n§r穴のあいた壁が迫ってくる。穴の位置に立ってすり抜けよう！"}]}
 execute if score selectgame game matches 38 run tellraw @a {"rawtext":[{"text":"次のゲーム: §b障害物ダッシュ\n§r動く壁とハードルをこえてゴールへ！当たるとチェックポイントに戻る。1〜3位がポイント。"}]}
 execute if score selectgame game matches 39 run tellraw @a {"rawtext":[{"text":"次のゲーム: §d配置の記憶\n§r自分のマスで光ったところを覚えて、消えたあと同じマスをふもう！全4ラウンド。"}]}
+execute if score selectgame game matches 40 run tellraw @a {"rawtext":[{"text":"次のゲーム: §cレーザー回避\n§r動くレーザーをよけよう！低いのはジャンプ、高いのはしゃがみ。"}]}
+execute if score selectgame game matches 41 run tellraw @a {"rawtext":[{"text":"次のゲーム: §6しっぽ取り\n§r相手を叩いてしっぽをうばおう！60秒で一番多く持っていた人の勝ち。"}]}
+execute if score selectgame game matches 42 run tellraw @a {"rawtext":[{"text":"次のゲーム: §dものまねポーズ\n§rお手本と同じ向き・ポーズで「ハイ！」を待とう。ちがったら脱落。"}]}
+execute if score selectgame game matches 43 run tellraw @a {"rawtext":[{"text":"次のゲーム: §bピクセルアート再現\n§rお手本と同じ絵を床に作ろう！ふむと色が変わる。"}]}
+execute if score selectgame game matches 44 run tellraw @a {"rawtext":[{"text":"次のゲーム: §e卵キャッチ\n§r空から落ちてくる卵をキャッチ！金の卵は3点。"}]}
+execute if score selectgame game matches 45 run tellraw @a {"rawtext":[{"text":"次のゲーム: §6コイン噴水\n§r噴水から飛び出すコインを拾おう！叩くと相手がコインを落とす。"}]}
+execute if score selectgame game matches 46 run tellraw @a {"rawtext":[{"text":"次のゲーム: §cふくらむ風船\n§r順番にポンプを押そう。風船を割った人がアウト！"}]}
+execute if score selectgame game matches 47 run tellraw @a {"rawtext":[{"text":"次のゲーム: §2まっくらスイカ割り\n§r真っ暗の中、音をたよりにスイカを叩こう！"}]}
+execute if score selectgame game matches 48 run tellraw @a {"rawtext":[{"text":"次のゲーム: §8下がる天井\n§r天井が下がってくる！足場の穴に隠れよう。"}]}
+execute if score selectgame game matches 49 run tellraw @a {"rawtext":[{"text":"次のゲーム: §c風船割り合戦\n§r頭の上の風船を割り合おう！全部割られたらアウト。"}]}
+execute if score selectgame game matches 50 run tellraw @a {"rawtext":[{"text":"次のゲーム: §dボヨンボール\n§rはねまわるボールをよけよう！"}]}
+execute if score selectgame game matches 51 run tellraw @a {"rawtext":[{"text":"次のゲーム: §2ワニの歯\n§r順番に歯を1本叩こう。かまれたらアウト！"}]}
+execute if score selectgame game matches 52 run tellraw @a {"rawtext":[{"text":"次のゲーム: §eコマぶつけ\n§rコマに乗ってぶつけ合い、相手を場外へ！"}]}
+execute if score selectgame game matches 53 run tellraw @a {"rawtext":[{"text":"次のゲーム: §f旗あげゲーム\n§r指示どおりの旗の形の床へ移動しよう！"}]}
+execute if score selectgame game matches 54 run tellraw @a {"rawtext":[{"text":"次のゲーム: §bお皿バランス\n§r頭の上のお皿を落とさずにゴールへ！1〜3位がポイント。"}]}
+execute if score selectgame game matches 55 run tellraw @a {"rawtext":[{"text":"次のゲーム: §c大玉ころがし\n§r大玉に乗ってゴールへ！1〜3位がポイント。"}]}
+execute if score selectgame game matches 56 run tellraw @a {"rawtext":[{"text":"次のゲーム: §6ロデオ\n§r暴れ牛に乗って、矢印の向きをすぐ見よう！振り落とされたらアウト。"}]}
+execute if score selectgame game matches 57 run tellraw @a {"rawtext":[{"text":"次のゲーム: §9バンパーカー\n§rカートでぶつけ合い、相手を場外へ！"}]}
+execute if score selectgame game matches 58 run tellraw @a {"rawtext":[{"text":"次のゲーム: §aアスレチック\n§r5つのコースから1つ。落ちたらチェックポイントから。1〜3位がポイント。"}]}
 
 scoreboard players set game_next_ready game 0
 scoreboard players set game_ready game 0

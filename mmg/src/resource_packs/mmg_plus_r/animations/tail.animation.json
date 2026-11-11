@@ -1,0 +1,17 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.tail": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "rotation": [
+      0,
+      "math.sin(q.life_time * 400) * 20",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

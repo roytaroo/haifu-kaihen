@@ -1,0 +1,17 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.top": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "rotation": [
+      0,
+      "q.life_time * 900",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

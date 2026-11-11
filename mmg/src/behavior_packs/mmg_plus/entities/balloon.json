@@ -1,0 +1,49 @@
+{
+ "format_version": "1.21.20",
+ "minecraft:entity": {
+  "description": {
+   "identifier": "mmgplus:balloon",
+   "is_spawnable": false,
+   "is_summonable": true,
+   "properties": {
+    "mmgplus:size": {
+     "type": "int",
+     "range": [
+      0,
+      30
+     ],
+     "default": 3,
+     "client_sync": true
+    }
+   }
+  },
+  "components": {
+   "minecraft:collision_box": {
+    "width": 0.6,
+    "height": 0.6
+   },
+   "minecraft:physics": {
+    "has_gravity": false,
+    "has_collision": false
+   },
+   "minecraft:damage_sensor": {
+    "triggers": [
+     {
+      "cause": "all",
+      "deals_damage": "no"
+     }
+    ]
+   },
+   "minecraft:pushable": {
+    "is_pushable": false,
+    "is_pushable_by_piston": false
+   },
+   "minecraft:type_family": {
+    "family": [
+     "mmgplus_prop",
+     "inanimate"
+    ]
+   }
+  }
+ }
+}

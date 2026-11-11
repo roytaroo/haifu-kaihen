@@ -1,0 +1,20 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:laser",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/mmgplus_laser"
+   },
+   "geometry": {
+    "default": "geometry.mmgplus.laser"
+   },
+   "render_controllers": [
+    "controller.render.default"
+   ]
+  }
+ }
+}

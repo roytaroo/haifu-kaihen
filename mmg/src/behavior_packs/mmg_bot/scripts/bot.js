@@ -76,7 +76,7 @@ async function botUI(player) {
 
 // ===== 動き =====
 // ゲームの種類ごとにざっくり動かす。細かい判断がいるゲーム(投票・数え・クラフト)は歩き回るだけ
-const ATTACK = new Set([2, 5, 7, 22]); // 近くの相手をなぐる
+const ATTACK = new Set([2, 5, 7, 22, 41, 45]); // 近くの相手をなぐる
 const KEEP_MOVING = new Set([4, 15, 18, 19, 21, 29]); // 止まらずに動く
 const IN_ARENA = (l) => l.x > -24 && l.x < 25 && l.z > -49 && l.z < 50;
 

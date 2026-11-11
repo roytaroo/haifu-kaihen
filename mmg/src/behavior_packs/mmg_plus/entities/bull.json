@@ -1,0 +1,61 @@
+{
+ "format_version": "1.21.20",
+ "minecraft:entity": {
+  "description": {
+   "identifier": "mmgplus:bull",
+   "is_spawnable": false,
+   "is_summonable": true,
+   "properties": {
+    "mmgplus:buck": {
+     "type": "int",
+     "range": [
+      0,
+      3
+     ],
+     "default": 0,
+     "client_sync": true
+    }
+   }
+  },
+  "components": {
+   "minecraft:collision_box": {
+    "width": 1.0,
+    "height": 1.4
+   },
+   "minecraft:physics": {},
+   "minecraft:damage_sensor": {
+    "triggers": [
+     {
+      "cause": "all",
+      "deals_damage": "no"
+     }
+    ]
+   },
+   "minecraft:pushable": {
+    "is_pushable": false,
+    "is_pushable_by_piston": false
+   },
+   "minecraft:type_family": {
+    "family": [
+     "mmgplus_prop",
+     "inanimate"
+    ]
+   },
+   "minecraft:rideable": {
+    "seat_count": 1,
+    "family_types": [
+     "player"
+    ],
+    "interact_text": "乗る",
+    "pull_in_entities": false,
+    "seats": {
+     "position": [
+      0,
+      1.45,
+      0
+     ]
+    }
+   }
+  }
+ }
+}

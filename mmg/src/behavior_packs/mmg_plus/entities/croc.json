@@ -1,0 +1,52 @@
+{
+ "format_version": "1.21.20",
+ "minecraft:entity": {
+  "description": {
+   "identifier": "mmgplus:croc",
+   "is_spawnable": false,
+   "is_summonable": true,
+   "properties": {
+    "mmgplus:bite": {
+     "type": "int",
+     "range": [
+      0,
+      1
+     ],
+     "default": 0,
+     "client_sync": true
+    }
+   }
+  },
+  "components": {
+   "minecraft:collision_box": {
+    "width": 1.8,
+    "height": 0.8
+   },
+   "minecraft:physics": {
+    "has_gravity": false,
+    "has_collision": false
+   },
+   "minecraft:damage_sensor": {
+    "triggers": [
+     {
+      "cause": "all",
+      "deals_damage": "no"
+     }
+    ]
+   },
+   "minecraft:pushable": {
+    "is_pushable": false,
+    "is_pushable_by_piston": false
+   },
+   "minecraft:type_family": {
+    "family": [
+     "mmgplus_prop",
+     "inanimate"
+    ]
+   },
+   "minecraft:scale": {
+    "value": 1.6
+   }
+  }
+ }
+}

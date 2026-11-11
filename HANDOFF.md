@@ -20,7 +20,7 @@
   - `game.js`: ランダムTP・投票UI・game4/10/12/17/22/24 の補助。`ranking` を 1 にするとチャットに point の順位を出す。
   - 設定: スコア `setting`(round, round-auto, testmode 等)、レベル `level game`(1〜5)。
 - ゲーム一覧(selectgame): 1 Escape Lava / 2 熱帯魚相撲 / 3 High and Low / 4 TNT RUN / 5 Adventure PVP / 6 TNT TAG / 7 Drop PVP / 8 降下デスマッチ / 9 逆らえ！ / 10 金床避け / 11 読みぶろぱ / 12 TNT避け / 13 アスレチック / 14 どうぶつリレー / 15 Block Party / 16 鉱石バトル / 17 崩れる床で生き延びろ / 18 穴落とし / 19 色塗りバトル / 20 クラフトマスター / 21 Warden Escape / 22 マグマノックバック / 23 村人数え / 24 モンスターバトル
-- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v5。
+- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v6。
 - 改変(v1、ゲーム内は未確認):
   - 追加パック `mmg_plus`(BP、scripts/main.js)+ `mmg_plus_r`(RP、掲示板の見えないエンティティ)。
   - 抽選をスクリプトへ: `select_game` → `scriptevent mmgplus:select`(OFFを除いて抽選、同じゲームの連続なし)→ `select_game_body`(元の残り+25〜27の説明)。
@@ -39,6 +39,9 @@
   - 追加ゲーム作り直し: 計算早押し(むずかしく)、色の記憶(5色・五角形・光る柱・判定を厳しく)、椅子取り(イスのモデル mmgplus:chair・曲)、宝探し(29x29・浮く宝 mmgplus:treasure_*、金1/ダイヤ3/エメ5点、**砂を使わない**: v1〜v3 は y=0 に砂を置いてコマンド部屋に落ちた)、29 はファイアバー(mmgplus:fireball 2本)、ボートレース(z -46→46 の一本道)、ピッタリ止め(よーい→スタートの合図)、ニワトリ集め(半径20・エサやり禁止)。
   - 会場の片付けは field 全体(x -24〜25, z -49〜50, y 1〜8)。
 - v5(未確認): 新ゲーム 33 一番多い色は？/34 早押し反射(しゃがむ)/35 矢の雨/36 隕石よけ/37 押し寄せる壁/38 障害物ダッシュ/39 配置の記憶。改変: 逆らえ！28種、村人数え(時間 80/70/60/55/50・Lv4以降に行商人と村人ゾンビ)、椅子取り(ニセモノ mmgplus_fake・逃げるイス mmgplus_run)、宝探し(43x43・フグで2点落とす)、ファイアバー(15秒で上の棒・しゃがみでよける)、ニワトリ(25秒でキツネ)、最終2ラウンド得点2倍、ラウンド結果(チャット+タイトル)、優勝の演出(試合後)。
+- v6(未確認): 選んだ残り全部。40 レーザー回避〜57 バンパーカー の18ゲーム + 58 アスレチック(5コース、元の13は REMOVED)。モデルは `tools/models.py`(色つきの箱 → BP/RP のエンティティ・geo・テクスチャ・アニメと dist/model_preview/*.png)。図鑑: https://claude.ai/artifact/CfGKr5h5usUtREPKKMeaaL
+  - 乗り物(コマ・カート・大玉・牛)は rideable のカスタムエンティティに applyImpulse。大きさ・傾き・かみつき・暴れは entity property(mmgplus:size/tilt/bite/buck)でアニメ。
+  - 旗あげゲームの声はまだ(だいきが音をくれたら RP の sounds に入れて playsound する)。
 - 次の候補: 記録系を既存ゲーム(アスレのタイム等)にも広げる。
 
 ## だいきが選んだもの(100ゲーム計画 https://claude.ai/artifact/UCiagkMnba3rgPeyUqeSmV の db "picks")

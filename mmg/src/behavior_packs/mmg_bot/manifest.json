@@ -4,7 +4,7 @@
         "name": "MMG Bot",
         "description": "BOTと遊べるようにする(Beta APIs が必要)",
         "uuid": "f6effde6-5d34-470c-babd-64ec73be5145",
-        "version": [1, 0, 1],
+        "version": [1, 0, 2],
         "min_engine_version": [1, 21, 20]
     },
     "modules": [
