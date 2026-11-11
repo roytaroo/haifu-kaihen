@@ -1,0 +1,17 @@
+{
+ "namespace": "chat",
+ "messages_text/text": {
+  "property_bag": {
+   "#font_type": "classic"
+  },
+  "bindings": [
+   {
+    "binding_type": "view",
+    "source_property_name": "#font_type",
+    "target_property_name": "#font_type"
+   }
+  ],
+  "font_type": "#font_type",
+  "font_scale_factor": 1.0
+ }
+}

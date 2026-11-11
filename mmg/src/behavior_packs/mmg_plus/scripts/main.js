@@ -1864,19 +1864,34 @@ system.runInterval(() => {
     if (nx === 1 && wasNext !== 1 && score("game", "playing") === 1) showRoundResult();
     wasNext = nx;
 }, 5);
+// 専用の画面(RP の ui/server_form.json、tools/rank_ui.py で作る)。タイトルに RANK_MARK を入れたフォームがこの見た目になる
+// ボタン2つで1行: 左「順位 名前」(アイコン = 行の背景: 順位の色・上がった/下がった・自分)、右「点数 +このラウンドの点」
+const RANK_MARK = "§r§m§r§n§r";
+let prevPtsRound = {};
 function showRoundResult() {
-    const rows = Object.entries(allPts).filter(([n]) => world.getPlayers({ name: n }).length).sort((a, b) => b[1] - a[1]);
+    const rows = Object.entries(allPts).filter(([n]) => world.getPlayers({ name: n }).length).sort((a, b) => b[1] - a[1]).slice(0, 12);
     if (!rows.length) return;
-    const lines = rows.map(([n, v], i) => {
-        const before = prevRank[n], mark = before === undefined || before === i ? "§7－" : before > i ? "§a↑" : "§c↓";
-        return `${mark} §f${i + 1}位 ${n} §e${v}pt`;
-    });
-    prevRank = Object.fromEntries(rows.map(([n], i) => [n, i]));
-    world.sendMessage(`§l§b＝ ラウンド ${score("game", "round") ?? 0} の結果 ＝§r\n` + lines.join("\n"));
+    const r = score("game", "round") ?? 0, total = score("setting", "round") ?? 0;
+    const rankOf = (i) => rows.findIndex(([, v]) => v === rows[i][1]); // 同点は同じ順位
+    const body = total >= 3 && r + 1 >= total - 1 && r < total ? "§6NEXT ROUND: BONUS x2" : `§7ROUND ${r} / ${total || "?"}`;
     for (const p of world.getPlayers()) {
-        const i = rows.findIndex(([n]) => n === p.name);
-        p.onScreenDisplay.setTitle("§lラウンド結果", { subtitle: `§f1位 ${rows[0][0]} ${rows[0][1]}pt${i >= 0 ? `  §7あなた ${i + 1}位` : ""}`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 10 });
+        if (isBot(p)) continue;
+        const f = new ActionFormData().title(`${RANK_MARK}§lROUND ${r} RESULTS`).body(body);
+        rows.forEach(([n, v], i) => {
+            const rank = rankOf(i), before = prevRank[n];
+            const tier = ["gold", "silver", "bronze"][rank] ?? "normal";
+            const kind = before === undefined || before === rank ? "same" : before > rank ? "up" : "down";
+            const gain = v - (prevPtsRound[n] ?? 0);
+            f.button(`§l${rank + 1}§r  ${n === p.name ? "§e" : "§f"}${n}${before !== undefined && before !== rank ? ` §7(${before + 1}→${rank + 1})` : ""}`, `textures/ui/mmgplus_rank/${tier}_${kind}${n === p.name ? "_me" : ""}`);
+            f.button(`§f${v}pt${gain > 0 ? ` §a+${gain}` : ""}`);
+        });
+        f.show(p).catch(() => {});
     }
+    soundAll("random.levelup", 1.6);
+    system.runTimeout(() => world.getPlayers().forEach((p) => { try { uiManager.closeAllForms(p); } catch {} }), 140);
+    prevRank = Object.fromEntries(rows.map(([n], i) => [n, rankOf(i)]));
+    prevPtsRound = Object.fromEntries(rows);
+    world.sendMessage(`§b§lROUND ${r}§r §f1st: ${rows[0][0]} (${rows[0][1]}pt)`);
 }
 // 優勝の演出(試合全体の最後): ロビーに戻ったあと、1位にスポットライトと花火
 async function celebrate(names) {
@@ -1929,7 +1944,7 @@ system.runInterval(() => {
 function endMatch() {
     const rows = Object.entries(allPts), top = Math.max(0, ...rows.map(([, v]) => v));
     if (top > 0) celebrate(rows.filter(([, v]) => v === top).map(([n]) => n));
-    allPts = {}; prevRank = {};
+    allPts = {}; prevRank = {}; prevPtsRound = {};
     const names = [...matchPlayers];
     if (names.length) {
         const pts = names.map((n) => lastPts[n] ?? 0);

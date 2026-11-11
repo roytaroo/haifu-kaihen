@@ -1,0 +1,28 @@
+{
+ "namespace": "common_buttons",
+ "new_ui_binding_button_label": {
+  "property_bag": {
+   "#font_type": "classic"
+  },
+  "bindings": [
+   {
+    "binding_type": "$button_text_collection_details",
+    "binding_collection_name": "$button_text_grid_collection_name",
+    "binding_collection_prefix": "$button_text_collection_prefix"
+   },
+   {
+    "binding_type": "$button_text_binding_type",
+    "binding_condition": "$button_binding_condition",
+    "binding_collection_name": "$button_text_grid_collection_name",
+    "binding_name": "$button_text",
+    "binding_name_override": "$button_text"
+   },
+   {
+    "binding_type": "view",
+    "source_property_name": "#font_type",
+    "target_property_name": "#font_type"
+   }
+  ],
+  "font_type": "#font_type"
+ }
+}
