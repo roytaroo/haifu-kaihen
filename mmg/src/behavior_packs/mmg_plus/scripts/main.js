@@ -107,7 +107,7 @@ async function prepGame() {
         40: () => buildArena(9, "gray_concrete", "glass", 4), 41: () => buildArena(10, "grass_block", "oak_fence", 2), 42: () => buildArena(7, "smooth_quartz", "glass", 3),
         44: () => buildArena(10, "white_concrete", "glass", 3), 45: () => buildArena(11, "smooth_sandstone", "glass", 3), 46: () => buildArena(8, "pink_concrete", "glass", 3),
         47: () => buildArena(10, "grass_block", "oak_fence", 2), 48: () => buildArena(7, "stone_bricks", "glass", 8), 49: () => buildArena(10, "light_blue_concrete", "glass", 4),
-        50: () => buildArena(9, "smooth_stone", "glass", 8), 51: () => buildArena(7, "smooth_sandstone", "glass", 3), 52: () => buildRing(10, "polished_andesite"),
+        50: () => buildArena(9, "smooth_stone", "glass", 8), 51: () => buildArena(12, "smooth_sandstone", "glass", 3), 52: () => buildRing(10, "polished_andesite"),
         53: () => clearArena(), 54: () => buildStraight("white_concrete", false), 55: () => buildStraight("lime_concrete", true), 56: () => buildArena(12, "coarse_dirt", "oak_fence", 2),
         57: () => buildRing(11, "light_gray_concrete"), 58: () => buildCourse(),
     })[id]?.();
@@ -1499,43 +1499,51 @@ async function gameBoyon() {
 }
 
 // ===== 51. ワニの歯 =====
-// 順番にワニの歯を1本叩く。1本だけ「かまれる歯」がある。3分の1になるまで
+// 巨大なワニ(長さ約14マス)が大きく口を開けている。順番に口の中の歯を1本叩く。1本だけ「かまれる歯」がある。3分の1になるまで
+// 歯の位置: ワニのモデルの下あご(y=5px、x=-5.5/4.5px、z=-19〜-7px)を、ワニの位置・180度回転・4倍に合わせてワールドの座標にしたもの
+const CROC_AT = { x: 0.5, y: 1, z: -2.5 }, CROC_S = 4 / 16;
+const TOOTH_SPOTS = [-5.5, 4.5].flatMap((mx) => [-19, -16, -13, -10].map((mz) => ({ x: CROC_AT.x - mx * CROC_S, y: CROC_AT.y + 5 * CROC_S, z: CROC_AT.z - mz * CROC_S })));
 let toothHit = null;
 world.afterEvents.entityHitEntity.subscribe((ev) => { if (ev.hitEntity?.typeId === "mmgplus:tooth" && ev.damagingEntity?.typeId === "minecraft:player") toothHit = { p: ev.damagingEntity, e: ev.hitEntity }; });
 async function gameCroc() {
     const start = playing();
-    const croc = spawnAt("mmgplus:croc", { x: 0.5, y: 1, z: 0.5 }); croc?.setRotation({ x: 0, y: 180 });
+    const croc = spawnAt("mmgplus:croc", CROC_AT); croc?.setRotation({ x: 0, y: 180 });
     let teeth = [], bad;
     const reset = () => {
         teeth.forEach((e) => { try { e.remove(); } catch {} });
-        teeth = []; for (let i = 0; i < 8; i++) { const e = spawnAt("mmgplus:tooth", { x: -1.6 + i * 0.6, y: 1.55, z: 3.6 }); if (e) teeth.push(e); }
+        teeth = TOOTH_SPOTS.map((p) => spawnAt("mmgplus:tooth", p)).filter(Boolean);
         bad = teeth[rand(0, teeth.length - 1)]; croc?.setProperty("mmgplus:bite", 0);
     };
     reset();
-    cmd("tp @a[tag=playing] 0.5 1 6 facing 0.5 1 0");
-    title("§2§lワニの歯", "§f順番に歯を1本叩こう。かまれたらアウト");
-    await wait(40);
+    cmd("tp @a[tag=playing] 0.5 1 6 facing 0.5 2 0");
+    title("§2§l巨大ワニの歯", "§f順番に、口の中の歯を1本叩こう。かまれたらアウト");
+    await wait(50);
     for (let turn = 0; turn < 200 && !aborted(); turn++) {
         const order = alive();
         if (endSurvive(start, turn * 10, 999) || (start.length === 1 && turn >= 6)) break;
         const p = order[turn % order.length];
-        title(`§l${p.name} の番`, "§f歯を1本叩いて", 30);
+        title(`§l${p.name} の番`, `§f口の中の歯を1本叩いて §7(残り ${teeth.length}本)`, 30);
         toothHit = null;
         let hitE;
         for (let t = 0; t < 200 && !aborted(); t += 2) {
-            if (isBot(p) && t === 30) hitE = teeth[rand(0, teeth.length - 1)];
+            if (isBot(p) && t === 30) { hitE = teeth[rand(0, teeth.length - 1)]; p.teleport({ x: hitE.location.x, y: 1, z: hitE.location.z + 1.2 }); }
             if (toothHit && toothHit.p.name === p.name) hitE = toothHit.e;
             if (hitE) break;
+            if (t % 20 === 0) cmd(`playsound note.hat @a ${CROC_AT.x} 2 ${CROC_AT.z} 0.5 ${(0.8 + t / 400).toFixed(2)}`); // カチ…カチ…
             await wait(2);
         }
         hitE ??= teeth[rand(0, teeth.length - 1)]; // 時間切れは勝手に1本
         if (hitE === bad) {
-            croc?.setProperty("mmgplus:bite", 1); soundAll("mob.zombie.woodbreak", 0.6);
-            out(p, "§cワニにかまれた！"); title("§c§lガブッ！", `§f${p.name} がアウト`, 30);
-            await wait(40); reset();
+            croc?.setProperty("mmgplus:bite", 1);
+            soundAll("mob.ravager.bite", 0.7); soundAll("random.explode", 0.6);
+            cmd("camerashake add @a[tag=playing] 0.8 0.6 positional");
+            cmd(`particle minecraft:huge_explosion_emitter ${CROC_AT.x} 2.5 ${CROC_AT.z + 3}`);
+            out(p, "§cワニにかまれた！"); title("§c§lガブッ！！", `§f${p.name} がアウト`, 40);
+            await wait(50); reset();
         } else {
             soundAll("random.click", 1.4); teeth.splice(teeth.indexOf(hitE), 1); try { hitE.remove(); } catch {}
-            await wait(10);
+            p.sendMessage("§aセーフ！");
+            await wait(12);
         }
     }
     teeth.forEach((e) => { try { e.remove(); } catch {} }); try { croc?.remove(); } catch {}

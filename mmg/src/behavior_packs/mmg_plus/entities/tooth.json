@@ -8,8 +8,8 @@
   },
   "components": {
    "minecraft:collision_box": {
-    "width": 0.4,
-    "height": 0.5
+    "width": 0.35,
+    "height": 0.45
    },
    "minecraft:physics": {
     "has_gravity": false,
@@ -32,6 +32,9 @@
      "mmgplus_prop",
      "inanimate"
     ]
+   },
+   "minecraft:scale": {
+    "value": 2.0
    }
   }
  }

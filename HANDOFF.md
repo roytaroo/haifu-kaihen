@@ -20,7 +20,7 @@
   - `game.js`: ランダムTP・投票UI・game4/10/12/17/22/24 の補助。`ranking` を 1 にするとチャットに point の順位を出す。
   - 設定: スコア `setting`(round, round-auto, testmode 等)、レベル `level game`(1〜5)。
 - ゲーム一覧(selectgame): 1 Escape Lava / 2 熱帯魚相撲 / 3 High and Low / 4 TNT RUN / 5 Adventure PVP / 6 TNT TAG / 7 Drop PVP / 8 降下デスマッチ / 9 逆らえ！ / 10 金床避け / 11 読みぶろぱ / 12 TNT避け / 13 アスレチック / 14 どうぶつリレー / 15 Block Party / 16 鉱石バトル / 17 崩れる床で生き延びろ / 18 穴落とし / 19 色塗りバトル / 20 クラフトマスター / 21 Warden Escape / 22 マグマノックバック / 23 村人数え / 24 モンスターバトル
-- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v8。
+- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v9。
 - 改変(v1、ゲーム内は未確認):
   - 追加パック `mmg_plus`(BP、scripts/main.js)+ `mmg_plus_r`(RP、掲示板の見えないエンティティ)。
   - 抽選をスクリプトへ: `select_game` → `scriptevent mmgplus:select`(OFFを除いて抽選、同じゲームの連続なし)→ `select_game_body`(元の残り+25〜27の説明)。
@@ -44,6 +44,7 @@
   - 旗あげゲームの声はまだ(だいきが音をくれたら RP の sounds に入れて playsound する)。
 - v7(未確認): ラウンド結果を専用の JSON UI に(tools/rank_ui.py → RP ui/server_form.json。タイトルの印 RANK_MARK、ボタン2つで1行、行の背景 = 順位の色×上下×自分、行は順にすべりこむ、7秒で閉じる)。文字をクラシック(カクカク)フォントにそろえる UI 上書き(hud/chat/scoreboard/ボタン/フォームのタイトル)。ワニと牛のモデルを作り込み版に(残り13個は だいきの OK 待ち)。
 - v8(未確認): モデル16個すべてを作り込み版に(tools/models.py の rounded/disc/eyes で丸み・目・模様)。イスも models.py に移した(props.geo.json から外した)。
+- v9(未確認): ワニの歯を巨大ワニに(scale 4、長さ約14マス、当たり判定は胴の真ん中だけ)。叩く歯8本(scale 2)を開いた口の下あごに並べる(TOOTH_SPOTS)。かまれると画面がゆれる。
 - 次の候補: 記録系を既存ゲーム(アスレのタイム等)にも広げる。
 
 ## だいきが選んだもの(100ゲーム計画 https://claude.ai/artifact/UCiagkMnba3rgPeyUqeSmV の db "picks")

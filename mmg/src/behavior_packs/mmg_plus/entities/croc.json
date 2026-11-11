@@ -19,8 +19,8 @@
   },
   "components": {
    "minecraft:collision_box": {
-    "width": 1.8,
-    "height": 0.9
+    "width": 0.4,
+    "height": 0.6
    },
    "minecraft:physics": {
     "has_gravity": false,
@@ -45,7 +45,7 @@
     ]
    },
    "minecraft:scale": {
-    "value": 1.6
+    "value": 4.0
    }
   }
  }
