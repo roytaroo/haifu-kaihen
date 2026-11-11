@@ -12,6 +12,7 @@ const GAMES = [
     "逆らえ！", "金床避け", "読みぶろぱ", "TNT避け", "アスレチック", "どうぶつリレー", "Block Party", "鉱石バトル",
     "崩れる床で生き延びろ", "穴落とし", "色塗りバトル", "クラフトマスター", "Warden Escape", "マグマノックバック", "村人数え", "モンスターバトル",
     "計算早押し", "色の記憶", "椅子取りゲーム", "宝探しプール", "ファイアバー", "ボートレース", "ピッタリ止め", "ニワトリ集め",
+    "一番多い色は？", "早押し反射", "矢の雨", "隕石よけ", "押し寄せる壁", "障害物ダッシュ", "配置の記憶",
 ]; // 番号 = 添字 + 1
 const FIRST_PLUS = 25;
 // だいきの指示で消したゲーム(抽選・ON/OFF・ランキングに出さない)
@@ -95,9 +96,16 @@ async function prepGame() {
     if (id === 29) buildFirebar();
     if (id === 30) buildRace();
     if (id === 32) buildFarm();
+    if (id === 33 || id === 34) buildWallRoom();
+    if (id === 35) buildArena(9, "smooth_stone", "glass", 4);
+    if (id === 36) buildArena(10, "basalt", "glass", 3);
+    if (id === 37) buildWalls();
+    if (id === 38) buildDash();
     cmd("tag @a remove mmgplus_out");
     if (id === 28) cmd("tp @a[tag=playing] 0 7 0");
     else if (id === 29) cmd("tp @a[tag=playing] 0 1 5");
+    else if (id === 37) cmd("tp @a[tag=playing] 0 1 6");
+    else if (id === 38) cmd("tp @a[tag=playing] 0 1 -44");
     else if (id === 30) cmd(`tp @a[tag=playing] ${raceX(RACE_START - 3) + 0.5} 1 ${RACE_START - 3} facing ${raceX(0)} 1 0`);
     else cmd("tp @a[tag=playing] 0 1 0");
     await wait(40);
@@ -118,6 +126,13 @@ async function startGame() {
         if (id === 30) winners = await gameRace();
         if (id === 31) winners = await gameStop();
         if (id === 32) winners = await gameFarm();
+        if (id === 33) winners = await gameColors();
+        if (id === 34) winners = await gameReflex();
+        if (id === 35) winners = await gameArrows();
+        if (id === 36) winners = await gameMeteor();
+        if (id === 37) winners = await gameWalls();
+        if (id === 38) winners = await gameDash();
+        if (id === 39) winners = await gameMemory();
     } catch (e) {
         console.warn(`[mmg_plus] game${id}: ${e}`);
         // 管理者にだけエラーを見せる(直す時の手がかり)
@@ -392,13 +407,37 @@ async function gameChairs() {
             const s = { x: Math.round(Math.cos(a) * r) + 0.5, y: 1, z: Math.round(Math.sin(a) * r) + 0.5 };
             if (spots.every((o) => Math.hypot(o.x - s.x, o.z - s.z) >= 2.5)) spots.push(s);
         }
-        spots.forEach((s) => { try { dim().spawnEntity("mmgplus:chair", s).setRotation({ x: 0, y: rand(0, 3) * 90 }); } catch {} });
-        title("§c§l座れ！", `§fイス ${spots.length}脚  §7(イスを右クリック/タップ)`, 20);
+        // 本物 need 脚 + ニセモノ(座ると消える)1脚。本物のうち1脚は逃げるイス
+        if (players.length >= 2) for (let tries = 0; spots.length < need + 1 && tries < 400; tries++) {
+            const a = Math.random() * Math.PI * 2, r = rand(2, 9);
+            const s = { x: Math.round(Math.cos(a) * r) + 0.5, y: 1, z: Math.round(Math.sin(a) * r) + 0.5 };
+            if (spots.every((o) => Math.hypot(o.x - s.x, o.z - s.z) >= 2.5)) spots.push(s);
+        }
+        spots.forEach((s, i) => {
+            try {
+                const c = dim().spawnEntity("mmgplus:chair", s); c.setRotation({ x: 0, y: rand(0, 3) * 90 });
+                if (i === need) c.addTag("mmgplus_fake"); else if (i === 0 && need >= 2) c.addTag("mmgplus_run");
+            } catch {}
+        });
+        title("§c§l座れ！", `§fイス ${need}脚 §7(ニセモノと逃げるイスに注意)`, 20);
         soundAll("random.anvil_land", 1.5);
         for (let t = 0; t < 120 && !aborted(); t += 2) {
+            for (const c of chairs()) {
+                const riders = c.getComponent("minecraft:rideable")?.getRiders() ?? [];
+                if (c.hasTag("mmgplus_fake") && riders.length) { riders.forEach((r) => r.sendMessage("§cニセモノのイスだった！")); cmd("playsound random.pop @a 0 2 0 1 0.6"); c.remove(); continue; }
+                if (c.hasTag("mmgplus_run") && !riders.length) {
+                    const near = alive().map((p) => ({ p, d: Math.hypot(p.location.x - c.location.x, p.location.z - c.location.z) })).sort((a, b) => a.d - b.d)[0];
+                    if (near && near.d < 4) {
+                        const dx = c.location.x - near.p.location.x, dz = c.location.z - near.p.location.z, d = Math.hypot(dx, dz) || 1;
+                        let nx = c.location.x + (dx / d) * 0.3, nz = c.location.z + (dz / d) * 0.3;
+                        if (Math.hypot(nx, nz) > 9.5) { nx = c.location.x - (dz / d) * 0.3; nz = c.location.z + (dx / d) * 0.3; } // 壁ぎわは横へにげる
+                        c.teleport({ x: nx, y: c.location.y, z: nz });
+                    }
+                }
+            }
             const n = alive().filter(seated).length;
-            actionbar(`§c座れ！ §f${n}/${spots.length}  §7残り ${Math.ceil((120 - t) / 20)}秒`);
-            if (n >= spots.length) break;
+            actionbar(`§c座れ！ §f${n}/${need}  §7残り ${Math.ceil((120 - t) / 20)}秒`);
+            if (n >= need) break;
             await wait(2);
         }
         const losers = alive().filter((p) => !seated(p));
@@ -418,25 +457,36 @@ const TREASURE = [
 ];
 function buildPool() {
     clearArena();
-    cmd("fill -15 0 -15 15 6 15 prismarine_bricks");
-    cmd("fill -14 0 -14 14 0 14 dark_prismarine");
-    cmd("fill -14 1 -14 14 5 14 water");
-    cmd("fill -14 6 -14 14 6 14 air");
-    for (const [x, z] of [[-15, -15], [15, -15], [-15, 15], [15, 15], [0, -15], [0, 15], [-15, 0], [15, 0]]) cmd(`setblock ${x} 6 ${z} sea_lantern`);
+    cmd("fill -22 0 -22 22 6 22 prismarine_bricks");
+    cmd("fill -21 0 -21 21 0 21 dark_prismarine");
+    cmd("fill -21 1 -21 21 5 21 water");
+    cmd("fill -21 6 -21 21 6 21 air");
+    for (const x of [-22, -11, 0, 11, 22]) for (const z of [-22, 22]) { cmd(`setblock ${x} 6 ${z} sea_lantern`); cmd(`setblock ${z} 6 ${x} sea_lantern`); }
 }
 async function gamePool() {
     const TIME = 1200;
     const got = new Map();
-    const want = () => Math.max(10, playing().length * 3);
+    const want = () => Math.max(16, playing().length * 4);
+    const stung = new Map();
     const pick = () => { let r = Math.random() * 100; return TREASURE.find((t) => (r -= t.w) < 0) ?? TREASURE[0]; };
     const spawn = () => {
         const t = pick();
-        try { dim().spawnEntity(t.type, { x: rand(-13, 13) + 0.5, y: 1.2 + Math.random() * 3, z: rand(-13, 13) + 0.5 }); } catch {}
+        try { dim().spawnEntity(t.type, { x: rand(-20, 20) + 0.5, y: 1.2 + Math.random() * 3, z: rand(-20, 20) + 0.5 }); } catch {}
     };
     cmd("effect @a[tag=playing] water_breathing 90 0 true");
     cmd("effect @a[tag=playing] night_vision 90 0 true");
     title("§l宝探し！", "§6金1点 §bダイヤ3点 §aエメラルド5点");
     for (let t = 0; t < TIME && !aborted(); t += 2) {
+        // 妨害のフグ: さわると2点落とす(2秒に1回まで)
+        const puffers = dim().getEntities({ type: "minecraft:pufferfish", tags: ["mmgplus_puffer"] });
+        for (let n = puffers.length; n < Math.max(3, playing().length); n++) { try { dim().spawnEntity("minecraft:pufferfish", { x: rand(-19, 19) + 0.5, y: 2.5, z: rand(-19, 19) + 0.5 }).addTag("mmgplus_puffer"); } catch {} }
+        for (const p of playing()) {
+            if ((stung.get(p.name) ?? 0) > system.currentTick) continue;
+            if (!puffers.some((f) => Math.hypot(f.location.x - p.location.x, f.location.y - (p.location.y + 0.8), f.location.z - p.location.z) < 1.6)) continue;
+            stung.set(p.name, system.currentTick + 40);
+            const lost = Math.min(2, got.get(p.name) ?? 0);
+            if (lost) { got.set(p.name, got.get(p.name) - lost); p.sendMessage(`§cフグにさされて ${lost}点 落とした！`); cmd(`playsound mob.pufferfish.sting "${p.name}"`); }
+        }
         const list = TREASURE.flatMap((tr) => dim().getEntities({ type: tr.type }).map((e) => ({ e, tr })));
         for (let n = list.length; n < want(); n++) spawn();
         for (const p of playing()) {
@@ -476,7 +526,7 @@ async function gameFirebar() {
     for (let arm = 0; arm < 2; arm++) for (let i = 1; i <= FB_LEN; i++) {
         try { balls.push({ e: dim().spawnEntity("mmgplus:fireball", { x: 0.5, y: 1.25, z: 0.5 }), arm, r: i * FB_STEP }); } catch {}
     }
-    let theta = 0, dir = 1, omega = (Math.PI * 2) / 100, swept = 0, revs = 0;
+    let theta = 0, dir = 1, omega = (Math.PI * 2) / 100, swept = 0, revs = 0, high = null;
     const t0 = Date.now();
     title("§6§lファイアバー！", "§f回ってくる火の玉をジャンプでよけよう");
     await wait(40);
@@ -506,6 +556,26 @@ async function gameFirebar() {
                 }
             }
         }
+        // 15秒たったら、反対向きに回る「上の棒」(頭の高さ)を追加。しゃがめばよけられる
+        if (!high && (Date.now() - t0) / 1000 >= 15) {
+            high = { theta: Math.PI / 2, balls: [] };
+            for (let i = 2; i <= FB_LEN; i++) { try { high.balls.push({ e: dim().spawnEntity("mmgplus:fireball", { x: 0.5, y: 2.1, z: 0.5 }), r: i * FB_STEP }); } catch {} }
+            title("§c§l上の棒が出た！", "§f上の棒は§eしゃがんで§fよけよう", 30); soundAll("mob.blaze.shoot", 0.7);
+        }
+        if (high) {
+            const hp = high.theta, hs = -step * 0.7;
+            high.theta += hs;
+            high.balls.forEach((b) => { if (b.e.isValid) b.e.teleport({ x: 0.5 + Math.cos(high.theta) * b.r, y: 2.1, z: 0.5 + Math.sin(high.theta) * b.r }); });
+            for (const p of alive()) {
+                const { x, z } = p.location, r = Math.hypot(x - 0.5, z - 0.5);
+                if (r < 1.5 || r > FB_LEN * FB_STEP + 0.6 || p.isSneaking) continue;
+                const from = Math.min(hp, high.theta), d = (((Math.atan2(z - 0.5, x - 0.5) - from) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+                if (d <= Math.abs(hs) + 0.45 / r || d >= Math.PI * 2 - 0.45 / r) {
+                    if (isBot(p) && chance(0.6, 0.8, 0.93)) continue; // BOT はしゃがんだことにする
+                    out(p, "§c上の棒に当たった！(しゃがむとよけられる)");
+                }
+            }
+        }
         swept += Math.abs(step);
         if (swept >= Math.PI) {
             swept = 0; revs++;
@@ -520,6 +590,7 @@ async function gameFirebar() {
         await wait(1);
     }
     balls.forEach((b) => { try { b.e.remove(); } catch {} });
+    high?.balls.forEach((b) => { try { b.e.remove(); } catch {} });
     const sec = Math.round((Date.now() - t0) / 100) / 10;
     const win = alive();
     win.forEach((p) => record(29, p.name, sec, "max"));
@@ -685,6 +756,11 @@ async function gameFarm() {
         return c;
     };
     for (let t = 0; t < TIME && !aborted(); t += 10) {
+        if (t === 500) {
+            for (let i = 0; i < 2 + Math.floor(players.length / 4); i++) { try { dim().spawnEntity("minecraft:fox", { x: rand(-5, 5) + 0.5, y: 1, z: rand(-5, 5) + 0.5 }).addTag("mmgplus_fox"); } catch {} }
+            title("§6§lキツネが来た！", "§fニワトリを守れ", 30); soundAll("mob.fox.screech");
+        }
+        if (t === 800) cmd("kill @e[type=fox,tag=mmgplus_fox]");
         const c = count();
         for (const p of playing()) p.onScreenDisplay.setActionBar(`§aニワトリ集め §fあなたの囲い: §e${c[pen.get(p.name)] ?? 0}羽  §7残り ${Math.ceil((TIME - t) / 20)}秒`);
         await wait(10);
@@ -699,7 +775,346 @@ async function gameFarm() {
     return win;
 }
 
+// ===== 33. 一番多い色は？ =====
+// 前の壁に色のモザイクを一瞬だけ見せる。一番多かった色をボタンで答える。5問で正解数を競う
+const MOSAIC = [["red", "§c赤"], ["blue", "§9青"], ["lime", "§a緑"], ["yellow", "§e黄"], ["purple", "§5紫"]];
+function buildWallRoom() {
+    clearArena();
+    cmd("fill -9 0 -12 9 0 4 smooth_quartz");
+    cmd("fill -9 1 -13 9 11 -13 black_concrete");
+}
+async function gameColors() {
+    const correct = new Map();
+    for (let q = 1; q <= 5 && !aborted(); q++) {
+        const n = 2 + Math.min(3, Math.ceil(level() / 2) + Math.floor(q / 3)); // 使う色の数
+        const cols = MOSAIC.slice().sort(() => Math.random() - 0.5).slice(0, n);
+        const count = cols.map(() => 0);
+        title(`§lQ${q}`, "§f前の壁を見て！");
+        await wait(30);
+        for (let x = -8; x <= 8; x++) for (let y = 1; y <= 10; y++) {
+            const i = rand(0, n - 1); count[i]++;
+            cmd(`setblock ${x} ${y} -13 ${cols[i][0]}_concrete`);
+        }
+        let ans = count.indexOf(Math.max(...count));
+        if (count.filter((c) => c === count[ans]).length > 1) { count[ans]++; cmd(`setblock 0 5 -13 ${cols[ans][0]}_concrete`); } // 同数をなくす
+        await wait([60, 50, 40, 30, 25][level() - 1]);
+        cmd("fill -8 1 -13 8 10 -13 black_concrete");
+        const answered = new Map();
+        const players = playing();
+        for (const p of players) {
+            if (isBot(p)) { answered.set(p.name, chance(0.5, 0.7, 0.85) ? ans : rand(0, n - 1)); continue; }
+            const f = new ActionFormData().title(`一番多い色は？ Q${q}`).body("一番多かった色は？");
+            cols.forEach((c) => f.button(`§l${c[1]}`));
+            f.show(p).then((r) => { if (!r.canceled) answered.set(p.name, r.selection); }).catch(() => {});
+        }
+        for (let t = 0; t < 200 && answered.size < players.length && !aborted(); t += 5) { actionbar(`§e一番多い色は？ §7残り ${Math.ceil((200 - t) / 20)}秒`); await wait(5); }
+        players.forEach((p) => { try { uiManager.closeAllForms(p); } catch {} });
+        world.sendMessage(`§f答え: ${cols[ans][1]}§f (${cols.map((c, i) => `${c[1]}${count[i]}`).join(" ")}§f)`);
+        for (const [name, a] of answered) if (a === ans) correct.set(name, (correct.get(name) ?? 0) + 1);
+        await wait(40);
+    }
+    const best = Math.max(0, ...correct.values());
+    return best ? playing().filter((p) => correct.get(p.name) === best) : [];
+}
+
+// ===== 34. 早押し反射 =====
+// 前の壁が赤から緑に変わった瞬間にしゃがむ。早かった順に得点。緑になる前にしゃがむとそのラウンドは失格
+async function gameReflex() {
+    const wins = new Map();
+    title("§l早押し反射", "§f壁が§a緑§fになったらしゃがむ！ 早すぎると失格", 50);
+    await wait(60);
+    for (let r = 1; r <= 5 && !aborted(); r++) {
+        cmd("fill -8 1 -13 8 10 -13 red_concrete");
+        title(`§lラウンド ${r}`, "§fまだ…", 20);
+        await wait(30);
+        const players = playing();
+        const foul = new Set();
+        const delay = rand(30, 120);
+        for (let t = 0; t < delay && !aborted(); t++) {
+            for (const p of players) if (!foul.has(p.name) && p.isSneaking) { foul.add(p.name); p.sendMessage("§cフライング！"); cmd(`playsound note.bass "${p.name}"`); }
+            await wait(1);
+        }
+        cmd("fill -8 1 -13 8 10 -13 lime_concrete");
+        soundAll("note.pling", 2);
+        const t0 = system.currentTick, times = new Map();
+        // BOT の反応時間(tick)
+        const botT = new Map(players.filter(isBot).map((p) => [p.name, rand(...[[7, 14], [5, 10], [4, 7]][botStr()])]));
+        for (let t = 0; t < 60 && !aborted(); t++) {
+            for (const p of players) {
+                if (foul.has(p.name) || times.has(p.name)) continue;
+                if (isBot(p) ? t >= botT.get(p.name) : p.isSneaking) times.set(p.name, (system.currentTick - t0) * 50);
+            }
+            await wait(1);
+        }
+        const order = [...times].sort((a, b) => a[1] - b[1]);
+        if (order.length) {
+            const [name, ms] = order[0];
+            wins.set(name, (wins.get(name) ?? 0) + 1);
+            record(34, name, ms / 1000, "min");
+            world.sendMessage(`§aラウンド${r}: ${order.slice(0, 3).map(([n, v], i) => `${i + 1}位 ${n} ${(v / 1000).toFixed(2)}秒`).join(" / ")}`);
+        }
+        await wait(30);
+    }
+    const best = Math.max(0, ...wins.values());
+    return best ? playing().filter((p) => wins.get(p.name) === best) : [];
+}
+
+// ===== 35. 矢の雨 =====
+// 四方の壁から矢が飛んでくる。3回当たったら脱落。だんだん増える
+const hits = new Map();
+world.afterEvents.entityHurt.subscribe((ev) => {
+    const p = ev.hurtEntity;
+    if (p.typeId !== "minecraft:player" || score("game", "selectgame") !== 35 || !p.hasTag("playing") || p.hasTag("mmgplus_out")) return;
+    if (ev.damageSource.cause !== "projectile") return;
+    const n = (hits.get(p.name) ?? 0) + 1;
+    hits.set(p.name, n);
+    try { p.addEffect("instant_health", 1, { amplifier: 4, showParticles: false }); } catch {}
+    if (n >= 3) out(p, "§c矢に3回当たった！"); else p.onScreenDisplay.setActionBar(`§c当たった！ §f残り ${3 - n}回`);
+});
+function buildArena(r, floor, wallBlock, h = 4) {
+    clearArena();
+    cmd(`fill ${-r} 0 ${-r} ${r} 0 ${r} ${floor}`);
+    cmd(`fill ${-r - 1} 1 ${-r - 1} ${r + 1} ${h} ${-r - 1} ${wallBlock}`); cmd(`fill ${-r - 1} 1 ${r + 1} ${r + 1} ${h} ${r + 1} ${wallBlock}`);
+    cmd(`fill ${-r - 1} 1 ${-r - 1} ${-r - 1} ${h} ${r + 1} ${wallBlock}`); cmd(`fill ${r + 1} 1 ${-r - 1} ${r + 1} ${h} ${r + 1} ${wallBlock}`);
+}
+async function gameArrows() {
+    hits.clear();
+    const start = playing();
+    title("§l矢の雨", "§f四方から飛んでくる矢をよけよう(3回でアウト)");
+    await wait(40);
+    const t0 = Date.now();
+    for (let t = 0; t < 1800 && !aborted(); t += 4) {
+        const sec = (Date.now() - t0) / 1000;
+        const perTick = Math.min(4, 1 + sec / 15 + level() * 0.2);
+        for (let k = 0; k < perTick; k++) if (Math.random() < 0.5) {
+            const side = rand(0, 3), a = rand(-9, 9) + 0.5;
+            const from = [{ x: a, z: -9.3 }, { x: a, z: 9.3 }, { x: -9.3, z: a }, { x: 9.3, z: a }][side];
+            const tgt = alive()[rand(0, Math.max(0, alive().length - 1))];
+            const tx = tgt && Math.random() < 0.5 ? tgt.location.x : rand(-8, 8), tz = tgt && Math.random() < 0.5 ? tgt.location.z : rand(-8, 8);
+            try {
+                const e = dim().spawnEntity("minecraft:arrow", { x: from.x, y: 1.6, z: from.z });
+                const dx = tx - from.x, dz = tz - from.z, d = Math.hypot(dx, dz) || 1, v = 1.1 + Math.min(1, sec / 60);
+                e.applyImpulse({ x: (dx / d) * v, y: 0.08, z: (dz / d) * v });
+            } catch {}
+        }
+        if (t % 40 === 0) cmd("kill @e[type=arrow,x=-12,y=0,z=-12,dx=24,dy=6,dz=24]");
+        if (t % 20 === 0) actionbar(`§c矢の雨 §f残り ${alive().length}人  §7${sec.toFixed(0)}秒`);
+        const n = alive().length;
+        if (n === 0 || (start.length > 1 && n <= Math.max(1, Math.floor(start.length / 3))) || (start.length === 1 && sec >= 45)) break;
+        await wait(4);
+    }
+    cmd("kill @e[type=arrow]");
+    const sec = Math.round((Date.now() - t0) / 100) / 10;
+    alive().forEach((p) => record(35, p.name, sec, "max"));
+    return alive();
+}
+
+// ===== 36. 隕石よけ =====
+// 着弾する場所に赤い印が出て、1.5秒後に空から隕石(火の玉のモデル)が落ちる。半径2.5以内にいたら脱落
+async function gameMeteor() {
+    const start = playing();
+    title("§c§l隕石よけ", "§f赤い印から逃げろ！");
+    await wait(40);
+    const falling = [];
+    const t0 = Date.now();
+    for (let t = 0; t < 2400 && !aborted(); t += 2) {
+        const sec = (Date.now() - t0) / 1000;
+        if (t % Math.max(6, 30 - Math.floor(sec / 3) - level() * 2) === 0) {
+            const tgt = alive()[rand(0, Math.max(0, alive().length - 1))];
+            const x = tgt && Math.random() < 0.6 ? tgt.location.x + rand(-2, 2) : rand(-9, 9) + 0.5, z = tgt && Math.random() < 0.6 ? tgt.location.z + rand(-2, 2) : rand(-9, 9) + 0.5;
+            let e; try { e = dim().spawnEntity("mmgplus:fireball", { x, y: 30, z }); } catch {}
+            if (e) falling.push({ e, x, z, land: system.currentTick + 30 });
+        }
+        for (const m of falling.slice()) {
+            const left = m.land - system.currentTick;
+            if (t % 4 === 0) cmd(`particle minecraft:redstone_wire_dust_particle ${m.x} 1.1 ${m.z}`);
+            for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2; if (t % 4 === 0) cmd(`particle minecraft:basic_flame_particle ${m.x + Math.cos(a) * 2.5} 1.1 ${m.z + Math.sin(a) * 2.5}`); }
+            if (left > 0) { try { m.e.teleport({ x: m.x, y: 1 + left, z: m.z }); } catch {} continue; }
+            falling.splice(falling.indexOf(m), 1);
+            try { m.e.remove(); } catch {}
+            cmd(`particle minecraft:huge_explosion_emitter ${m.x} 1.5 ${m.z}`);
+            cmd(`playsound random.explode @a ${m.x} 1 ${m.z} 1 1`);
+            for (const p of alive()) if (Math.hypot(p.location.x - m.x, p.location.z - m.z) < 2.5) out(p, "§c隕石に当たった！");
+        }
+        if (t % 20 === 0) actionbar(`§c隕石よけ §f残り ${alive().length}人  §7${sec.toFixed(0)}秒`);
+        const n = alive().length;
+        if (n === 0 || (start.length > 1 && n <= Math.max(1, Math.floor(start.length / 3))) || (start.length === 1 && sec >= 45)) break;
+        await wait(2);
+    }
+    falling.forEach((m) => { try { m.e.remove(); } catch {} });
+    const sec = Math.round((Date.now() - t0) / 100) / 10;
+    alive().forEach((p) => record(36, p.name, sec, "max"));
+    return alive();
+}
+
+// ===== 37. 押し寄せる壁 =====
+// 通路(x -7〜7)の奥から、穴のあいた壁が迫ってくる。穴の位置に立てばすり抜けられる。だんだん速く・穴が小さく
+async function gameWalls() {
+    const start = playing();
+    title("§l押し寄せる壁", "§f穴の位置に立ってすり抜けろ！");
+    await wait(40);
+    for (let wave = 1; wave <= 30 && !aborted(); wave++) {
+        const hw = Math.max(1, 3 - Math.floor(wave / 4)); // 穴のはば
+        const holes = [];
+        for (let k = 0; k < (wave < 6 ? 2 : 1); k++) holes.push(rand(-7, 7 - hw + 1));
+        const inHole = (x) => holes.some((h) => x >= h && x < h + hw);
+        const speed = Math.max(1, 4 - Math.floor(wave / 3) - Math.floor(level() / 3));
+        const color = ["orange", "magenta", "cyan", "lime", "pink"][wave % 5];
+        for (let z = -19; z <= 11 && !aborted(); z++) {
+            cmd(`fill -7 1 ${z - 1} 7 3 ${z - 1} air`);
+            cmd(`fill -7 1 ${z} 7 3 ${z} ${color}_concrete`);
+            for (const h of holes) cmd(`fill ${h} 1 ${z} ${h + hw - 1} 2 ${z} air`);
+            for (const p of alive()) {
+                const px = Math.floor(p.location.x), pz = Math.floor(p.location.z);
+                if (pz === z && !inHole(px)) out(p, "§c壁に押しつぶされた！");
+            }
+            // BOT は穴の位置へ
+            if (z === -10) for (const p of alive().filter(isBot)) if (chance(0.6, 0.8, 0.95)) p.teleport({ x: holes[0] + hw / 2, y: 1, z: p.location.z });
+            await wait(speed);
+        }
+        cmd("fill -7 1 11 7 3 12 air");
+        if (wave % 3 === 0) soundAll("note.hat", 1.5);
+        actionbar(`§6押し寄せる壁 §f${wave}枚目  残り ${alive().length}人`);
+        const n = alive().length;
+        if (n === 0 || (start.length > 1 && n <= Math.max(1, Math.floor(start.length / 3))) || (start.length === 1 && wave >= 12)) break;
+    }
+    return alive();
+}
+
+// ===== 38. 障害物ダッシュ =====
+// z -44 → 44 のまっすぐなコース。左右に動く壁とハードルをこえてゴールへ。当たるとひとつ前のチェックポイントに戻る
+const DASH_W = 4;
+const dashBars = [-30, -18, -6, 6, 18, 30].map((z, i) => ({ z, w: 3, x: -DASH_W, dir: i % 2 ? 1 : -1 }));
+function buildWalls() {
+    clearArena();
+    cmd("fill -8 0 -20 8 0 12 light_gray_concrete");
+    cmd("fill -8 1 -20 -8 4 12 glass"); cmd("fill 8 1 -20 8 4 12 glass"); cmd("fill -8 1 12 8 4 12 glass");
+}
+function buildDash() {
+    clearArena();
+    cmd(`fill ${-DASH_W} 0 -46 ${DASH_W} 0 46 white_concrete`);
+    cmd(`fill ${-DASH_W - 1} 1 -46 ${-DASH_W - 1} 2 46 glass`); cmd(`fill ${DASH_W + 1} 1 -46 ${DASH_W + 1} 2 46 glass`);
+    cmd(`fill ${-DASH_W} 1 -46 ${DASH_W} 2 -46 glass`);
+    for (const z of [-36, -24, -12, 0, 12, 24, 36]) cmd(`fill ${-DASH_W} 1 ${z} ${DASH_W} 1 ${z} oak_slab`); // ハードル
+    for (const z of [-24, 0, 24]) cmd(`fill ${-DASH_W} 0 ${z - 2} ${DASH_W} 0 ${z - 2} lime_concrete`); // チェックポイント
+    cmd(`fill ${-DASH_W} 0 -42 ${DASH_W} 0 -42 lime_concrete`);
+    for (let x = -DASH_W; x <= DASH_W; x++) for (const z of [44, 45]) cmd(`setblock ${x} 0 ${z} ${(x + z) % 2 === 0 ? "white_concrete" : "black_concrete"}`);
+    cmd(`fill ${-DASH_W} 1 -41 ${DASH_W} 2 -41 glass`);
+}
+async function gameDash() {
+    const players = playing();
+    players.forEach((p, i) => p.teleport({ x: -3 + (i % 7) + 0.5, y: 1, z: -44 + Math.floor(i / 7) * 1.2 }, { rotation: { x: 0, y: 0 } }));
+    for (const n of ["3", "2", "1"]) { title(`§l${n}`); soundAll("note.pling", 0.8); await wait(20); }
+    cmd(`fill ${-DASH_W} 1 -41 ${DASH_W} 2 -41 air`);
+    title("§a§lGO!"); soundAll("note.pling", 1.6);
+    cmd("effect @a[tag=playing] speed 120 0 true");
+    const t0 = Date.now(), order = [];
+    const cp = (z) => [-42, -26, -2, 22].filter((c) => c <= z).pop() ?? -42;
+    for (let t = 0; t < 3000 && !aborted(); t += 2) {
+        for (const b of dashBars) {
+            cmd(`fill ${b.x} 1 ${b.z} ${b.x + b.w - 1} 2 ${b.z} air`);
+            if (t % [6, 5, 4, 3, 3][level() - 1] === 0) { b.x += b.dir; if (b.x <= -DASH_W || b.x + b.w - 1 >= DASH_W) b.dir = -b.dir; }
+            cmd(`fill ${b.x} 1 ${b.z} ${b.x + b.w - 1} 2 ${b.z} red_concrete`);
+        }
+        for (const p of playing()) {
+            if (order.includes(p)) continue;
+            const { x, z } = p.location;
+            if (isBot(p) && t % 4 === 0) { try { p.teleport({ x: p.location.x, y: 1, z: z + [0.5, 0.7, 0.9][botStr()] }); } catch {} }
+            if (dashBars.some((b) => Math.floor(z) === b.z && Math.floor(x) >= b.x && Math.floor(x) < b.x + b.w)) {
+                const c = cp(z); p.teleport({ x: 0.5, y: 1, z: c + 0.5 }, { rotation: { x: 0, y: 0 } });
+                p.sendMessage("§c当たった！ チェックポイントへ戻る"); cmd(`playsound note.bass "${p.name}"`);
+            }
+            if (z >= 44) {
+                order.push(p);
+                const sec = (Date.now() - t0) / 1000;
+                world.sendMessage(`§b${order.length}位 §f${p.name} §7${sec.toFixed(2)}秒`);
+                record(38, p.name, sec, "min");
+            }
+            if (t % 10 === 0) p.onScreenDisplay.setActionBar(`§b障害物ダッシュ §fゴールまで ${Math.max(0, Math.round(44 - z))}m`);
+        }
+        if (players.every((p) => order.includes(p) || !p.isValid)) break;
+        await wait(2);
+    }
+    cmd("effect @a[tag=playing] clear");
+    return order.slice(0, players.length === 1 ? 1 : Math.min(3, players.length - 1));
+}
+
+// ===== 39. 配置の記憶 =====
+// ひとり1つの4x4のマス。光ったマスを覚えて、消えたあと同じマスをふむ(ふむと光る、もう一度ふむと消える)
+async function gameMemory() {
+    clearArena();
+    const players = playing();
+    const grids = players.map((p, i) => ({ p, ox: (i % 6) * 7 - 18, oz: Math.floor(i / 6) * 7 - 4 }));
+    for (const g of grids) {
+        cmd(`fill ${g.ox - 1} 0 ${g.oz - 1} ${g.ox + 4} 0 ${g.oz + 4} polished_deepslate`);
+        cmd(`fill ${g.ox} 0 ${g.oz} ${g.ox + 3} 0 ${g.oz + 3} white_concrete`);
+        g.p.teleport({ x: g.ox + 2, y: 1, z: g.oz - 1.5 }, { rotation: { x: 40, y: 0 } });
+    }
+    const score2 = new Map();
+    for (let r = 1; r <= 4 && !aborted(); r++) {
+        const n = 3 + r + level() - 1;
+        const lit = new Set();
+        while (lit.size < Math.min(12, n)) lit.add(rand(0, 15));
+        title(`§lラウンド ${r}`, `§f${lit.size}マス 光ります`);
+        await wait(30);
+        for (const g of grids) for (const k of lit) cmd(`setblock ${g.ox + (k % 4)} 0 ${g.oz + Math.floor(k / 4)} sea_lantern`);
+        await wait([80, 70, 60, 50, 40][level() - 1]);
+        for (const g of grids) cmd(`fill ${g.ox} 0 ${g.oz} ${g.ox + 3} 0 ${g.oz + 3} white_concrete`);
+        title("§lふもう！", "§f光っていたマスをふむ(もう一度ふむと取り消し)");
+        const marks = new Map(grids.map((g) => [g.p.name, new Set()]));
+        const prev = new Map();
+        for (let t = 0; t < 240 && !aborted(); t += 2) {
+            for (const g of grids) {
+                if (!g.p.isValid) continue;
+                const m = marks.get(g.p.name);
+                if (isBot(g.p)) { if (t === 100) for (const k of lit) if (chance(0.6, 0.8, 0.92)) m.add(k); continue; }
+                const lx = Math.floor(g.p.location.x) - g.ox, lz = Math.floor(g.p.location.z) - g.oz;
+                const k = lx >= 0 && lx < 4 && lz >= 0 && lz < 4 && g.p.location.y < 1.3 ? lz * 4 + lx : -1;
+                if (k >= 0 && prev.get(g.p.name) !== k) {
+                    if (m.has(k)) m.delete(k); else m.add(k);
+                    cmd(`setblock ${g.ox + lx} 0 ${g.oz + lz} ${m.has(k) ? "yellow_concrete" : "white_concrete"}`);
+                    cmd(`playsound note.hat "${g.p.name}"`);
+                }
+                prev.set(g.p.name, k);
+            }
+            if (t % 20 === 0) actionbar(`§d配置の記憶 §7残り ${Math.ceil((240 - t) / 20)}秒`);
+            await wait(2);
+        }
+        for (const g of grids) {
+            const m = marks.get(g.p.name);
+            let ok = 0, ng = 0;
+            for (const k of m) lit.has(k) ? ok++ : ng++;
+            const pts = Math.max(0, ok - ng);
+            score2.set(g.p.name, (score2.get(g.p.name) ?? 0) + pts);
+            for (const k of lit) cmd(`setblock ${g.ox + (k % 4)} 0 ${g.oz + Math.floor(k / 4)} ${m.has(k) ? "lime_concrete" : "red_concrete"}`);
+            if (g.p.isValid) g.p.sendMessage(`§fラウンド${r}: 正解 ${ok} / まちがい ${ng} → ${pts}点`);
+        }
+        await wait(50);
+    }
+    const best = Math.max(0, ...score2.values());
+    playing().filter((p) => score2.get(p.name) === best).forEach((p) => record(39, p.name, best, "max"));
+    return best ? playing().filter((p) => score2.get(p.name) === best) : [];
+}
+
 // ===== 元のゲームの調整 =====
+// 村人数え(23): レベル4以降、村人に似たモブ(行商人・村人ゾンビ)を混ぜる。数えるのは村人だけ
+let decoyDone = false;
+system.runInterval(() => {
+    if (score("game", "selectgame") !== 23 || score("game", "playing") !== 1) { decoyDone = false; return; }
+    if (decoyDone || level() < 4) return;
+    const vs = dim().getEntities({ type: "minecraft:villager" });
+    if (vs.length < 3) return;
+    decoyDone = true;
+    const n = Math.ceil(vs.length * (level() === 4 ? 0.3 : 0.5));
+    for (let i = 0; i < n; i++) {
+        const at = vs[rand(0, vs.length - 1)].location;
+        try {
+            const e = dim().spawnEntity(Math.random() < 0.5 ? "minecraft:wandering_trader" : "minecraft:zombie_villager_v2", { x: at.x + rand(-1, 1), y: at.y, z: at.z + rand(-1, 1) });
+            e.addEffect("fire_resistance", 20000, { showParticles: false });
+        } catch {}
+    }
+}, 10);
+
 // TNT TAG(6): 生き残りが参加人数の3分の1まで減ったら終わり(元は最後の1人まで)
 let tagTotal = 0;
 system.runInterval(() => {
@@ -722,13 +1137,21 @@ const DEFY = {
     13: (p) => { const v = p.getVelocity(); return Math.hypot(v.x, v.z) > 0.08; }, 14: (p) => { const v = p.getVelocity(); return Math.hypot(v.x, v.z) > 0.08; },
     15: (p) => p.getRotation().x < -50, 16: (p) => p.getRotation().x < -50,
     17: (p) => p.isSprinting, 18: (p) => p.isSprinting,
+    19: (p) => p.getRotation().x > 50, 20: (p) => p.getRotation().x > 50,
+    21: (p) => Math.hypot(p.location.x, p.location.z) < 2.5, 22: (p) => Math.hypot(p.location.x, p.location.z) < 2.5,
+    23: (p) => Math.hypot(p.location.x, p.location.z) > 6, 24: (p) => Math.hypot(p.location.x, p.location.z) > 6,
+    25: (p) => punched.has(p.name), 26: (p) => punched.has(p.name),
+    27: (p) => turnedBack(p), 28: (p) => turnedBack(p),
 };
 let defyFrom = 0, defyLast = 0;
+const punched = new Set(), startYaw = new Map();
+const turnedBack = (p) => { const a = Math.abs(((p.getRotation().y - (startYaw.get(p.name) ?? 0)) % 360 + 540) % 360 - 180); return a > 135; };
+world.afterEvents.entityHitEntity.subscribe((ev) => { if (ev.damagingEntity.typeId === "minecraft:player" && ev.hitEntity.typeId === "minecraft:player") punched.add(ev.damagingEntity.name); });
 system.runInterval(() => {
     if (score("game", "selectgame") !== 9) return;
     const m = score("game", "game9_m") ?? 0, x = score("game", "game9_x");
     if (x !== 1) { defyLast = 0; return; }
-    if (m !== defyLast) { defyLast = m; defyFrom = system.currentTick + 20; }
+    if (m !== defyLast) { defyLast = m; defyFrom = system.currentTick + 20; punched.clear(); startYaw.clear(); for (const p of playing()) startYaw.set(p.name, p.getRotation().y); }
     if (!DEFY[m] || system.currentTick < defyFrom) return;
     for (const p of playing()) {
         if (p.hasTag("died") || p.hasTag("game9_die") || p.hasTag("game9_goal")) continue;
@@ -751,8 +1174,63 @@ function record(id, name, v, kind) {
         world.sendMessage(`§6★ ${GAMES[id - 1]} の新記録！ §f${name} ${fmtRecord(id, v)}`);
     }
 }
-const RECORD_UNIT = { 25: "秒", 26: "個", 28: "点", 29: "秒", 30: "秒", 31: "秒ずれ", 32: "羽" };
+const RECORD_UNIT = { 25: "秒", 26: "個", 28: "点", 29: "秒", 30: "秒", 31: "秒ずれ", 32: "羽", 34: "秒", 35: "秒", 36: "秒", 38: "秒", 39: "点" };
 const fmtRecord = (id, v) => (Number.isInteger(v) ? `${v}` : v.toFixed(2)) + (RECORD_UNIT[id] ?? "");
+
+// 最終2ラウンドは得点2倍。増えた分と同じだけ足す(BOT も)。allPts は BOT も入れた今の得点
+let seenPts = {}, allPts = {}, lastRound = 0, prevRank = {};
+const isBonusRound = () => { const r = score("game", "round") ?? 0, total = score("setting", "round") ?? 0; return total >= 3 && r >= total - 1; };
+system.runInterval(() => {
+    if (score("game", "playing") !== 1) { seenPts = {}; lastRound = 0; return; }
+    const o = obj("point"); if (!o) return;
+    const r = score("game", "round") ?? 0;
+    if (r !== lastRound) { lastRound = r; if (isBonusRound()) { title("§6§lボーナスラウンド！", "§fこのラウンドは得点2倍", 50); soundAll("random.levelup", 0.8); } }
+    for (const part of o.getParticipants()) {
+        let v; try { v = o.getScore(part); } catch { continue; }
+        const name = part.displayName, seen = seenPts[name] ?? 0;
+        if (v > seen && isBonusRound()) { o.addScore(part, v - seen); world.sendMessage(`§6${name} ボーナス +${v - seen}`); v += v - seen; }
+        seenPts[name] = v; allPts[name] = v;
+    }
+}, 5);
+// ラウンド結果: 次のゲームの準備に入った時に、今の順位と上がり下がりを出す
+let wasNext = 0;
+system.runInterval(() => {
+    const nx = score("game", "game_next_ready") ?? 0;
+    if (nx === 1 && wasNext !== 1 && score("game", "playing") === 1) showRoundResult();
+    wasNext = nx;
+}, 5);
+function showRoundResult() {
+    const rows = Object.entries(allPts).filter(([n]) => world.getPlayers({ name: n }).length).sort((a, b) => b[1] - a[1]);
+    if (!rows.length) return;
+    const lines = rows.map(([n, v], i) => {
+        const before = prevRank[n], mark = before === undefined || before === i ? "§7－" : before > i ? "§a↑" : "§c↓";
+        return `${mark} §f${i + 1}位 ${n} §e${v}pt`;
+    });
+    prevRank = Object.fromEntries(rows.map(([n], i) => [n, i]));
+    world.sendMessage(`§l§b＝ ラウンド ${score("game", "round") ?? 0} の結果 ＝§r\n` + lines.join("\n"));
+    for (const p of world.getPlayers()) {
+        const i = rows.findIndex(([n]) => n === p.name);
+        p.onScreenDisplay.setTitle("§lラウンド結果", { subtitle: `§f1位 ${rows[0][0]} ${rows[0][1]}pt${i >= 0 ? `  §7あなた ${i + 1}位` : ""}`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 10 });
+    }
+}
+// 優勝の演出(試合全体の最後): ロビーに戻ったあと、1位にスポットライトと花火
+async function celebrate(names) {
+    await wait(60);
+    const winners = names.map((n) => world.getPlayers({ name: n })[0]).filter(Boolean);
+    if (!winners.length) return;
+    for (const p of world.getPlayers()) p.onScreenDisplay.setTitle(`§6§l優勝 ${names.join(" & ")}`, { subtitle: "§fおめでとう！", fadeInDuration: 10, stayDuration: 100, fadeOutDuration: 20 });
+    cmd("execute as @a at @s run playsound random.totem @s ~ ~ ~ 1 1");
+    for (let i = 0; i < 16; i++) {
+        for (const w of winners) {
+            if (!w.isValid) continue;
+            const l = w.location;
+            cmd(`particle minecraft:totem_particle ${l.x} ${l.y + 1} ${l.z}`);
+            for (let k = 0; k < 8; k++) { const a = (k / 8) * Math.PI * 2 + i * 0.3; cmd(`particle minecraft:endrod ${l.x + Math.cos(a) * 1.5} ${l.y + 0.2 + (i % 4) * 0.6} ${l.z + Math.sin(a) * 1.5}`); }
+            if (i % 4 === 0) { try { dim().spawnEntity("minecraft:fireworks_rocket", { x: l.x + rand(-3, 3), y: l.y + 1, z: l.z + rand(-3, 3) }); } catch {} }
+        }
+        await wait(10);
+    }
+}
 
 // point を見張って増えた分を記録する(試合の最後に point は消されるので、その直前の値で順位を決める)
 let lastPts = {};
@@ -784,6 +1262,9 @@ system.runInterval(() => {
 }, 10);
 
 function endMatch() {
+    const rows = Object.entries(allPts), top = Math.max(0, ...rows.map(([, v]) => v));
+    if (top > 0) celebrate(rows.filter(([, v]) => v === top).map(([n]) => n));
+    allPts = {}; prevRank = {};
     const names = [...matchPlayers];
     if (names.length) {
         const pts = names.map((n) => lastPts[n] ?? 0);

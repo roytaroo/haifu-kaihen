@@ -4,7 +4,7 @@
         "description": "Many mini games!!",
         "name": "Many mini game behavior pack",
         "uuid": "88f32602-a809-4f55-ba3d-30c03231fb05",
-        "version": [0, 1, 6],
+        "version": [0, 1, 7],
         "min_engine_version": [1, 21, 20]
     },
     "modules": [

@@ -61,6 +61,13 @@ execute if score selectgame game matches 29 run tellraw @a {"rawtext":[{"text":"
 execute if score selectgame game matches 30 run tellraw @a {"rawtext":[{"text":"次のゲーム: §bボートレース\n§r氷の一本道をボートでまっすぐゴールへ！1〜3位がポイント。"}]}
 execute if score selectgame game matches 31 run tellraw @a {"rawtext":[{"text":"次のゲーム: §eピッタリ止め\n§r目標の秒数ぴったりで「ストップ！」を押そう。いちばん近い人が勝利。"}]}
 execute if score selectgame game matches 32 run tellraw @a {"rawtext":[{"text":"次のゲーム: §aニワトリ集め\n§rたねを持ってニワトリを自分の囲いに連れていこう！最後に囲いの中にいる数で勝負。§r\n§7制限時間: 60秒"}]}
+execute if score selectgame game matches 33 run tellraw @a {"rawtext":[{"text":"次のゲーム: §e一番多い色は？\n§r前の壁に一瞬だけ色のモザイクが出る。一番多かった色を答えよう！全5問。"}]}
+execute if score selectgame game matches 34 run tellraw @a {"rawtext":[{"text":"次のゲーム: §a早押し反射\n§r前の壁が緑になった瞬間にしゃがもう！早すぎるとフライング。全5ラウンド。"}]}
+execute if score selectgame game matches 35 run tellraw @a {"rawtext":[{"text":"次のゲーム: §c矢の雨\n§r四方の壁から飛んでくる矢をよけよう！3回当たったら脱落。"}]}
+execute if score selectgame game matches 36 run tellraw @a {"rawtext":[{"text":"次のゲーム: §c隕石よけ\n§r赤い印の所に隕石が落ちてくる。印から逃げよう！"}]}
+execute if score selectgame game matches 37 run tellraw @a {"rawtext":[{"text":"次のゲーム: §6押し寄せる壁\n§r穴のあいた壁が迫ってくる。穴の位置に立ってすり抜けよう！"}]}
+execute if score selectgame game matches 38 run tellraw @a {"rawtext":[{"text":"次のゲーム: §b障害物ダッシュ\n§r動く壁とハードルをこえてゴールへ！当たるとチェックポイントに戻る。1〜3位がポイント。"}]}
+execute if score selectgame game matches 39 run tellraw @a {"rawtext":[{"text":"次のゲーム: §d配置の記憶\n§r自分のマスで光ったところを覚えて、消えたあと同じマスをふもう！全4ラウンド。"}]}
 
 scoreboard players set game_next_ready game 0
 scoreboard players set game_ready game 0

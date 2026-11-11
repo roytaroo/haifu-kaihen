@@ -4,7 +4,7 @@
         "name": "MMG Plus",
         "description": "追加ミニゲーム・ON/OFF設定・ランキング掲示板",
         "uuid": "b06f1bb8-5f2c-46d2-b1df-807e2417ee90",
-        "version": [1, 0, 3],
+        "version": [1, 0, 4],
         "min_engine_version": [1, 21, 20]
     },
     "modules": [
