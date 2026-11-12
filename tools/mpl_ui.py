@@ -297,6 +297,7 @@ json.dump(hud, open(os.path.join(UI, 'hud_screen.json'), 'w', encoding='utf-8'),
 # サイドバーの背景
 sb = json.load(open(os.path.join(UI, 'scoreboards.json'), encoding='utf-8'))
 sb['scoreboard_sidebar/main'] = {'texture': 'textures/ui/mpl/side', 'alpha': 1.0, 'bindings': []}
+sb.setdefault('scoreboard_sidebar_score', {})['visible'] = False  # 並び順用の数字はかくす
 json.dump(sb, open(os.path.join(UI, 'scoreboards.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
 # ===== 専用フォーム =====

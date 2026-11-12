@@ -8,6 +8,7 @@
     "binding_collection_name": "scoreboard_scores"
    }
   ],
+  "visible": false,
   "font_type": "unicode"
  },
  "scoreboard_sidebar_player": {

@@ -1804,9 +1804,9 @@ const MG_HOWTO = {
 // ミニゲームの ON/OFF
 const mgOn = () => MG_IDS.filter((id) => !load("mg_off", []).includes(id));
 
-// ===== アイコン(RP の font/glyph_E1.png、tools/mpl_glyphs.py)=====
-const I = { star: "", coin: "", dice: "", crown: "", up: "", down: "", heart: "", bolt: "", bag: "", clock: "" };
-const BADGE = (n) => String.fromCharCode(0xe110 + Math.min(7, Math.max(0, n - 1)));
+// ===== アイコン(ふつうの文字。自作の絵文字は大きく出たのでやめた)=====
+const I = { star: "★", coin: "●", dice: "⚄", crown: "♛", up: "▲", down: "▼", heart: "♥", bolt: "⚡", bag: "◆", clock: "⌚" };
+const BADGE = (n) => String.fromCharCode(0x2460 + Math.min(7, Math.max(0, n - 1))); // ①〜⑧
 
 // ===== 音楽(RP の sounds/mpl/*.ogg、tools/mpl_music.py で作ったオリジナル曲)=====
 const BGM = { board: ["mpl.bgm_board", 640], minigame: ["mpl.bgm_minigame", 480], finale: ["mpl.bgm_finale", 300] };
@@ -1828,10 +1828,69 @@ const cam = {
     clear: (who = "@a") => cmd(`camera ${who} clear`),
     fade: (who = "@a", inS = 0.3, hold = 0.3, outS = 0.4) => cmd(`camera ${who} fade time ${inS} ${hold} ${outS} color 0 0 0`),
 };
+// カメラ → 目の高さまでの間にブロックがあるか(あれば見えない)
+function blocked(a, b) {
+    const d = dim(), n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z) * 3);
+    for (let i = 1; i < n; i++) {
+        const k = i / n, q = { x: Math.floor(a.x + (b.x - a.x) * k), y: Math.floor(a.y + (b.y - a.y) * k), z: Math.floor(a.z + (b.z - a.z) * k) };
+        try { const bl = d.getBlock(q); if (bl && !bl.isAir && !bl.isLiquid && !bl.typeId.includes("light")) return true; } catch {}
+    }
+    return false;
+}
+// 人の前(ボードの真ん中の方向)からのカメラ位置。見えなければ角度・高さを変えて探す
+function frontShot(p, dist = 3.2, h = 1.65) {
+    const l = p.location, head = { x: l.x, y: l.y + 1.5, z: l.z };
+    const base = Math.atan2(BOARD.z - l.z, BOARD.x - l.x);
+    for (const up of [0, 1.2, 2.6]) for (const da of [0, 0.5, -0.5, 1, -1, 1.6, -1.6, 2.4, -2.4, Math.PI]) {
+        const a = base + da, pos = { x: l.x + Math.cos(a) * dist, y: l.y + h + up, z: l.z + Math.sin(a) * dist };
+        if (!blocked(pos, head)) return { pos, head };
+    }
+    return { pos: { x: l.x, y: l.y + 6, z: l.z + 0.01 }, head };
+}
+const pose = (p, kind) => cmd(`playanimation "${p.name}" animation.mpl.${kind} default 0.3`);
+// いいこと(good)・わるいこと(bad): カメラがその人の前へ回りこみ、はしゃぐ / 落ち込む
+async function react(p, good, sec = 0.6) {
+    if (!p?.isValid) return;
+    const { pos, head } = frontShot(p);
+    cam.to("@a[tag=mpl_board]", pos, head, sec, "out_cubic");
+    try { p.teleport(p.location, { facingLocation: { x: pos.x, y: p.location.y + 1.6, z: pos.z } }); } catch {}
+    await wait(Math.round(sec * 20));
+    pose(p, good ? "cheer" : "sad");
+    const l = p.location;
+    if (good) { cmd(`particle minecraft:totem_particle ${l.x} ${l.y + 1.2} ${l.z}`); cmd(`playsound random.levelup @a ${l.x} ${l.y} ${l.z} 0.8 1.5`); }
+    else { cmd(`particle minecraft:villager_angry ${l.x} ${l.y + 2} ${l.z}`); cmd(`playsound mob.villager.no @a ${l.x} ${l.y} ${l.z} 0.8 0.7`); }
+    for (let i = 0; i < 6; i++) { const q = p.location; if (good) cmd(`particle minecraft:villager_happy ${q.x + rand(-1, 1) * 0.6} ${q.y + 1.8} ${q.z + rand(-1, 1) * 0.6}`); else cmd(`particle minecraft:falling_dust_dragon_egg_particle ${q.x} ${q.y + 2.3} ${q.z}`); await wait(6); }
+}
+// ワープ: その場で光って浮き上がる → 暗転 → 行き先で光る
+async function warpOut(p) {
+    const l = p.location;
+    cmd(`playsound mob.endermen.portal @a ${l.x} ${l.y} ${l.z} 1 0.8`);
+    for (let i = 0; i < 14; i++) { const q = p.location; cmd(`particle minecraft:portal_reverse_particle ${q.x} ${q.y + 0.8} ${q.z}`); cmd(`particle minecraft:end_chest ${q.x} ${q.y + 0.4} ${q.z}`); try { p.teleport({ x: q.x, y: l.y + i * 0.06, z: q.z }); } catch {} await wait(2); }
+}
+function warpIn(p) { const q = p.location; cmd(`particle minecraft:knockback_roar_particle ${q.x} ${q.y + 1} ${q.z}`); cmd(`particle minecraft:totem_particle ${q.x} ${q.y + 1} ${q.z}`); cmd(`playsound mob.shulker.teleport @a ${q.x} ${q.y} ${q.z} 1 1`); }
+// 2人の場所の入れかえ: 2人が映る高い位置から → 2人とも光って浮く → 暗転して入れかわる → それぞれをアップで
+async function swapAnim(a, b) {
+    const pa = world.getPlayers({ name: a })[0], pb = world.getPlayers({ name: b })[0];
+    const la = spot(G.pos[b]), lb = spot(G.pos[a]); // まだ入れかえ前の位置(G.pos は呼ぶ前に入れかえ済み)
+    const mid = { x: (la.x + lb.x) / 2, y: 1, z: (la.z + lb.z) / 2 }, span = Math.hypot(la.x - lb.x, la.z - lb.z);
+    const back = Math.atan2(mid.z - BOARD.z, mid.x - BOARD.x);
+    cam.to("@a[tag=mpl_board]", { x: mid.x + Math.cos(back) * (6 + span * 0.5), y: 6 + span * 0.45, z: mid.z + Math.sin(back) * (6 + span * 0.5) }, mid, 1);
+    ribbon("gold", "SWAP!", `${a} ⇔ ${b}`, 90);
+    await wait(24);
+    await Promise.all([pa, pb].filter(Boolean).map((p) => warpOut(p)));
+    cam.fade("@a", 0.25, 0.3, 0.35); await wait(7);
+    for (const n of [a, b]) world.getPlayers({ name: n })[0]?.teleport(spot(G.pos[n]), lookCenter);
+    await wait(5);
+    for (const p of [pa, pb]) if (p?.isValid) { warpIn(p); await react(p, p.name === a, 0.5); await wait(12); }
+}
+
 // 今の人の少し後ろ・上から見る
 function follow(p, sec = 0.6) {
-    const l = p.location, dx = l.x - BOARD.x, dz = l.z - BOARD.z, d = Math.hypot(dx, dz) || 1;
-    cam.to("@a[tag=mpl_board]", { x: l.x + (dx / d) * 7, y: l.y + 6, z: l.z + (dz / d) * 7 }, { x: l.x, y: l.y + 1, z: l.z }, sec);
+    const l = p.location, dx = l.x - BOARD.x, dz = l.z - BOARD.z, d = Math.hypot(dx, dz) || 1, look = { x: l.x, y: l.y + 1, z: l.z };
+    // ブロックで見えない時は、もっと高い所・横から
+    let pos = { x: l.x + (dx / d) * 7, y: l.y + 6, z: l.z + (dz / d) * 7 };
+    for (const [k, up] of [[1, 9], [0.6, 12], [0.3, 15]]) { if (!blocked(pos, look)) break; pos = { x: l.x + (dx / d) * 7 * k, y: l.y + up, z: l.z + (dz / d) * 7 * k }; }
+    cam.to("@a[tag=mpl_board]", pos, look, sec);
 }
 
 // ===== ボード =====
@@ -1909,7 +1968,7 @@ function hud() {
     try { world.scoreboard.removeObjective("mpl_hud"); } catch {}
     const o = world.scoreboard.addObjective("mpl_hud", `§e§l${I.crown} TURN ${Math.max(1, G.turn)}/${G.turns}`);
     const rows = rankRows();
-    rows.forEach(([n, st, co]) => o.setScore(boldText(`${G.now === n ? "§e▶" : " "}${BADGE(rankOfName(n))} §f${n.slice(0, 10)}  §e${I.star}${st} §6${I.coin}${co}`), st * 1000 + co));
+    rows.forEach(([n, st, co], i) => o.setScore(boldText(`${G.now === n ? "§e▶" : " "}${BADGE(rankOfName(n))} §f${n.slice(0, 10)}  §e${I.star}${st} §6${I.coin}${co}`), rows.length - i));
     cmd("scoreboard objectives setdisplay sidebar mpl_hud descending");
 }
 let starEntity;
@@ -2063,13 +2122,13 @@ async function takeTurn(p, last, nextName) {
     }
     // 止まったマス
     const sp = spaceAt(G.pos[name]), mul = last ? 2 : 1;
-    if (sp.kind === "blue") { addCoins(name, 3 * mul); ribbon("blue", `+${3 * mul} ${I.coin}`, name, 25); soundAllPlayers("random.orb", 1.4); cmd(`particle minecraft:villager_happy ${p.location.x} ${p.location.y + 1} ${p.location.z}`); }
-    else if (sp.kind === "red") { addCoins(name, -3 * mul); ribbon("red", `-${3 * mul} ${I.coin}`, name, 25); soundAllPlayers("note.bass", 0.7); cmd(`particle minecraft:villager_angry ${p.location.x} ${p.location.y + 1} ${p.location.z}`); }
-    else if (sp.kind === "lucky") { const n = rand(5, 15); addCoins(name, n); banner("lucky", `+${n} ${I.coin}  ${name}`, 35); soundAllPlayers("random.levelup", 1.2); }
+    if (sp.kind === "blue") { addCoins(name, 3 * mul); ribbon("blue", `+${3 * mul} ${I.coin}`, name, 45); soundAllPlayers("random.orb", 1.4); await react(p, true); }
+    else if (sp.kind === "red") { addCoins(name, -3 * mul); ribbon("red", `-${3 * mul} ${I.coin}`, name, 45); soundAllPlayers("note.bass", 0.7); await react(p, false); }
+    else if (sp.kind === "lucky") { const n = rand(5, 15); addCoins(name, n); banner("lucky", `+${n} ${I.coin}  ${name}`, 50); soundAllPlayers("random.levelup", 1.2); await react(p, true); }
     else if (sp.kind === "event") await happening(p);
     else if (sp.kind === "shop") await shop(p);
     else if (sp.kind === "skull") await skull(p);
-    await wait(25);
+    await wait(15);
 }
 // アイテムを使う(サイコロの前)。持っていなければ何もしない
 async function useItem(p) {
@@ -2089,9 +2148,9 @@ async function useItem(p) {
     bag.splice(bag.indexOf(pick), 1);
     banner("item", `${ITEMS[pick].name}  ${name}`, 35); soundAllPlayers("random.orb", 0.8);
     const others = G.players.filter((n) => n !== name);
-    if (pick === "pipe" && others.length) { const t = others[rand(0, others.length - 1)]; [G.pos[name], G.pos[t]] = [G.pos[t], G.pos[name]]; for (const n of [name, t]) world.getPlayers({ name: n })[0]?.teleport(spot(G.pos[n]), lookCenter); ribbon("purple", `${name} と ${t} が場所をこうかん！`, "", 40); }
-    if (pick === "gold") { G.pos[name] = (G.star - 1 + SPACES.length) % SPACES.length; p.teleport(spot(G.pos[name]), lookCenter); follow(p, 0.8); }
-    if (pick === "glove" && others.length) { const t = others.sort((a, b) => (G.coins[b] ?? 0) - (G.coins[a] ?? 0))[0], n = Math.min(rand(5, 10), G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n); ribbon("purple", `${t} から ${n}${I.coin} うばった！`, name, 40); }
+    if (pick === "pipe" && others.length) { await wait(30); const t = others[rand(0, others.length - 1)]; [G.pos[name], G.pos[t]] = [G.pos[t], G.pos[name]]; await swapAnim(name, t); }
+    if (pick === "gold") { await wait(30); await warpOut(p); cam.fade("@a", 0.25, 0.3, 0.35); await wait(7); G.pos[name] = (G.star - 1 + SPACES.length) % SPACES.length; p.teleport(spot(G.pos[name]), lookCenter); warpIn(p); await react(p, true, 0.4); }
+    if (pick === "glove" && others.length) { const t = others.sort((a, b) => (G.coins[b] ?? 0) - (G.coins[a] ?? 0))[0], n = Math.min(rand(5, 10), G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n); ribbon("purple", `${t} から ${n}${I.coin} うばった！`, name, 50); await react(p, true); const tp = world.getPlayers({ name: t })[0]; if (tp) await react(tp, false); }
     return pick;
 }
 // ===== 屋台のショップ =====
@@ -2143,7 +2202,18 @@ async function shop(p) {
     await wait(15);
     let buy = null;
     if (bag.length >= 3) ribbon("gray", "アイテムはもう3つ持っている", "3つまで", 30, [p]);
-    else if (isBot(p)) { const ok = keys.filter((k) => ITEMS[k].price <= (G.coins[name] ?? 0) - 5); if (ok.length && Math.random() < 0.7) buy = ok[rand(0, ok.length - 1)]; await wait(30); }
+    else if (isBot(p)) {
+        ribbon("purple", "えらんでいます…", name, 120);
+        for (let j = 0; j < shown.length; j++) {
+            const q = shown[j]?.location; if (!q) continue;
+            botLook(p, q.x.toFixed(2), (q.y + 0.3).toFixed(2), q.z.toFixed(2));
+            cmd(`particle minecraft:villager_happy ${q.x} ${q.y + 0.6} ${q.z}`); cmd(`playsound random.click @a ${q.x} ${q.y} ${q.z} 0.6 ${1 + j * 0.15}`);
+            await wait(rand(22, 32));
+        }
+        const ok = keys.filter((k) => ITEMS[k].price <= (G.coins[name] ?? 0) - 5); if (ok.length && Math.random() < 0.7) buy = ok[rand(0, ok.length - 1)];
+        if (buy) { const q = shown[keys.indexOf(buy)]?.location; if (q) { botLook(p, q.x.toFixed(2), (q.y + 0.3).toFixed(2), q.z.toFixed(2)); for (let k = 0; k < 4; k++) { cmd(`particle minecraft:heart_particle ${q.x} ${q.y + 0.7} ${q.z}`); await wait(6); } } }
+        await wait(15);
+    }
     else {
         const fm = new ActionFormData().title(`${FORM_MARK}§lショップ`).body(`§l§fいらっしゃい！ どれにする？ §6${I.coin}${G.coins[name] ?? 0}§f 持っている`);
         keys.forEach((k) => fm.button(`§l${ITEMS[k].name}  §6${I.coin}${ITEMS[k].price}\n§7${ITEMS[k].desc}`));
@@ -2157,9 +2227,9 @@ async function shop(p) {
         addCoins(name, -ITEMS[buy].price); bag.push(buy);
         const j = keys.indexOf(buy); try { shown[j]?.remove(); } catch {}
         cmd(`playsound mob.villager.yes @a ${vpos.x} 1 ${vpos.z} 1 1`); cmd(`playsound random.orb @a ${vpos.x} 1 ${vpos.z} 1 1.4`);
-        ribbon("purple", `${ITEMS[buy].name} を買った！`, "まいど！", 30);
-    } else { cmd(`playsound mob.villager.no @a ${vpos.x} 1 ${vpos.z} 1 1`); ribbon("gray", "SEE YOU AGAIN!", name, 25); }
-    await wait(25);
+        ribbon("purple", `${ITEMS[buy].name} を買った！`, "まいど！", 50);
+        await wait(10); await react(p, true, 0.5);
+    } else { cmd(`playsound mob.villager.no @a ${vpos.x} 1 ${vpos.z} 1 1`); ribbon("gray", "SEE YOU AGAIN!", name, 35); await wait(25); }
     try { v?.remove(); } catch {}
     shown.forEach((e) => { try { e?.remove(); } catch {} });
     await stallShutter(i, true, true);
@@ -2185,6 +2255,19 @@ async function buyStar(p) {
     cmd("execute as @a at @s run playsound mpl.star_get @s ~ ~ ~ 1 1");
     try { starEntity?.remove(); } catch {}
     const c = p.location;
+    // スターが頭の上をくるくる回りながら下りてきて、体に吸いこまれる(約5秒)
+    (async () => {
+        const st = spawnAt("mmgplus:star", { x: c.x, y: c.y + 4, z: c.z });
+        for (let t = 0; t <= 100 && st?.isValid; t++) {
+            const u = t / 100, r = 1.6 * (1 - u * u), a = t * 0.22;
+            st.teleport({ x: c.x + Math.cos(a) * r, y: c.y + 3.4 - u * 2.2 + Math.sin(t * 0.3) * 0.15 * (1 - u), z: c.z + Math.sin(a) * r });
+            if (t % 4 === 0) cmd(`particle minecraft:totem_particle ${st.location.x} ${st.location.y} ${st.location.z}`);
+            await wait(1);
+        }
+        try { st?.remove(); } catch {}
+        cmd(`particle minecraft:knockback_roar_particle ${c.x} ${c.y + 1} ${c.z}`); cmd(`playsound random.levelup @a ${c.x} ${c.y} ${c.z} 1 2`);
+        pose(p, "cheer");
+    })();
     // 0〜6秒: まわりを1周(1秒ごとに60度)。6秒: 正面に寄ってアップ。7秒: 花火
     for (let k = 0; k <= 6; k++) {
         const a = (k / 6) * Math.PI * 2 + Math.PI / 2;
@@ -2193,7 +2276,7 @@ async function buyStar(p) {
         if (k % 2 === 0) cmd(`particle minecraft:totem_particle ${c.x} ${c.y + 1} ${c.z}`);
         await wait(20);
     }
-    cam.to("@a[tag=mpl_board]", { x: c.x, y: c.y + 1.7, z: c.z + 2.2 }, { x: c.x, y: c.y + 1.5, z: c.z }, 0.8, "out_back");
+    { const { pos, head } = frontShot(p, 2.4); cam.to("@a[tag=mpl_board]", pos, head, 0.8, "out_back"); }
     for (let k = 0; k < 4; k++) spawnAt("minecraft:fireworks_rocket", { x: c.x + rand(-3, 3), y: c.y + 1, z: c.z + rand(-3, 3) });
     await wait(30);
     if (keep) bgm("board");
@@ -2208,24 +2291,25 @@ async function happening(p) {
     banner("happening", "", 25); soundAllPlayers("random.orb", 0.6);
     for (let i = 0; i < 8; i++) { cmd(`particle minecraft:villager_happy ${p.location.x} ${p.location.y + 1.5} ${p.location.z}`); await wait(3); }
     const ev = rand(1, 7);
-    if (ev === 1) { const n = rand(5, 12); addCoins(name, n); ribbon("green", `COIN SHOWER! +${n}${I.coin}`, `${name}`, 30); }
-    else if (ev === 2 && others.length) { const t = others[rand(0, others.length - 1)], n = Math.min(5, G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n); ribbon("purple", `COIN THIEF!`, `${name} が ${t} から ${n}${I.coin}`, 40); }
-    else if (ev === 3) { G.pos[name] = (G.star - 1 + SPACES.length) % SPACES.length; cam.fade(); await wait(8); p.teleport(spot(G.pos[name]), lookCenter); follow(p, 0.6); ribbon("blue", `WARP!`, `${name} がスターの手前へ`, 40); }
-    else if (ev === 4 && others.length) { const t = others[rand(0, others.length - 1)]; [G.pos[name], G.pos[t]] = [G.pos[t], G.pos[name]]; cam.fade(); await wait(8); for (const n of [name, t]) world.getPlayers({ name: n })[0]?.teleport(spot(G.pos[n]), lookCenter); ribbon("gold", `SWAP!`, `${name} ⇔ ${t}`, 40); }
-    else if (ev === 5) { const n = Math.min(8, G.coins[name] ?? 0); addCoins(name, -n); ribbon("red", `DROPPED COINS -${n}${I.coin}`, `${name}`, 30); }
-    else if (ev === 6) { const k = Object.keys(ITEMS)[rand(0, 4)]; if ((G.items[name] ?? []).length < 3) { G.items[name].push(k); ribbon("purple", `A GIFT!`, `${name} に ${ITEMS[k].name}`, 40); } }
+    if (ev === 1) { const n = rand(5, 12); addCoins(name, n); ribbon("green", `COIN SHOWER! +${n}${I.coin}`, `${name}`, 50); await react(p, true); }
+    else if (ev === 2 && others.length) { const t = others[rand(0, others.length - 1)], n = Math.min(5, G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n); ribbon("purple", `COIN THIEF!`, `${name} が ${t} から ${n}${I.coin}`, 60); await react(p, true); const tp = world.getPlayers({ name: t })[0]; if (tp) await react(tp, false); }
+    else if (ev === 3) { ribbon("blue", `WARP!`, `${name} がスターの手前へ`, 70); await warpOut(p); cam.fade("@a", 0.25, 0.3, 0.35); await wait(7); G.pos[name] = (G.star - 1 + SPACES.length) % SPACES.length; p.teleport(spot(G.pos[name]), lookCenter); warpIn(p); await react(p, true, 0.4); }
+    else if (ev === 4 && others.length) { const t = others[rand(0, others.length - 1)]; [G.pos[name], G.pos[t]] = [G.pos[t], G.pos[name]]; await swapAnim(name, t); }
+    else if (ev === 5) { const n = Math.min(8, G.coins[name] ?? 0); addCoins(name, -n); ribbon("red", `DROPPED COINS -${n}${I.coin}`, `${name}`, 50); await react(p, false); }
+    else if (ev === 6) { const k = Object.keys(ITEMS)[rand(0, 4)]; if ((G.items[name] ?? []).length < 3) { G.items[name].push(k); ribbon("purple", `A GIFT!`, `${name} に ${ITEMS[k].name}`, 50); await react(p, true); } }
     else { const total = G.players.reduce((s, n) => s + (G.coins[n] ?? 0), 0), each = Math.floor(total / G.players.length); for (const n of G.players) G.coins[n] = each; hud(); ribbon("gold", `EVERYONE EQUAL!`, `コインを全員 ${each}${I.coin} に`, 40); }
     soundAllPlayers("mob.villager.yes", 1.2);
-    await wait(50);
+    await wait(25);
 }
 // ドクロのマス: コイン半分 か スターを1つ取られる(まれ)
 async function skull(p) {
     const name = p.name;
     cmd(`camera @a fade time 0.2 0.6 0.4 color 80 0 0`); soundAllPlayers("mob.wither.ambient", 0.8);
     await wait(20);
-    if ((G.stars[name] ?? 0) > 0 && Math.random() < 0.25) { G.stars[name]--; hud(); banner("skull", `${I.star} を1つ失った…  ${name}`, 50); }
-    else { const n = Math.floor((G.coins[name] ?? 0) / 2); addCoins(name, -n); banner("skull", `コインが半分… -${n}${I.coin}  ${name}`, 50); }
-    await wait(50);
+    if ((G.stars[name] ?? 0) > 0 && Math.random() < 0.25) { G.stars[name]--; hud(); banner("skull", `${I.star} を1つ失った…  ${name}`, 70); }
+    else { const n = Math.floor((G.coins[name] ?? 0) / 2); addCoins(name, -n); banner("skull", `コインが半分… -${n}${I.coin}  ${name}`, 70); }
+    await react(p, false, 0.8);
+    await wait(20);
 }
 // ターンの最後のミニゲーム(ルーレットで決める)
 async function minigameRound() {
@@ -2249,10 +2333,11 @@ async function minigameRound() {
     for (const p of gp()) { p.addTag("mpl_board"); p.teleport(spot(G.pos[p.name], G.players.indexOf(p.name)), lookCenter); }
     lockBoard();
     cam.to("@a[tag=mpl_board]", { x: 0.5, y: 30, z: 106 }, { x: 0.5, y: 0, z: 130 }, 1);
-    if (names.length) banner("win", `+10${I.coin}  ${names.join(", ")}`, 50); else ribbon("gray", "NO WINNER", "", 45);
-    await wait(30);
-    showStandings(`TURN ${G.turn} RESULTS`);
-    await wait(150);
+    if (names.length) banner("win", `+10${I.coin}  ${names.join(", ")}`, 60); else ribbon("gray", "NO WINNER", "", 45);
+    await wait(25);
+    for (const q of gp()) if (!names.includes(q.name)) pose(q, "sad");
+    for (const n of names.slice(0, 3)) { const q = world.getPlayers({ name: n })[0]; if (q) { await react(q, true, 0.5); await wait(6); } }
+    await wait(10);
 }
 // 順位の画面(RP の ui/server_form.json)
 const RANK_MARK = "§r§m§r§n§r";
@@ -2312,9 +2397,12 @@ async function finale() {
         for (const n of winners) { const w = world.getPlayers({ name: n })[0]; if (!w) continue; const l = w.location; cmd(`particle minecraft:totem_particle ${l.x} ${l.y + 1} ${l.z}`); if (i % 3 === 0) spawnAt("minecraft:fireworks_rocket", { x: l.x + rand(-4, 4), y: l.y + 1, z: l.z + rand(-4, 4) }); }
         await wait(10);
     }
-    cam.clear();
-    showStandings("FINAL RESULTS");
+    for (const q of gp()) if (!winners.includes(q.name)) pose(q, "sad");
+    for (const n of winners) { const q = world.getPlayers({ name: n })[0]; if (q) pose(q, "cheer"); }
+    await wait(20);
+    ribbon("gold", "FINAL RESULTS", rankRows().map(([n, st, co]) => `${BADGE(rankOfName(n))}${n} ${I.star}${st} ${I.coin}${co}`).join("  "), 140);
     await wait(150);
+    cam.clear();
     const st = load("party_stats", {}); for (const n of winners) st[n] = (st[n] ?? 0) + 1; save("party_stats", st);
 }
 
