@@ -1,0 +1,24 @@
+{
+ "resource_pack_name": "mpl",
+ "texture_name": "atlas.items",
+ "texture_data": {
+  "mmgplus_flag_red_up": {
+   "textures": "textures/items/mmgplus_flag_red_up"
+  },
+  "mmgplus_flag_red_down": {
+   "textures": "textures/items/mmgplus_flag_red_down"
+  },
+  "mmgplus_flag_white_up": {
+   "textures": "textures/items/mmgplus_flag_white_up"
+  },
+  "mmgplus_flag_white_down": {
+   "textures": "textures/items/mmgplus_flag_white_down"
+  },
+  "mmgplus_boost": {
+   "textures": "textures/items/mmgplus_boost"
+  },
+  "mpl_menu": {
+   "textures": "textures/items/mpl_menu"
+  }
+ }
+}

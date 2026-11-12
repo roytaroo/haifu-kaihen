@@ -1,0 +1,28 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "mmgplus:treasure_emerald",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/items/emerald"
+      },
+      "geometry": {
+        "default": "geometry.mmgplus.item"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ],
+      "animations": {
+        "a": "animation.mmgplus.spin"
+      },
+      "scripts": {
+        "animate": [
+          "a"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.bull": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "rotation": [
+      "math.sin(q.life_time * 500) * 8 * q.property('mmgplus:buck')",
+      0,
+      "math.sin(q.life_time * 330) * 4 * q.property('mmgplus:buck')"
+     ],
+     "position": [
+      0,
+      "math.abs(math.sin(q.life_time * 500)) * 3 * q.property('mmgplus:buck')",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

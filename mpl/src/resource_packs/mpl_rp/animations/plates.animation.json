@@ -1,0 +1,17 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.plates": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "rotation": [
+      0,
+      0,
+      "q.property('mmgplus:tilt') * 4"
+     ]
+    }
+   }
+  }
+ }
+}

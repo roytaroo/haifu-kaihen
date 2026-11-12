@@ -1,0 +1,22 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.dice": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "rotation": [
+      "q.property('mmgplus:rolling') * q.life_time * 720",
+      "q.property('mmgplus:rolling') * q.life_time * 540",
+      0
+     ],
+     "position": [
+      0,
+      "math.sin(q.life_time * 300) * 1",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

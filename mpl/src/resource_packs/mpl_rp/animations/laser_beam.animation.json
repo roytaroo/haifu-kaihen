@@ -1,0 +1,17 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.laser_beam": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "scale": [
+      1,
+      "1 + math.sin(q.life_time * 1600) * 0.25",
+      "1 + math.sin(q.life_time * 1600) * 0.25"
+     ]
+    }
+   }
+  }
+ }
+}

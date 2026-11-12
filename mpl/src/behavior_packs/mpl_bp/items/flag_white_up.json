@@ -1,0 +1,21 @@
+{
+ "format_version": "1.20.50",
+ "minecraft:item": {
+  "description": {
+   "identifier": "mmgplus:flag_white_up",
+   "menu_category": {
+    "category": "items"
+   }
+  },
+  "components": {
+   "minecraft:max_stack_size": 1,
+   "minecraft:icon": {
+    "texture": "mmgplus_flag_white_up"
+   },
+   "minecraft:display_name": {
+    "value": "§f白の旗(上)\n§7右クリック/タップで上げ下げ"
+   },
+   "minecraft:hand_equipped": true
+  }
+ }
+}

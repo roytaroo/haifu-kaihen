@@ -1,0 +1,18 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.balloon": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "scale": "0.5 + q.property('mmgplus:size') * 0.15",
+     "position": [
+      0,
+      "math.sin(q.life_time * 120) * 0.6",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

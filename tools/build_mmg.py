@@ -16,6 +16,7 @@ def with_beta_api(data):
         ver, name, root = nbt.read(p)
         ex = root['experiments'][1]
         ex.update({'gametest': (1, 1), 'experiments_ever_used': (1, 1), 'saved_with_toggled_experiments': (1, 1)})
+        root['Time'] = (4, 6000)  # 元のワールドは夜中(18000)で止まっていて暗かったので昼に
         nbt.write(p, ver, name, root)
         return open(p, 'rb').read()
 

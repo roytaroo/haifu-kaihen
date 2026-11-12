@@ -1,0 +1,17 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.boyon": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "scale": [
+      "1 + math.abs(math.sin(q.life_time * 400)) * 0.08",
+      "1 - math.abs(math.sin(q.life_time * 400)) * 0.1",
+      "1 + math.abs(math.sin(q.life_time * 400)) * 0.08"
+     ]
+    }
+   }
+  }
+ }
+}

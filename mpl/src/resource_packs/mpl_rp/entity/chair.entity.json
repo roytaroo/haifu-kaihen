@@ -1,0 +1,20 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:chair",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/mmgplus_chair"
+   },
+   "geometry": {
+    "default": "geometry.mmgplus.chair"
+   },
+   "render_controllers": [
+    "controller.render.default"
+   ]
+  }
+ }
+}

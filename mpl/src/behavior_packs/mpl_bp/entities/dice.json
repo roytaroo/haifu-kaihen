@@ -1,0 +1,58 @@
+{
+ "format_version": "1.21.20",
+ "minecraft:entity": {
+  "description": {
+   "identifier": "mmgplus:dice",
+   "is_spawnable": false,
+   "is_summonable": true,
+   "properties": {
+    "mmgplus:rolling": {
+     "type": "int",
+     "range": [
+      0,
+      1
+     ],
+     "default": 1,
+     "client_sync": true
+    },
+    "mmgplus:face": {
+     "type": "int",
+     "range": [
+      0,
+      6
+     ],
+     "default": 0,
+     "client_sync": true
+    }
+   }
+  },
+  "components": {
+   "minecraft:collision_box": {
+    "width": 0.9,
+    "height": 0.9
+   },
+   "minecraft:physics": {
+    "has_gravity": false,
+    "has_collision": false
+   },
+   "minecraft:damage_sensor": {
+    "triggers": [
+     {
+      "cause": "all",
+      "deals_damage": "no"
+     }
+    ]
+   },
+   "minecraft:pushable": {
+    "is_pushable": false,
+    "is_pushable_by_piston": false
+   },
+   "minecraft:type_family": {
+    "family": [
+     "mmgplus_prop",
+     "inanimate"
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "format_version": "1.14.0",
+ "sound_definitions": {
+  "mmgplus.chair_music": {
+   "category": "record",
+   "sounds": [
+    {
+     "name": "sounds/mmgplus/chair_music",
+     "stream": true,
+     "volume": 1.0
+    }
+   ]
+  }
+ }
+}
