@@ -3,7 +3,7 @@
 // ミニゲームの共通の約束(下の「ミニゲーム」の部分はこれを使う):
 //   スコアボード game に selectgame(今のミニゲームの番号)・playing(1 = 遊んでいる)・level(むずかしさ 1〜5)
 //   参加している人はタグ playing。脱落はタグ mmgplus_out。BOT はタグ mmgbot(BOT パックがつける)
-import { world, system, GameMode, ItemStack } from "@minecraft/server";
+import { world, system, GameMode, ItemStack, ItemLockMode } from "@minecraft/server";
 import { ActionFormData, ModalFormData, MessageFormData, uiManager } from "@minecraft/server-ui";
 
 const SPECTATOR = GameMode.Spectator ?? GameMode.spectator;
@@ -2314,6 +2314,17 @@ async function minigameTour(ids) {
 }
 
 // ===== メニュー(MPL のメニューのアイテム: mpl:menu)=====
+// 管理者のメニューはいつでも一番右(スロット9)に固定。動かせない・落とせない・死んでも消えない。消されても すぐ戻す
+function keepMenu(p) {
+    const inv = p.getComponent("minecraft:inventory")?.container; if (!inv) return;
+    const cur = inv.getItem(8);
+    if (cur?.typeId === "mpl:menu" && cur.lockMode === ItemLockMode.slot && cur.keepOnDeath) return;
+    for (let i = 0; i < inv.size; i++) if (i !== 8 && inv.getItem(i)?.typeId === "mpl:menu") inv.setItem(i); // ほかの場所のメニューは消す
+    if (cur && cur.typeId !== "mpl:menu") { inv.setItem(8); const rest = inv.addItem(cur); if (rest) p.dimension.spawnItem(rest, p.location); } // スロット9にあった物はよける
+    const m = new ItemStack("mpl:menu"); m.lockMode = ItemLockMode.slot; m.keepOnDeath = true;
+    inv.setItem(8, m);
+}
+system.runInterval(() => { for (const p of world.getPlayers()) if (isAdmin(p)) { try { keepMenu(p); } catch {} } }, 10);
 world.afterEvents.itemUse.subscribe((ev) => { if (ev.itemStack?.typeId === "mpl:menu") menu(ev.source); });
 async function menu(p) {
     if (!isAdmin(p)) { bar(p, "§cメニューは管理者だけ使えます"); return; }
@@ -2382,7 +2393,7 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
     const p = ev.player;
     if (isBot(p)) return;
     if (!load("host", null)) { save("host", p.name); p.addTag("mpl_admin"); }
-    if (isAdmin(p) && !p.getComponent("minecraft:inventory")?.container?.getItem(8)) p.getComponent("minecraft:inventory")?.container?.setItem(8, new ItemStack("mpl:menu"));
+    if (isAdmin(p)) keepMenu(p);
     if (ev.initialSpawn) {
         if (!G.on) p.teleport(LOBBY, lookCenter);
         banner("title", "ようこそ！", 70, [p]);
