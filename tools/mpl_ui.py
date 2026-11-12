@@ -55,10 +55,11 @@ def logo(text, theme, W=1280, H=320, jp=True, tilt=True):
         bb = font.getbbox(ch)
         cw, chh = max(1, bb[2] - bb[0]), max(1, bb[3] - bb[1])
         m = Image.new('L', (cw + 40 * S, chh + 40 * S)); ImageDraw.Draw(m).text((20 * S - bb[0], 20 * S - bb[1]), ch, font=font, fill=255)
+        if not ch.strip(): m = Image.new('L', (110 * S, 40 * S))
         if jp: m = dil(m, 5 * S)  # ゴシックを太く
         if tilt and ch.strip(): m = m.rotate((-5 if i % 2 else 5), resample=Image.BICUBIC, expand=True)
         imgs.append(m)
-    gap = -8 * S
+    gap = -34 * S
     tw = sum(m.width for m in imgs) + gap * (len(imgs) - 1)
     th = max(m.height for m in imgs)
     canvas_w, canvas_h = tw + 120 * S, th + 120 * S
@@ -77,7 +78,11 @@ def logo(text, theme, W=1280, H=320, jp=True, tilt=True):
     o3 = dil(full, 5 * S); o2 = dil(full, 15 * S); o1 = dil(full, 22 * S)
     out = Image.new('RGBA', (canvas_w, canvas_h))
     sh = o1.filter(ImageFilter.GaussianBlur(6 * S)).point(lambda v: v * 0.55)
-    out.paste((0, 0, 0, 255), (0, 10 * S), sh)
+    out.paste((0, 0, 0, 255), (0, 16 * S), sh)
+    # 厚み(下に押し出した立体)
+    dk = tuple(max(0, int(c * 0.45)) for c in inner)
+    for k in range(12 * S, 0, -1):
+        out.paste(dk + (255,), (0, k), o1)
     out.paste((25, 15, 50, 255), (0, 0), o1)
     out.paste((255, 255, 255, 255), (0, 0), o2)
     out.paste(inner + (255,), (0, 0), o3)
@@ -120,22 +125,22 @@ def shine_strip(img, mask):
 LOGOS = [
     ('title', 'MEGAMI PARTY LAND', RAINBOW, False, True),
     ('turn', 'TURN', 'blue', False, False),
-    ('yourturn', 'あなたの番！', 'gold', True, True),
-    ('order', '順番けってい！', 'blue', True, False),
-    ('starappear', 'スター出現！', 'gold', True, True),
-    ('star', 'スターゲット！', 'gold', True, True),
-    ('minigame', 'ミニゲーム！', RAINBOW, True, True),
-    ('win', '勝ち！', 'red', True, True),
-    ('happening', 'ハプニング！', 'green', True, False),
-    ('skull', 'ドクロ…', 'dark', True, False),
-    ('shop', 'いらっしゃい！', 'pink', True, False),
-    ('lucky', 'ラッキー！', 'gold', True, True),
-    ('gameset', 'ゲーム終了！', 'red', True, False),
-    ('result', '結果発表', 'gold', True, True),
-    ('champion', '優勝！', 'gold', True, True),
-    ('lastspurt', 'ラストスパート！', 'red', True, False),
-    ('bonus', 'ボーナススター', 'gold', True, True),
-    ('item', 'アイテム！', 'purple', True, False),
+    ('yourturn', 'YOUR TURN!', 'gold', False, True),
+    ('order', 'TURN ORDER', 'blue', False, False),
+    ('starappear', 'STAR APPEARS!', 'gold', False, True),
+    ('star', 'STAR GET!', 'gold', False, True),
+    ('minigame', 'MINIGAME!', RAINBOW, False, True),
+    ('win', 'WINNER!', 'red', False, True),
+    ('happening', 'HAPPENING!', 'green', False, False),
+    ('skull', 'BAD LUCK...', 'dark', False, False),
+    ('shop', 'WELCOME!', 'pink', False, False),
+    ('lucky', 'LUCKY!', 'gold', False, True),
+    ('gameset', 'GAME SET!', 'red', False, False),
+    ('result', 'RESULTS', 'gold', False, True),
+    ('champion', 'CHAMPION!', 'gold', False, True),
+    ('lastspurt', 'FINAL STRETCH!', 'red', False, False),
+    ('bonus', 'BONUS STARS', 'gold', False, True),
+    ('item', 'ITEM!', 'purple', False, False),
 ]
 NUMS = list(range(0, 31))
 RIBBONS = {'gold': ((255, 214, 70), (220, 120, 0)), 'blue': ((90, 170, 255), (20, 70, 200)), 'red': ((255, 110, 100), (180, 20, 30)),
@@ -150,9 +155,9 @@ def nine(name, img, sl):
 if not os.environ.get('MPL_UI_JSON_ONLY'):
     LW, LH = 1024, 256
     for key, text, th, jp, _ in LOGOS:
-        im, m = logo(text, th, LW, LH, jp, tilt=(key != 'title'))
+        im, m = logo(text, th, LW, LH, jp, tilt=False)
         im.save(os.path.join(TEX, f'logo_{key}.png'), optimize=True)
-        if key in ('star', 'minigame', 'title'): im.save(os.path.join(ROOT, 'mpl', f'preview_logo_{key}.png'))
+        pass
     for n in NUMS:
         im, _ = logo(str(n), 'gold', 240, 180, False, tilt=False)
         im.save(os.path.join(TEX, f'num_{n}.png'), optimize=True)

@@ -13,7 +13,7 @@
     "texture": "mmgplus_flag_white_down"
    },
    "minecraft:display_name": {
-    "value": "§f白の旗(下)\n§7右クリック/タップで上げ下げ"
+    "value": "§fWhite Flag (DOWN)\n§7Use to raise/lower"
    },
    "minecraft:hand_equipped": true
   }
