@@ -17,7 +17,8 @@
     {
      "name": "sounds/mpl/bgm_board",
      "stream": true,
-     "volume": 1.0
+     "volume": 1.0,
+     "is3D": false
     }
    ]
   },
@@ -27,7 +28,8 @@
     {
      "name": "sounds/mpl/bgm_minigame",
      "stream": true,
-     "volume": 1.0
+     "volume": 1.0,
+     "is3D": false
     }
    ]
   },
@@ -37,7 +39,8 @@
     {
      "name": "sounds/mpl/bgm_finale",
      "stream": true,
-     "volume": 1.0
+     "volume": 1.0,
+     "is3D": false
     }
    ]
   },
@@ -47,7 +50,8 @@
     {
      "name": "sounds/mpl/fanfare_star",
      "stream": false,
-     "volume": 1.0
+     "volume": 1.0,
+     "is3D": false
     }
    ]
   }
