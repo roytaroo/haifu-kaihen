@@ -21,7 +21,7 @@ def level_dat():
         def put(k, v): root[k] = (keep_types.get(k, 8 if isinstance(v, str) else 3), v)
         put('LevelName', f'MEGAMI PARTY LAND {tag}')
         put('RandomSeed', random.randint(1, 2**62)); put('LastPlayed', int(time.time())); put('currentTick', 0); put('worldStartCount', 0)
-        put('SpawnX', 0); put('SpawnY', 1); put('SpawnZ', 128); put('Time', 6000); put('PlayerHasDied', 0)
+        put('SpawnX', 0); put('SpawnY', 1); put('SpawnZ', 106); put('Time', 6000); put('PlayerHasDied', 0)
         put('GameType', 2); put('Difficulty', 1); put('Generator', 2)
         put('FlatWorldLayers', json.dumps({'biome_id': 1, 'block_layers': [], 'encoding_version': 6, 'structure_options': None, 'world_version': 'version.post_1_18'}))
         for k, v in {'dodaylightcycle': 0, 'doweathercycle': 0, 'domobspawning': 0, 'pvp': 0, 'falldamage': 0, 'keepinventory': 1, 'doimmediaterespawn': 1,
