@@ -1376,7 +1376,7 @@ async function gameBoyon() {
 // 巨大なワニ(長さ約14マス)が大きく口を開けている。順番に口の中の歯を1本叩く。1本だけ「かまれる歯」がある。3分の1になるまで
 // 歯の位置: ワニのモデルの下あご(y=5px、x=-5.5/4.5px、z=-19〜-7px)を、ワニの位置・180度回転・4倍に合わせてワールドの座標にしたもの
 const CROC_AT = { x: 0.5, y: 1, z: -2.5 }, CROC_S = 4 / 16;
-const TOOTH_SPOTS = [-5.5, -2, 1.5, 4.5].flatMap((mx) => [-20, -17].map((mz) => ({ x: CROC_AT.x - mx * CROC_S, y: CROC_AT.y + 5 * CROC_S, z: CROC_AT.z - mz * CROC_S })));
+const TOOTH_SPOTS = [-5.5, 4.5].flatMap((mx) => [-20, -17, -14, -11].map((mz) => ({ x: CROC_AT.x - mx * CROC_S, y: CROC_AT.y + 5 * CROC_S, z: CROC_AT.z - mz * CROC_S })));
 let toothHit = null;
 world.afterEvents.entityHitEntity.subscribe((ev) => { if (ev.hitEntity?.typeId === "mmgplus:tooth" && ev.damagingEntity?.typeId === "minecraft:player") toothHit = { p: ev.damagingEntity, e: ev.hitEntity }; });
 async function gameCroc() {
@@ -1389,7 +1389,7 @@ async function gameCroc() {
         bad = teeth[rand(0, teeth.length - 1)]; croc?.setProperty("mmgplus:bite", 0);
     };
     reset();
-    cmd("tp @a[tag=playing] 0.5 1 6 facing 0.5 2 0");
+    cmd("tp @a[tag=playing] 0.5 1 5 facing 0.5 2 0");
     title("§2§l巨大ワニの歯", "§f順番に、口の中の歯を1本叩こう。かまれたらアウト");
     await wait(50);
     for (let turn = 0; turn < 200 && !aborted(); turn++) {
@@ -1400,7 +1400,7 @@ async function gameCroc() {
         toothHit = null;
         let hitE;
         for (let t = 0; t < 200 && !aborted(); t += 2) {
-            if (isBot(p) && t === 4) { p.botTarget = teeth[rand(0, teeth.length - 1)]; botGo(p, p.botTarget.location.x, 1, 3.9); }
+            if (isBot(p) && t === 4) { p.botTarget = teeth[rand(0, teeth.length - 1)]; botGo(p, Math.max(-0.8, Math.min(1.8, p.botTarget.location.x)), 1, 2.8); }
             if (isBot(p) && t === 40 && p.botTarget?.isValid) { botLook(p, p.botTarget.location.x, p.botTarget.location.y + 0.3, p.botTarget.location.z); hitE = p.botTarget; }
             if (toothHit && toothHit.p.name === p.name) hitE = toothHit.e;
             if (hitE) break;
@@ -2301,5 +2301,5 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
 // ワニの口の中に入らない(入ったら前へ押し出す)
 system.runInterval(() => {
     if (score("game", "selectgame") !== 51) return;
-    for (const p of playing()) { const l = p.location; if (l.x > -2 && l.x < 3 && l.z > -12 && l.z < 3.2 && !isBot(p)) p.teleport({ x: l.x, y: 1, z: 3.8 }); }
+    for (const p of playing()) { const l = p.location; if (l.x > -2 && l.x < 3 && l.z > -12 && l.z < 2.6 && !isBot(p)) p.teleport({ x: l.x, y: 1, z: 2.7 }); }
 }, 2);
