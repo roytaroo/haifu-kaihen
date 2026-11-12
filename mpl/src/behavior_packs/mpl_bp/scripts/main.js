@@ -434,19 +434,19 @@ function buildFirebar() {
 // 棒(中心から角度 a の線)までの距離と、根元からの長さ
 function barHit(px, pz, a, len) {
     const dx = px - 0.5, dz = pz - 0.5, along = dx * Math.cos(a) + dz * Math.sin(a), perp = Math.abs(-dx * Math.sin(a) + dz * Math.cos(a));
-    return along > 0.4 && along < len + 0.4 && perp < 0.6;
+    return along > 0.6 && along < len + 0.3 && perp < 0.45; // 見た目(半径0.44)より少し内側だけ当たり(ゆるめ)
 }
 async function gameFirebar() {
     const start = playing();
     const balls = [];
     for (let arm = 0; arm < 2; arm++) for (let i = 1; i <= FB_LEN; i++) {
-        try { balls.push({ e: dim().spawnEntity("mmgplus:fireball", { x: 0.5, y: 1.3, z: 0.5 }), arm, r: i * FB_STEP }); } catch {}
+        try { balls.push({ e: dim().spawnEntity("mmgplus:fireball", { x: 0.5, y: 1.02, z: 0.5 }), arm, r: i * FB_STEP }); } catch {}
     }
     let theta = 0, dir = 1, omega = (Math.PI * 2) / 100, swept = 0, revs = 0, high = null;
     const t0 = Date.now();
     title("§6§lファイアバー！", "§f回ってくる火の玉をジャンプでよけよう");
     await wait(40);
-    const place = () => balls.forEach((b) => { if (b.e.isValid) b.e.teleport({ x: 0.5 + Math.cos(theta + b.arm * Math.PI) * b.r, y: 1.3, z: 0.5 + Math.sin(theta + b.arm * Math.PI) * b.r }); });
+    const place = () => balls.forEach((b) => { if (b.e.isValid) b.e.teleport({ x: 0.5 + Math.cos(theta + b.arm * Math.PI) * b.r, y: 1.02, z: 0.5 + Math.sin(theta + b.arm * Math.PI) * b.r }); });
     for (let t = 0; t < 2400 && !aborted(); t++) {
         const prev = theta, step = omega * dir;
         theta += step;
@@ -459,7 +459,7 @@ async function gameFirebar() {
             for (let arm = 0; arm < 2; arm++) {
                 // 当たり: このtickで棒が通った角度(前・中・今の3か所)のどこかで棒に近く、足が火の玉より下
                 const hitNow = [0, 0.5, 1].some((k) => barHit(x, z, prev + step * k + arm * Math.PI, FB_LEN * FB_STEP));
-                if (y < 1.6 && hitNow) {
+                if (y < 1.32 && hitNow) {
                     out(p, "§c火の玉に当たった！");
                     cmd(`particle minecraft:large_explosion ${x} ${y + 1} ${z}`);
                     break;
@@ -474,13 +474,13 @@ async function gameFirebar() {
         // 15秒たったら、反対向きに回る「上の棒」(頭の高さ)を追加。しゃがめばよけられる
         if (!high && (Date.now() - t0) / 1000 >= 15) {
             high = { theta: Math.PI / 2, balls: [] };
-            for (let i = 2; i <= FB_LEN; i++) { try { high.balls.push({ e: dim().spawnEntity("mmgplus:fireball", { x: 0.5, y: 2.2, z: 0.5 }), r: i * FB_STEP }); } catch {} }
+            for (let i = 2; i <= FB_LEN; i++) { try { high.balls.push({ e: dim().spawnEntity("mmgplus:fireball", { x: 0.5, y: 2.55, z: 0.5 }), r: i * FB_STEP }); } catch {} }
             title("§c§l上の棒が出た！", "§f上の棒は§eしゃがんで§fよけよう", 30); soundAll("mob.blaze.shoot", 0.7);
         }
         if (high) {
             const hp = high.theta, hs = -step * 0.7;
             high.theta += hs;
-            high.balls.forEach((b) => { if (b.e.isValid) b.e.teleport({ x: 0.5 + Math.cos(high.theta) * b.r, y: 2.2, z: 0.5 + Math.sin(high.theta) * b.r }); });
+            high.balls.forEach((b) => { if (b.e.isValid) b.e.teleport({ x: 0.5 + Math.cos(high.theta) * b.r, y: 2.55, z: 0.5 + Math.sin(high.theta) * b.r }); });
             for (const p of alive()) {
                 const { x, z } = p.location, r = Math.hypot(x - 0.5, z - 0.5);
                 if (r < 1.5 || r > FB_LEN * FB_STEP + 0.6 || p.isSneaking) continue;
@@ -490,7 +490,9 @@ async function gameFirebar() {
                 }
             }
         }
-        if (t % 3 === 0) for (const b of balls) if (b.e.isValid && Math.random() < 0.35) cmd(`particle minecraft:basic_flame_particle ${b.e.location.x} ${b.e.location.y + 0.2} ${b.e.location.z}`);
+        // 炎の粒(玉のうしろにたなびく)
+        if (t % 2 === 0) for (const b of [...balls, ...(high?.balls ?? [])]) if (b.e.isValid && Math.random() < 0.45) { const l = b.e.location; cmd(`particle minecraft:basic_flame_particle ${l.x + (Math.random() - 0.5) * 0.6} ${l.y + 0.3 + Math.random() * 0.6} ${l.z + (Math.random() - 0.5) * 0.6}`); }
+        if (t % 6 === 0) for (const b of balls) if (b.e.isValid && Math.random() < 0.2) { const l = b.e.location; cmd(`particle minecraft:lava_particle ${l.x} ${l.y + 0.5} ${l.z}`); }
         swept += Math.abs(step);
         if (swept >= Math.PI) {
             swept = 0; revs++;

@@ -6,11 +6,11 @@
    "bones": {
     "root": {
      "rotation": [
-      0,
-      "q.life_time * 400",
+      "math.sin(q.life_time * 500) * 12",
+      "q.life_time * 540",
       0
      ],
-     "scale": "1 + math.sin(q.life_time * 900) * 0.08"
+     "scale": "1 + math.sin(q.life_time * 1100) * 0.06"
     }
    }
   }
