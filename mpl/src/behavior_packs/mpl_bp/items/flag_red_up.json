@@ -13,7 +13,7 @@
     "texture": "mmgplus_flag_red_up"
    },
    "minecraft:display_name": {
-    "value": "§cRed Flag (UP)\n§7Sneak to raise/lower"
+    "value": "§c赤の旗(上)\n§7しゃがむで上げ下げ"
    },
    "minecraft:hand_equipped": true,
    "minecraft:allow_off_hand": true

@@ -8,7 +8,7 @@ import { spawnSimulatedPlayer } from "@minecraft/server-gametest";
 const TAG = "mmgbot";
 const NAMES = ["Aki", "Ren", "Mio", "Sora", "Yuu", "Haru", "Nagi", "Kai", "Rin", "Tomo", "Sei", "Hina"];
 const LOBBY = { x: 0.5, y: 1, z: 124.5 }; // MPL のロビー
-const STRENGTH = ["EASY", "NORMAL", "HARD"];
+const STRENGTH = ["よわい", "ふつう", "つよい"];
 const dim = () => world.getDimension("overworld");
 const rand = (a, b) => a + Math.random() * (b - a);
 const bots = new Map(); // 名前 → SimulatedPlayer
@@ -74,14 +74,14 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
 
 async function botUI(player) {
     const res = await new ModalFormData().title("BOT")
-        .slider("Number of bots", 0, NAMES.length, { valueStep: 1, defaultValue: bots.size })
-        .dropdown("Bot strength", STRENGTH, { defaultValueIndex: strength() })
+        .slider("BOTの人数", 0, NAMES.length, { valueStep: 1, defaultValue: bots.size })
+        .dropdown("BOTの強さ", STRENGTH, { defaultValueIndex: strength() })
         .show(player);
     if (res.canceled) return;
     const [n, st] = res.formValues;
     const s = setting(); s.strength = st; saveSetting(s);
     setCount(n);
-    player.sendMessage(`§aBots: ${bots.size} (${STRENGTH[st]})`);
+    player.sendMessage(`§aBOT ${bots.size}人(${STRENGTH[st]})にしました`);
 }
 
 // ===== 動き =====

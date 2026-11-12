@@ -13,7 +13,7 @@
     "texture": "mpl_menu"
    },
    "minecraft:display_name": {
-    "value": "§eMPL Menu\n§7Use to open"
+    "value": "§eMPLのメニュー\n§7右クリック/タップ"
    },
    "minecraft:hand_equipped": true
   }

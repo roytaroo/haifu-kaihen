@@ -13,7 +13,7 @@
     "texture": "mmgplus_boost"
    },
    "minecraft:display_name": {
-    "value": "§eBoost\n§7Use to dash forward (every 3s)"
+    "value": "§eブースト\n§7右クリック/タップで前へダッシュ(3秒に1回)"
    },
    "minecraft:hand_equipped": true
   }

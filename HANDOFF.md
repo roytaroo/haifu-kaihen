@@ -103,3 +103,11 @@
 
 ## MPL v11
 - v9 のドット文字ロゴをやめて、v8 の英語・立体ロゴに戻した(だいきの指示)。ロゴ・UI・tools/mpl_ui.py は v8 と同じ。パックのバージョンだけ上げた
+
+## MPL v12(英語は演出の見出しだけ)
+- だいき: 英語にしたいのは演出のタイトルだけ。チャット・メニューのボタン・設定は日本語のままでいい
+  - main.js・bot.js・アイテム名・「乗る」・パック説明を v7 の日本語に戻した
+  - 英語のまま: ロゴ全部 + 帯の見出し(PASSED START / NOT ENOUGH COINS / SEE YOU AGAIN! / COIN SHOWER! / COIN THIEF! / WARP! / SWAP! / DROPPED COINS / A GIFT! / EVERYONE EQUAL! / NO WINNER / MINIGAME STAR / COIN STAR)
+- 専用フォーム: 見出しの星アイコンがはみ出していた → フォームの見出しからアイコンを消した
+- 専用フォームの文字は全部太字(§l)+ 英語設定と同じフォント(classic、ほかの画面と同じ仕組み)
+- 未確認

@@ -313,8 +313,8 @@ sf['mpl_btn'] = {'type': 'panel', 'size': ['100%', 31], 'controls': [{'b@common.
         {'icon': {'type': 'image', 'size': [20, 20], 'anchor_from': 'left_middle', 'anchor_to': 'left_middle', 'offset': [6, 0], 'layer': 4,
                   'bindings': [c2('#form_button_texture', '#texture'), c2('#form_button_texture_file_system', '#texture_file_system'),
                                vis("(not ((#texture = '') or (#texture = 'loading')))")]}},
-        {'t': {'type': 'label', 'text': '#form_button_text', 'layer': 4, 'shadow': True, 'localize': False, 'color': [1, 1, 1], 'size': ['100% - 56px', 'default'],
-               'text_alignment': 'center', 'bindings': [c2('#form_button_text')]}}]}}]}
+        {'t': {'type': 'label', 'text': '#form_button_text', 'property_bag': {'#font_type': 'classic'}, 'font_type': '#font_type', 'layer': 4, 'shadow': True, 'localize': False, 'color': [1, 1, 1], 'size': ['100% - 56px', 'default'],
+               'text_alignment': 'center', 'bindings': [c2('#form_button_text'), {'binding_type': 'view', 'source_property_name': '#font_type', 'target_property_name': '#font_type'}]}}]}}]}
 sf['mpl_form_in'] = {'anim_type': 'offset', 'easing': 'out_back', 'duration': 0.3, 'from': [0, 40], 'to': [0, 0]}
 sf['mpl_form'] = {
     'type': 'panel', 'size': ['100%', '100%'], 'layer': 60,
@@ -324,10 +324,10 @@ sf['mpl_form'] = {
         {'card': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [250, '100%c + 20px'], 'layer': 1, 'anims': ['@server_form.mpl_form_in'], 'controls': [{'st': {
             'type': 'stack_panel', 'orientation': 'vertical', 'size': [226, '100%c'], 'controls': [
                 {'head': {'type': 'image', 'texture': 'textures/ui/mpl/ribbon_gold', 'size': ['100% + 30px', 28], 'layer': 2, 'controls': [
-                    {'t': {'type': 'label', 'text': TT, 'layer': 3, 'shadow': True, 'localize': False, 'font_scale_factor': 1.35, 'color': [1, 1, 1], 'bindings': [{'binding_name': TT}]}}]}},
+                    {'t': {'type': 'label', 'text': TT, 'property_bag': {'#font_type': 'classic'}, 'font_type': '#font_type', 'layer': 3, 'shadow': True, 'localize': False, 'font_scale_factor': 1.35, 'color': [1, 1, 1], 'bindings': [{'binding_name': TT}, {'binding_type': 'view', 'source_property_name': '#font_type', 'target_property_name': '#font_type'}]}}]}},
                 {'pad0': {'type': 'panel', 'size': ['100%', 6]}},
-                {'body': {'type': 'label', 'text': '#form_text', 'size': ['100%', 'default'], 'text_alignment': 'center', 'layer': 2, 'shadow': True, 'localize': False, 'color': [0.92, 0.92, 1],
-                          'bindings': [{'binding_name': '#form_text'}]}},
+                {'body': {'type': 'label', 'text': '#form_text', 'property_bag': {'#font_type': 'classic'}, 'font_type': '#font_type',  'size': ['100%', 'default'], 'text_alignment': 'center', 'layer': 2, 'shadow': True, 'localize': False, 'color': [0.92, 0.92, 1],
+                          'bindings': [{'binding_name': '#form_text'}, {'binding_type': 'view', 'source_property_name': '#font_type', 'target_property_name': '#font_type'}]}},
                 {'pad1': {'type': 'panel', 'size': ['100%', 6]}},
                 {'buttons': {'type': 'stack_panel', 'orientation': 'vertical', 'size': ['100%', '100%c'], 'layer': 2,
                              'factory': {'name': 'buttons', 'control_ids': {'button': 'server_form.mpl_btn'}}, 'collection_name': 'form_buttons',

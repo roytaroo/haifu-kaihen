@@ -50,7 +50,7 @@
     "family_types": [
      "player"
     ],
-    "interact_text": "Ride",
+    "interact_text": "乗る",
     "pull_in_entities": false,
     "seats": {
      "position": [
