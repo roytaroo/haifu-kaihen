@@ -446,9 +446,6 @@ function buildChairs() {
     for (let a = 0; a < 360; a += 45) cmd(`setblock ${Math.round(Math.cos((a * Math.PI) / 180) * 11)} 1 ${Math.round(Math.sin((a * Math.PI) / 180) * 11)} lantern`);
 }
 // 「むすんでひらいて」風の短い曲(半音の数)。1音 = 4tick
-// オクラホマミキサー(Turkey in the Straw)のメロディ(半音の数、0 = ド)
-const MELODY = [0, 2, 4, 7, 7, 7, 7, 7, 4, 5, 7, 9, 7, 4, 0, 2, 4, 7, 7, 7, 7, 7, 4, 5, 7, 9, 7, 4, 2, 0, 2, 4, 5, 5, 5, 5, 5, 2, 4, 5, 7, 5, 2, 7, 5, 4, 2, 0];
-const notePitch = (n) => Math.min(2, Math.max(0.5, 0.8 * 2 ** (n / 12)));
 const chairs = () => dim().getEntities({ type: "mmgplus:chair" });
 const seated = (p) => p.getComponent("minecraft:riding")?.entityRidingOn?.typeId === "mmgplus:chair";
 
@@ -462,14 +459,14 @@ async function gameChairs() {
         cmd("kill @e[type=mmgplus:chair]");
         title(`§lラウンド ${round}`, "§f♪ 曲のあいだ歩き回ろう");
         await wait(30);
-        const len = rand(20, 50); // 音の数
-        for (let i = 0; i < len && !aborted(); i++) {
-            const n = MELODY[i % MELODY.length];
-            soundAll("note.harp", notePitch(n));
-            if (i % 2 === 0) soundAll("note.bd", 1);
+        // 曲(だいきがくれたオクラホマミキサー、RP の sounds/mmgplus/chair_music.ogg)を最初から流し、6〜20秒のどこかで止める
+        cmd("playsound mmgplus.chair_music @a[tag=playing] 0 3 0 4 1");
+        const len = rand(120, 400);
+        for (let t = 0; t < len && !aborted(); t += 5) {
             actionbar("§e椅子取りゲーム §f♪♪♪");
-            await wait(4);
+            await wait(5);
         }
+        cmd("stopsound @a mmgplus.chair_music");
         if (aborted()) return [];
         // 曲が止まった → イスを出す(重ならないように)
         const need = Math.max(1, players.length - 1);

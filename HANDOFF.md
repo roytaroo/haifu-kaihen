@@ -20,7 +20,7 @@
   - `game.js`: ランダムTP・投票UI・game4/10/12/17/22/24 の補助。`ranking` を 1 にするとチャットに point の順位を出す。
   - 設定: スコア `setting`(round, round-auto, testmode 等)、レベル `level game`(1〜5)。
 - ゲーム一覧(selectgame): 1 Escape Lava / 2 熱帯魚相撲 / 3 High and Low / 4 TNT RUN / 5 Adventure PVP / 6 TNT TAG / 7 Drop PVP / 8 降下デスマッチ / 9 逆らえ！ / 10 金床避け / 11 読みぶろぱ / 12 TNT避け / 13 アスレチック / 14 どうぶつリレー / 15 Block Party / 16 鉱石バトル / 17 崩れる床で生き延びろ / 18 穴落とし / 19 色塗りバトル / 20 クラフトマスター / 21 Warden Escape / 22 マグマノックバック / 23 村人数え / 24 モンスターバトル
-- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v14。
+- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v15。
 - 改変(v1、ゲーム内は未確認):
   - 追加パック `mmg_plus`(BP、scripts/main.js)+ `mmg_plus_r`(RP、掲示板の見えないエンティティ)。
   - 抽選をスクリプトへ: `select_game` → `scriptevent mmgplus:select`(OFFを除いて抽選、同じゲームの連続なし)→ `select_game_body`(元の残り+25〜27の説明)。
@@ -51,6 +51,7 @@
 - v12(未確認): だいきの文句に対応。削除: 35 矢の雨・39 配置の記憶・41 しっぽ取り。カウントダウン(元の game_start_countdown の titleraw と音)を消した。暗視をどのゲームにも(47以外)。Warden の透明を消す。村人数えのまぎらわしいモブは行商人と魔女、BOT の答えは scoreboard game23_a に入れる。計算かんたん、色の記憶ゆっくり、オクラホマミキサー、宝探し・卵30秒、スイカ・コイン45秒、ニワトリ60秒、ファイアバーは端まで、ボート・ダッシュ・大玉はゴールで観戦へ、隕石むずかしく、壁の速さをなだらかに、ダッシュむずかしく、レーザーはモデル(mmgplus:laser_beam)、ものまねは4色の壁、ピクセルは仕切りと名前、卵は BOT が散る、風船は輪になって動けない(inputpermission)、コインは噴水のまわりから、ワニの向き、コマ/カートはブースト(mmgplus:boost、tools/items.py)と場外の線がせまる、旗あげは旗のアイテム(赤=オフハンド・しゃがむ、白=右手・右クリック)、大玉は柵のすきま保証・速く・体力1、BOT の名前から Bot_ を外した、色塗りで雪玉、泳ぐポーズを直す。
   - v13: ラウンド結果で全行が1行目になる件 → collection_name を行・段・カードにもつけた。カードを細く(230)。出すきっかけを nextgame.mcfunction の scriptevent mmgplus:round_end に(前は 5tick ごとの見張りで見逃していた)。
 - v14(未確認): OP メニューに「このゲームをスキップ」(確認画面 → スキップ)。run.active を止め、元の回路の redstone_block を消し(main_finish2 と同じ範囲)、selectgame=0 で finish_game、会場を空にして game_next_ready=1。ポイントは入らない。
+- v15(未確認): 椅子取りの曲を だいきがくれた音(オクラホマミキサー、28秒)に。RP sounds/mmgplus/chair_music.ogg + sound_definitions(mmgplus.chair_music、category record)。毎ラウンド最初から流して 6〜20秒で stopsound。
 - 次の候補: 記録系を既存ゲーム(アスレのタイム等)にも広げる。
 
 ## だいきが選んだもの(100ゲーム計画 https://claude.ai/artifact/UCiagkMnba3rgPeyUqeSmV の db "picks")
