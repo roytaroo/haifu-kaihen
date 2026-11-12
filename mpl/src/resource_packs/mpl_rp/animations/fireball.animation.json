@@ -1,0 +1,18 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.fireball": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "rotation": [
+      0,
+      "q.life_time * 400",
+      0
+     ],
+     "scale": "1 + math.sin(q.life_time * 900) * 0.08"
+    }
+   }
+  }
+ }
+}

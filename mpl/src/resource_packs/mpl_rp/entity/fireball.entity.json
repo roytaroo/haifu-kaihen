@@ -1,28 +1,28 @@
 {
-  "format_version": "1.10.0",
-  "minecraft:client_entity": {
-    "description": {
-      "identifier": "mmgplus:fireball",
-      "materials": {
-        "default": "entity_alphatest"
-      },
-      "textures": {
-        "default": "textures/items/fireball"
-      },
-      "geometry": {
-        "default": "geometry.mmgplus.fireball"
-      },
-      "render_controllers": [
-        "controller.render.default"
-      ],
-      "animations": {
-        "a": "animation.mmgplus.spin_fast"
-      },
-      "scripts": {
-        "animate": [
-          "a"
-        ]
-      }
-    }
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:fireball",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/mmgplus_fireball"
+   },
+   "geometry": {
+    "default": "geometry.mmgplus.fireball"
+   },
+   "render_controllers": [
+    "controller.render.default"
+   ],
+   "animations": {
+    "a": "animation.mmgplus.fireball"
+   },
+   "scripts": {
+    "animate": [
+     "a"
+    ]
+   }
   }
+ }
 }

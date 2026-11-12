@@ -39,6 +39,21 @@ def rounded(cx, cy, cz, rx, ry, rz, color, step=2, bands=None, **kw):
         out.append(C([cx - w / 2, y0, cz - d * 0.31], [w, step, d * 0.62], col, flat=True, **kw))
         out.append(C([cx - w * 0.31, y0, cz - d / 2], [w * 0.62, step, d], col, flat=True, **kw))
     return out
+def sphere(cx, cy, cz, r, color, step=1.0, light=22, **kw):
+    # すき間もでこぼこもない球: 高さ・奥行きごとに、その場所の太さぶんの横向きの棒を並べる(ブロックで作った球と同じ考え方)
+    out = []
+    n = max(2, int(round(2 * r / step)))
+    for i in range(n):
+        y = -r + (i + 0.5) * step
+        for j in range(n):
+            z = -r + (j + 0.5) * step
+            q = r * r - y * y - z * z
+            if q <= 0: continue
+            w = 2 * q ** 0.5
+            if w < step * 0.6: continue
+            col = tuple(max(0, min(255, v + int(light * (y / r)) - int(10 * abs(z) / r))) for v in color)
+            out.append(C([cx - w / 2, cy + y - step / 2, cz + z - step / 2], [w, step, step], col, flat=True, **kw))
+    return out
 def disc(cx, y, cz, r, h, color, **kw):
     # 八角形の円盤
     return [C([cx - r, y, cz - r * 0.42], [2 * r, h, r * 0.84], color, **kw), C([cx - r * 0.42, y, cz - r], [r * 0.84, h, 2 * r], color, **kw),
@@ -54,7 +69,8 @@ def eyes(x, y, z, gap=4, size=3):
 
 # 風船: まんまるの本体・光・結び目・くねった糸(大きさは mmgplus:size)
 model('balloon', '風船(ふくらむ風船・風船割り合戦)', [
-    *rounded(0, 16, 0, 6.5, 7.5, 6.5, RED, step=0.75),
+    *sphere(0, 16, 0, 7, RED, step=1.0),
+    C([-4.2, 18.5, -6.2], [2.2, 3, 0.4], (255, 170, 180), flat=True),
     C([-1.5, 7.5, -1.5], [3, 1.2, 3], (190, 35, 45)), C([-1, 6.5, -1], [2, 1, 2], (190, 35, 45)),
     C([-0.3, 3.5, -0.3], [0.6, 3, 0.6], WHITE, flat=True, rot=[0, 0, 12], pivot=[0, 6.5, 0]),
     C([-0.3, 0.5, -0.3], [0.6, 3, 0.6], WHITE, flat=True, rot=[0, 0, -10], pivot=[0, 3.5, 0])],
@@ -188,6 +204,8 @@ model('tail', 'しっぽ(しっぽ取り・叩いてうばう)', [
     C([-2.5, 5.5, 7.5], [5, 4.5, 3.5], ORANGE, rot=[-35, 0, 0], pivot=[0, 7, 7.5]), C([-2, 7, 10], [4, 4, 3], WHITE, rot=[-45, 0, 0], pivot=[0, 8.5, 10]),
     C([-1.2, 8.5, 12], [2.4, 2.4, 2], WHITE, rot=[-55, 0, 0], pivot=[0, 9.5, 12])],
     anim={'root': {'rotation': [0, "math.sin(q.life_time * 400) * 20", 0]}}, box=(0.5, 0.6))
+model('fireball', '炎の玉(ファイアバー・隕石)', [*sphere(0, 4, 0, 4, (255, 120, 20), step=1.0, light=40), *sphere(0, 4, 0, 2.6, (255, 230, 90), step=0.9, light=20)],
+    bones={'root': [0, 4, 0]}, anim={'root': {'rotation': [0, "q.life_time * 400", 0], 'scale': "1 + math.sin(q.life_time * 900) * 0.08"}}, box=(0.5, 0.5))
 # レーザーの発射台: 金属の台・注意の黄黒しま・赤く光るレンズ
 model('laser', 'レーザーの発射台(レーザー回避)', [*disc(0, 0, 0, 5, 2, (70, 72, 82)), *disc(0, 2, 0, 4, 1, (240, 200, 40), faces={'stripes': (30, 30, 30)}),
     C([-2.5, 3, -2.5], [5, 4, 5], (90, 92, 104)), C([-1.5, 4, -3.2], [3, 2, 0.8], (255, 50, 50), flat=True), C([-0.8, 4.6, -3.4], [1, 1, 0.3], (255, 200, 200), flat=True),

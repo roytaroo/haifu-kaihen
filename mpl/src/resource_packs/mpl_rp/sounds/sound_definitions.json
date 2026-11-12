@@ -10,6 +10,50 @@
      "volume": 1.0
     }
    ]
+  },
+  "mpl.bgm_board": {
+   "category": "record",
+   "sounds": [
+    {
+     "name": "sounds/mpl/bgm_board",
+     "stream": true,
+     "volume": 1.0,
+     "is3D": false
+    }
+   ]
+  },
+  "mpl.bgm_minigame": {
+   "category": "record",
+   "sounds": [
+    {
+     "name": "sounds/mpl/bgm_minigame",
+     "stream": true,
+     "volume": 1.0,
+     "is3D": false
+    }
+   ]
+  },
+  "mpl.bgm_finale": {
+   "category": "record",
+   "sounds": [
+    {
+     "name": "sounds/mpl/bgm_finale",
+     "stream": true,
+     "volume": 1.0,
+     "is3D": false
+    }
+   ]
+  },
+  "mpl.fanfare_star": {
+   "category": "record",
+   "sounds": [
+    {
+     "name": "sounds/mpl/fanfare_star",
+     "stream": false,
+     "volume": 1.0,
+     "is3D": false
+    }
+   ]
   }
  }
 }

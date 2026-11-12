@@ -1058,6 +1058,11 @@ async function gameWalls() {
 // z -44 → 44 のまっすぐなコース。動く壁(2段の速さ)・ブロックのハードル・押し戻しの床をこえてゴールへ。当たるとひとつ前のチェックポイントに戻る
 const DASH_W = 4;
 const dashBars = [];
+function buildWalls() {
+    clearArena();
+    cmd("fill -8 0 -20 8 0 12 light_gray_concrete");
+    cmd("fill -8 1 -20 -8 4 12 barrier"); cmd("fill 8 1 -20 8 4 12 barrier"); cmd("fill -8 1 12 8 4 12 barrier");
+}
 function buildDash() {
     clearArena();
     dashBars.length = 0;

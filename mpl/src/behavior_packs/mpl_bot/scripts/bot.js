@@ -13,6 +13,7 @@ const dim = () => world.getDimension("overworld");
 const rand = (a, b) => a + Math.random() * (b - a);
 const bots = new Map(); // 名前 → SimulatedPlayer
 const brain = new Map(); // 名前 → { next, goal, phase }
+const held = new Map(); // 名前 → この tick までは自分で考えない(ミニゲームから動きを指示された)
 
 function setting() {
     try { return JSON.parse(world.getDynamicProperty("bot") ?? "{}"); } catch { return {}; }
@@ -59,7 +60,16 @@ world.afterEvents.entityDie.subscribe((ev) => {
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.id === "mmgbot:ui" && ev.sourceEntity?.typeId === "minecraft:player") botUI(ev.sourceEntity);
-    if (ev.id === "mmgbot:jump") { const b = bots.get(ev.message.trim()); try { b?.jump(); } catch {} }
+    // ミニゲームからの指示: jump <名前> / move <名前> x y z [速さ] / look <名前> x y z / sneak <名前> 0|1 / stop <名前>
+    const [who, ...a] = ev.message.trim().split(/\s+/), b = bots.get(who);
+    if (!b) return;
+    try {
+        if (ev.id === "mmgbot:jump") b.jump();
+        if (ev.id === "mmgbot:move") { const [x, y, z, sp] = a.map(Number); b.isSprinting = true; b.moveToLocation({ x, y, z }, { speed: sp || speed(), faceTarget: true }); held.set(who, system.currentTick + 30); }
+        if (ev.id === "mmgbot:look") { const [x, y, z] = a.map(Number); b.lookAtLocation({ x, y, z }); held.set(who, system.currentTick + 20); }
+        if (ev.id === "mmgbot:sneak") b.isSneaking = a[0] === "1";
+        if (ev.id === "mmgbot:stop") { b.stopMoving(); held.set(who, system.currentTick + 20); }
+    } catch {}
 });
 
 async function botUI(player) {
@@ -100,8 +110,8 @@ function roam(p, b, radius = 7, inArena = true) {
     try { p.navigateToLocation(goal, speed()); } catch { p.moveToLocation(goal, { speed: speed() }); }
 }
 function lively(p) {
-    try { p.isSprinting = Math.random() < 0.6; } catch {}
-    if (Math.random() < 0.06) { try { p.jump(); } catch {} }
+    try { const v = p.getVelocity(); p.isSprinting = Math.hypot(v.x, v.z) > 0.05; } catch {}
+    if (Math.random() < 0.004) { try { p.jump(); } catch {} } // たまに跳ぶくらい
 }
 // ロビー: スタート地点のまわりを歩き回る(遠くへ行きすぎたら戻る)
 function lobbyRoam(p, b) {
@@ -145,7 +155,8 @@ system.runInterval(() => {
     for (const [name, p] of bots) {
         if (!p.isValid) { bots.delete(name); continue; }
         if (p.getGameMode() === (GameMode.Spectator ?? GameMode.spectator)) continue;
-        if (p.hasTag("mpl_board")) { try { p.stopMoving(); } catch {} continue; } // すごろくの間は自分のマスで待つ
+        if (p.hasTag("mpl_board") || p.hasTag("mpl_lock")) { try { p.stopMoving(); } catch {} continue; } // すごろくの間・動けない時は待つ
+        if ((held.get(name) ?? 0) > system.currentTick) continue;
         if (!p.hasTag("playing")) { let b = brain.get(name); if (!b || b.sg !== -1) { b = { sg: -1 }; brain.set(name, b); } try { lobbyRoam(p, b); } catch {} continue; }
         let b = brain.get(name);
         if (!b || b.sg !== sg) { b = { sg }; brain.set(name, b); try { p.stopSwimming(); p.stopMoving(); } catch {} } // ゲームが変わったら考え直す(泳ぐポーズも直す)
