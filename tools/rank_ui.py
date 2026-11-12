@@ -41,19 +41,16 @@ ui = {'namespace': 'server_form'}
 rows = []
 for i in range(ROWS):
     delay = 0.15 + i * 0.07
-    ui[f'mmg_row_a{i}'] = {'anim_type': 'alpha', 'from': 0, 'to': 0, 'duration': delay, 'next': '@server_form.mmg_row_a'}
-    ui[f'mmg_row_o{i}'] = {'anim_type': 'offset', 'from': [-60, 0], 'to': [-60, 0], 'duration': delay, 'next': '@server_form.mmg_row_o'}
+    ui[f'mmg_row_o{i}'] = {'anim_type': 'offset', 'from': [-400, 0], 'to': [-400, 0], 'duration': delay, 'next': '@server_form.mmg_row_o'}
     left = {'type': 'panel', 'size': [W, RH], 'collection_index': i * 2, 'bindings': [coll('#form_button_text'), {'binding_type': 'view', 'source_property_name': "(not (#form_button_text = ''))", 'target_property_name': '#visible'}],
             'controls': [
                 {'bg': {'type': 'image', 'size': ['100%', '100%'], 'layer': 1, 'bindings': [coll('#form_button_texture', '#texture'), coll('#form_button_texture_file_system', '#texture_file_system')]}},
                 {'t': {'type': 'label', 'text': '#form_button_text', 'layer': 2, 'anchor_from': 'left_middle', 'anchor_to': 'left_middle', 'offset': [7, 1], 'size': [200, 'default'], 'shadow': True, 'localize': False, 'font_type': 'MinecraftTen', 'bindings': [coll('#form_button_text')]}}]}
     right = {'type': 'label', 'text': '#form_button_text', 'layer': 3, 'collection_index': i * 2 + 1, 'anchor_from': 'right_middle', 'anchor_to': 'right_middle', 'offset': [-26, 1],
              'size': [90, 'default'], 'text_alignment': 'right', 'shadow': True, 'localize': False, 'font_type': 'MinecraftTen', 'bindings': [coll('#form_button_text')]}
-    rows.append({f'row{i}': {'type': 'panel', 'size': [W, RH + 3], 'alpha': 1, 'anims': [f'@server_form.mmg_row_a{i}', f'@server_form.mmg_row_o{i}'],
+    rows.append({f'row{i}': {'type': 'panel', 'size': [W, RH + 3], 'anims': [f'@server_form.mmg_row_o{i}'],
                              'controls': [{'l': left}, {'r': right}]}})
-ui['mmg_row_a'] = {'anim_type': 'alpha', 'from': 0, 'to': 1, 'duration': 0.25}
-ui['mmg_row_o'] = {'anim_type': 'offset', 'from': [-60, 0], 'to': [0, 0], 'duration': 0.35, 'easing': 'out_back'}
-ui['mmg_pop'] = {'anim_type': 'size', 'from': ['80%', '80%'], 'to': ['100%', '100%'], 'duration': 0.3, 'easing': 'out_back'}
+ui['mmg_row_o'] = {'anim_type': 'offset', 'from': [-400, 0], 'to': [0, 0], 'duration': 0.35, 'easing': 'out_back'}
 ui['mmg_rank_form'] = {
     'type': 'panel', 'size': ['100%', '100%'], 'layer': 60, 'collection_name': 'form_buttons',
     'bindings': [{'binding_name': '#title_text'}, {'binding_type': 'view', 'source_property_name': f"(not ((#title_text - '{MARK}') = #title_text))", 'target_property_name': '#visible'}],
@@ -70,8 +67,11 @@ ui['mmg_rank_form'] = {
                 {'pad1': {'type': 'panel', 'size': ['100%', 8]}},
                 *rows,
                 {'pad2': {'type': 'panel', 'size': ['100%', 8]}}]}}]}}]}
-# 画面に足す(元のフォームの上にかぶせる)
-ui['long_form'] = {'modifications': [{'array_name': 'controls', 'operation': 'insert_back', 'value': [{'mmg_rank_form@server_form.mmg_rank_form': {}}]}]}
+# 画面に足す: long_form をまるごと定義(BOWFLIT で動いている形)。ふつうのフォームは印がない時だけ出す
+NORMAL = {'$title_panel': 'common_dialogs.standard_title_label', '$title_size': ['100% - 14px', 10], 'size': [225, 200], '$text_name': '#title_text',
+          '$title_text_binding_type': 'none', '$child_control': 'server_form.long_form_panel', 'layer': 2,
+          'bindings': [{'binding_name': '#title_text'}, {'binding_type': 'view', 'source_property_name': f"((#title_text - '{MARK}') = #title_text)", 'target_property_name': '#visible'}]}
+ui['long_form'] = {'type': 'panel', 'size': ['100%', '100%'], 'controls': [{'long_form@common_dialogs.main_panel_no_buttons': NORMAL}, {'mmg_rank_form@server_form.mmg_rank_form': {}}]}
 json.dump(ui, open(os.path.join(UI, 'server_form.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
 # ===== 文字をクラシックフォントにそろえる =====
@@ -93,12 +93,8 @@ files = {
         'scoreboard_sidebar_score': CLASSIC([{'binding_name': '#player_score_sidebar', 'binding_type': 'collection', 'binding_collection_name': 'scoreboard_scores'}]),
         'scoreboard_sidebar_player': CLASSIC([{'binding_name': '#player_name_sidebar', 'binding_type': 'collection', 'binding_collection_name': 'scoreboard_players'}]),
         'scoreboard_sidebar/main/displayed_objective': CLASSIC([g('#objective_sidebar_name')])},
-    'ui_template_buttons.json': {'namespace': 'common_buttons', 'new_ui_binding_button_label': CLASSIC([
-        {'binding_type': '$button_text_collection_details', 'binding_collection_name': '$button_text_grid_collection_name', 'binding_collection_prefix': '$button_text_collection_prefix'},
-        {'binding_type': '$button_text_binding_type', 'binding_condition': '$button_binding_condition', 'binding_collection_name': '$button_text_grid_collection_name', 'binding_name': '$button_text', 'binding_name_override': '$button_text'}], FT)},
-    'ui_template_dialogs.json': {'namespace': 'common_dialogs', 'standard_title_label': CLASSIC([
-        {'binding_type': '$title_text_binding_type', 'binding_condition': '$title_binding_condition', 'binding_name': '$text_name', 'binding_name_override': '$text_name'},
-        {'binding_type': 'global', 'binding_condition': 'once', 'binding_name': '#tts_dialog_title'}], FT)},
 }
 for fn, d in files.items(): json.dump(d, open(os.path.join(UI, fn), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+for fn in ('ui_template_buttons.json', 'ui_template_dialogs.json'):
+    if os.path.exists(os.path.join(UI, fn)): os.remove(os.path.join(UI, fn))
 print('ok')
