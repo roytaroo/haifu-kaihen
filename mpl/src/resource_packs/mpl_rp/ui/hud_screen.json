@@ -26,6 +26,11 @@
     "binding_type": "view",
     "source_property_name": "#font_type",
     "target_property_name": "#font_type"
+   },
+   {
+    "binding_type": "view",
+    "source_property_name": "((#text - '§r§b§r§n§r') = #text)",
+    "target_property_name": "#visible"
    }
   ]
  },
@@ -43,6 +48,15 @@
     "binding_type": "view",
     "source_property_name": "#font_type",
     "target_property_name": "#font_type"
+   },
+   {
+    "binding_name": "#hud_title_text_string",
+    "binding_type": "global"
+   },
+   {
+    "binding_type": "view",
+    "source_property_name": "((#hud_title_text_string - '§r§b§r§n§r') = #hud_title_text_string)",
+    "target_property_name": "#visible"
    }
   ]
  },
@@ -114,6 +128,4756 @@
     "source_property_name": "#font_type",
     "target_property_name": "#font_type"
    }
+  ]
+ },
+ "mpl_pop1": {
+  "anim_type": "size",
+  "easing": "out_quad",
+  "duration": 0.2,
+  "from": [
+   "10%",
+   "10%"
+  ],
+  "to": [
+   "115%",
+   "115%"
+  ],
+  "next": "@hud.mpl_pop2"
+ },
+ "mpl_pop2": {
+  "anim_type": "size",
+  "easing": "in_out_sine",
+  "duration": 0.15,
+  "from": [
+   "115%",
+   "115%"
+  ],
+  "to": [
+   "100%",
+   "100%"
+  ]
+ },
+ "mpl_flash": {
+  "anim_type": "alpha",
+  "easing": "out_quad",
+  "duration": 0.6,
+  "from": 1.0,
+  "to": 0.0
+ },
+ "mpl_glint": {
+  "anim_type": "size",
+  "duration": 0.45,
+  "from": [
+   0,
+   0
+  ],
+  "to": [
+   0,
+   0
+  ],
+  "next": "@hud.mpl_glint2"
+ },
+ "mpl_glint2": {
+  "anim_type": "size",
+  "easing": "out_quad",
+  "duration": 0.18,
+  "from": [
+   0,
+   0
+  ],
+  "to": [
+   34,
+   34
+  ],
+  "next": "@hud.mpl_glint3"
+ },
+ "mpl_glint3": {
+  "anim_type": "size",
+  "easing": "in_quad",
+  "duration": 0.3,
+  "from": [
+   34,
+   34
+  ],
+  "to": [
+   0,
+   0
+  ]
+ },
+ "mpl_rays": {
+  "anim_type": "flip_book",
+  "initial_uv": [
+   0,
+   0
+  ],
+  "frame_count": 8,
+  "frame_step": 256,
+  "fps": 12,
+  "looping": true
+ },
+ "mpl_slide": {
+  "anim_type": "offset",
+  "easing": "out_back",
+  "duration": 0.35,
+  "from": [
+   -420,
+   0
+  ],
+  "to": [
+   0,
+   0
+  ]
+ },
+ "mpl_drop": {
+  "anim_type": "offset",
+  "easing": "out_back",
+  "duration": 0.4,
+  "from": [
+   0,
+   -60
+  ],
+  "to": [
+   0,
+   0
+  ]
+ },
+ "mpl_fadein": {
+  "anim_type": "alpha",
+  "easing": "linear",
+  "duration": 0.25,
+  "from": 0.0,
+  "to": 1.0
+ },
+ "mpl_sub": {
+  "type": "image",
+  "texture": "textures/ui/mpl/toast",
+  "size": [
+   "100%c + 16px",
+   "100%c + 8px"
+  ],
+  "layer": 5,
+  "anchor_from": "top_middle",
+  "anchor_to": "top_middle",
+  "anims": [
+   "@hud.mpl_fadein"
+  ],
+  "bindings": [
+   {
+    "binding_name": "#hud_subtitle_text_string",
+    "binding_type": "global"
+   },
+   {
+    "binding_type": "view",
+    "source_property_name": "(not (#hud_subtitle_text_string = ''))",
+    "target_property_name": "#visible"
+   }
+  ],
+  "controls": [
+   {
+    "t": {
+     "type": "label",
+     "text": "#hud_subtitle_text_string",
+     "layer": 6,
+     "shadow": true,
+     "localize": false,
+     "font_scale_factor": 1.25,
+     "color": [
+      1,
+      1,
+      1
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_subtitle_text_string",
+       "binding_type": "global"
+      }
+     ]
+    }
+   }
+  ],
+  "offset": [
+   0,
+   0
+  ]
+ },
+ "mpl_banner": {
+  "type": "panel",
+  "size": [
+   "100%",
+   0
+  ],
+  "controls": [
+   {
+    "k_title": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§0§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "rays": {
+        "type": "image",
+        "texture": "textures/ui/mpl/rays",
+        "uv_size": [
+         256,
+         256
+        ],
+        "uv": [
+         0,
+         0
+        ],
+        "size": [
+         190,
+         190
+        ],
+        "offset": [
+         0,
+         -55
+        ],
+        "layer": 1,
+        "alpha": 0.85,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_rays"
+        ]
+       }
+      },
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_title",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_turn": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§1§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_turn",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_yourturn": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§2§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "rays": {
+        "type": "image",
+        "texture": "textures/ui/mpl/rays",
+        "uv_size": [
+         256,
+         256
+        ],
+        "uv": [
+         0,
+         0
+        ],
+        "size": [
+         190,
+         190
+        ],
+        "offset": [
+         0,
+         -55
+        ],
+        "layer": 1,
+        "alpha": 0.85,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_rays"
+        ]
+       }
+      },
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_yourturn",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_order": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§3§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_order",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_starappear": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§4§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "rays": {
+        "type": "image",
+        "texture": "textures/ui/mpl/rays",
+        "uv_size": [
+         256,
+         256
+        ],
+        "uv": [
+         0,
+         0
+        ],
+        "size": [
+         190,
+         190
+        ],
+        "offset": [
+         0,
+         -55
+        ],
+        "layer": 1,
+        "alpha": 0.85,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_rays"
+        ]
+       }
+      },
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_starappear",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_star": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§5§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "rays": {
+        "type": "image",
+        "texture": "textures/ui/mpl/rays",
+        "uv_size": [
+         256,
+         256
+        ],
+        "uv": [
+         0,
+         0
+        ],
+        "size": [
+         190,
+         190
+        ],
+        "offset": [
+         0,
+         -55
+        ],
+        "layer": 1,
+        "alpha": 0.85,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_rays"
+        ]
+       }
+      },
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_star",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_minigame": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§6§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "rays": {
+        "type": "image",
+        "texture": "textures/ui/mpl/rays",
+        "uv_size": [
+         256,
+         256
+        ],
+        "uv": [
+         0,
+         0
+        ],
+        "size": [
+         190,
+         190
+        ],
+        "offset": [
+         0,
+         -55
+        ],
+        "layer": 1,
+        "alpha": 0.85,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_rays"
+        ]
+       }
+      },
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_minigame",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_win": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§7§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "rays": {
+        "type": "image",
+        "texture": "textures/ui/mpl/rays",
+        "uv_size": [
+         256,
+         256
+        ],
+        "uv": [
+         0,
+         0
+        ],
+        "size": [
+         190,
+         190
+        ],
+        "offset": [
+         0,
+         -55
+        ],
+        "layer": 1,
+        "alpha": 0.85,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_rays"
+        ]
+       }
+      },
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_win",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_happening": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§8§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_happening",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_skull": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§9§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_skull",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_shop": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§a§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_shop",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_lucky": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§b§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "rays": {
+        "type": "image",
+        "texture": "textures/ui/mpl/rays",
+        "uv_size": [
+         256,
+         256
+        ],
+        "uv": [
+         0,
+         0
+        ],
+        "size": [
+         190,
+         190
+        ],
+        "offset": [
+         0,
+         -55
+        ],
+        "layer": 1,
+        "alpha": 0.85,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_rays"
+        ]
+       }
+      },
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_lucky",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_gameset": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§c§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_gameset",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_result": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§d§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "rays": {
+        "type": "image",
+        "texture": "textures/ui/mpl/rays",
+        "uv_size": [
+         256,
+         256
+        ],
+        "uv": [
+         0,
+         0
+        ],
+        "size": [
+         190,
+         190
+        ],
+        "offset": [
+         0,
+         -55
+        ],
+        "layer": 1,
+        "alpha": 0.85,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_rays"
+        ]
+       }
+      },
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_result",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_champion": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§e§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "rays": {
+        "type": "image",
+        "texture": "textures/ui/mpl/rays",
+        "uv_size": [
+         256,
+         256
+        ],
+        "uv": [
+         0,
+         0
+        ],
+        "size": [
+         190,
+         190
+        ],
+        "offset": [
+         0,
+         -55
+        ],
+        "layer": 1,
+        "alpha": 0.85,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_rays"
+        ]
+       }
+      },
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_champion",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_lastspurt": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§0§f§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_lastspurt",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_bonus": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§0§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "rays": {
+        "type": "image",
+        "texture": "textures/ui/mpl/rays",
+        "uv_size": [
+         256,
+         256
+        ],
+        "uv": [
+         0,
+         0
+        ],
+        "size": [
+         190,
+         190
+        ],
+        "offset": [
+         0,
+         -55
+        ],
+        "layer": 1,
+        "alpha": 0.85,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_rays"
+        ]
+       }
+      },
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_bonus",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_item": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§1§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "flash": {
+        "type": "image",
+        "texture": "textures/ui/mpl/flash",
+        "size": [
+         300,
+         110
+        ],
+        "offset": [
+         0,
+         -20
+        ],
+        "layer": 2,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_flash"
+        ]
+       }
+      },
+      {
+       "box": {
+        "type": "panel",
+        "size": [
+         280,
+         70
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "controls": [
+         {
+          "logo": {
+           "type": "image",
+           "texture": "textures/ui/mpl/logo_item",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 3,
+           "anims": [
+            "@hud.mpl_pop1"
+           ]
+          }
+         },
+         {
+          "glint": {
+           "type": "image",
+           "texture": "textures/ui/mpl/glint",
+           "size": [
+            0,
+            0
+           ],
+           "offset": [
+            96,
+            -18
+           ],
+           "layer": 4,
+           "anims": [
+            "@hud.mpl_glint"
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         72
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n0": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§2§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_0",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n1": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§3§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_1",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n2": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§4§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_2",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n3": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§5§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_3",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n4": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§6§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_4",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n5": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§7§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_5",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n6": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§8§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_6",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n7": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§9§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_7",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n8": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§a§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_8",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n9": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§b§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_9",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n10": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§c§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_10",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n11": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§d§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_11",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n12": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§e§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_12",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n13": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§1§f§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_13",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n14": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§0§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_14",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n15": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§1§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_15",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n16": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§2§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_16",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n17": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§3§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_17",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n18": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§4§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_18",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n19": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§5§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_19",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n20": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§6§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_20",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n21": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§7§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_21",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n22": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§8§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_22",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n23": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§9§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_23",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n24": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§a§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_24",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n25": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§b§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_25",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n26": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§c§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_26",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n27": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§d§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_27",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n28": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§e§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_28",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n29": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§2§f§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_29",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_n30": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§3§0§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "num": {
+        "type": "image",
+        "texture": "textures/ui/mpl/num_30",
+        "size": [
+         100,
+         75
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_pop1"
+        ]
+       }
+      },
+      {
+       "sub@hud.mpl_sub": {
+        "offset": [
+         0,
+         76
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_r_gold": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§3§1§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "stack": {
+        "type": "stack_panel",
+        "orientation": "vertical",
+        "size": [
+         "100%",
+         "100%c"
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_slide"
+        ],
+        "controls": [
+         {
+          "rb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "img": {
+              "type": "image",
+              "texture": "textures/ui/mpl/ribbon_gold",
+              "size": [
+               "100%c + 56px",
+               "100%c + 14px"
+              ],
+              "layer": 3,
+              "controls": [
+               {
+                "t": {
+                 "type": "label",
+                 "text": "#hud_title_text_string",
+                 "layer": 4,
+                 "shadow": true,
+                 "localize": false,
+                 "font_scale_factor": 1.6,
+                 "color": [
+                  1,
+                  1,
+                  1
+                 ],
+                 "bindings": [
+                  {
+                   "binding_name": "#hud_title_text_string",
+                   "binding_type": "global"
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "gap": {
+           "type": "panel",
+           "size": [
+            "100%",
+            4
+           ]
+          }
+         },
+         {
+          "sb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "sub@hud.mpl_sub": {}
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_r_blue": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§3§2§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "stack": {
+        "type": "stack_panel",
+        "orientation": "vertical",
+        "size": [
+         "100%",
+         "100%c"
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_slide"
+        ],
+        "controls": [
+         {
+          "rb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "img": {
+              "type": "image",
+              "texture": "textures/ui/mpl/ribbon_blue",
+              "size": [
+               "100%c + 56px",
+               "100%c + 14px"
+              ],
+              "layer": 3,
+              "controls": [
+               {
+                "t": {
+                 "type": "label",
+                 "text": "#hud_title_text_string",
+                 "layer": 4,
+                 "shadow": true,
+                 "localize": false,
+                 "font_scale_factor": 1.6,
+                 "color": [
+                  1,
+                  1,
+                  1
+                 ],
+                 "bindings": [
+                  {
+                   "binding_name": "#hud_title_text_string",
+                   "binding_type": "global"
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "gap": {
+           "type": "panel",
+           "size": [
+            "100%",
+            4
+           ]
+          }
+         },
+         {
+          "sb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "sub@hud.mpl_sub": {}
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_r_red": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§3§3§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "stack": {
+        "type": "stack_panel",
+        "orientation": "vertical",
+        "size": [
+         "100%",
+         "100%c"
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_slide"
+        ],
+        "controls": [
+         {
+          "rb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "img": {
+              "type": "image",
+              "texture": "textures/ui/mpl/ribbon_red",
+              "size": [
+               "100%c + 56px",
+               "100%c + 14px"
+              ],
+              "layer": 3,
+              "controls": [
+               {
+                "t": {
+                 "type": "label",
+                 "text": "#hud_title_text_string",
+                 "layer": 4,
+                 "shadow": true,
+                 "localize": false,
+                 "font_scale_factor": 1.6,
+                 "color": [
+                  1,
+                  1,
+                  1
+                 ],
+                 "bindings": [
+                  {
+                   "binding_name": "#hud_title_text_string",
+                   "binding_type": "global"
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "gap": {
+           "type": "panel",
+           "size": [
+            "100%",
+            4
+           ]
+          }
+         },
+         {
+          "sb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "sub@hud.mpl_sub": {}
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_r_purple": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§3§4§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "stack": {
+        "type": "stack_panel",
+        "orientation": "vertical",
+        "size": [
+         "100%",
+         "100%c"
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_slide"
+        ],
+        "controls": [
+         {
+          "rb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "img": {
+              "type": "image",
+              "texture": "textures/ui/mpl/ribbon_purple",
+              "size": [
+               "100%c + 56px",
+               "100%c + 14px"
+              ],
+              "layer": 3,
+              "controls": [
+               {
+                "t": {
+                 "type": "label",
+                 "text": "#hud_title_text_string",
+                 "layer": 4,
+                 "shadow": true,
+                 "localize": false,
+                 "font_scale_factor": 1.6,
+                 "color": [
+                  1,
+                  1,
+                  1
+                 ],
+                 "bindings": [
+                  {
+                   "binding_name": "#hud_title_text_string",
+                   "binding_type": "global"
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "gap": {
+           "type": "panel",
+           "size": [
+            "100%",
+            4
+           ]
+          }
+         },
+         {
+          "sb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "sub@hud.mpl_sub": {}
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_r_green": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§3§5§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "stack": {
+        "type": "stack_panel",
+        "orientation": "vertical",
+        "size": [
+         "100%",
+         "100%c"
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_slide"
+        ],
+        "controls": [
+         {
+          "rb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "img": {
+              "type": "image",
+              "texture": "textures/ui/mpl/ribbon_green",
+              "size": [
+               "100%c + 56px",
+               "100%c + 14px"
+              ],
+              "layer": 3,
+              "controls": [
+               {
+                "t": {
+                 "type": "label",
+                 "text": "#hud_title_text_string",
+                 "layer": 4,
+                 "shadow": true,
+                 "localize": false,
+                 "font_scale_factor": 1.6,
+                 "color": [
+                  1,
+                  1,
+                  1
+                 ],
+                 "bindings": [
+                  {
+                   "binding_name": "#hud_title_text_string",
+                   "binding_type": "global"
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "gap": {
+           "type": "panel",
+           "size": [
+            "100%",
+            4
+           ]
+          }
+         },
+         {
+          "sb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "sub@hud.mpl_sub": {}
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_r_gray": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§3§6§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "stack": {
+        "type": "stack_panel",
+        "orientation": "vertical",
+        "size": [
+         "100%",
+         "100%c"
+        ],
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_slide"
+        ],
+        "controls": [
+         {
+          "rb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "img": {
+              "type": "image",
+              "texture": "textures/ui/mpl/ribbon_gray",
+              "size": [
+               "100%c + 56px",
+               "100%c + 14px"
+              ],
+              "layer": 3,
+              "controls": [
+               {
+                "t": {
+                 "type": "label",
+                 "text": "#hud_title_text_string",
+                 "layer": 4,
+                 "shadow": true,
+                 "localize": false,
+                 "font_scale_factor": 1.6,
+                 "color": [
+                  1,
+                  1,
+                  1
+                 ],
+                 "bindings": [
+                  {
+                   "binding_name": "#hud_title_text_string",
+                   "binding_type": "global"
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            }
+           ]
+          }
+         },
+         {
+          "gap": {
+           "type": "panel",
+           "size": [
+            "100%",
+            4
+           ]
+          }
+         },
+         {
+          "sb": {
+           "type": "panel",
+           "size": [
+            "100%",
+            "100%c"
+           ],
+           "controls": [
+            {
+             "sub@hud.mpl_sub": {}
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   },
+   {
+    "k_card": {
+     "type": "panel",
+     "size": [
+      "100%",
+      0
+     ],
+     "anchor_from": "top_middle",
+     "anchor_to": "top_middle",
+     "offset": [
+      0,
+      -24
+     ],
+     "bindings": [
+      {
+       "binding_name": "#hud_title_text_string",
+       "binding_type": "global"
+      },
+      {
+       "binding_type": "view",
+       "source_property_name": "(not ((#hud_title_text_string - '§r§b§r§n§r§3§7§r') = #hud_title_text_string))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "img": {
+        "type": "image",
+        "texture": "textures/ui/mpl/card",
+        "size": [
+         280,
+         "100%c + 22px"
+        ],
+        "layer": 3,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "anims": [
+         "@hud.mpl_drop"
+        ],
+        "controls": [
+         {
+          "st": {
+           "type": "stack_panel",
+           "orientation": "vertical",
+           "size": [
+            256,
+            "100%c"
+           ],
+           "controls": [
+            {
+             "head": {
+              "type": "image",
+              "texture": "textures/ui/mpl/ribbon_purple",
+              "size": [
+               "100%",
+               26
+              ],
+              "layer": 4,
+              "controls": [
+               {
+                "t": {
+                 "type": "label",
+                 "text": "#hud_title_text_string",
+                 "layer": 5,
+                 "shadow": true,
+                 "localize": false,
+                 "font_scale_factor": 1.4,
+                 "color": [
+                  1,
+                  0.95,
+                  0.55
+                 ],
+                 "bindings": [
+                  {
+                   "binding_name": "#hud_title_text_string",
+                   "binding_type": "global"
+                  }
+                 ]
+                }
+               }
+              ]
+             }
+            },
+            {
+             "gap": {
+              "type": "panel",
+              "size": [
+               "100%",
+               6
+              ]
+             }
+            },
+            {
+             "how": {
+              "type": "label",
+              "text": "#hud_subtitle_text_string",
+              "size": [
+               "100%",
+               "default"
+              ],
+              "text_alignment": "center",
+              "layer": 5,
+              "shadow": true,
+              "localize": false,
+              "font_scale_factor": 1.1,
+              "color": [
+               1,
+               1,
+               1
+              ],
+              "bindings": [
+               {
+                "binding_name": "#hud_subtitle_text_string",
+                "binding_type": "global"
+               }
+              ]
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  ]
+ },
+ "hud_title_text": {
+  "modifications": [
+   {
+    "array_name": "controls",
+    "operation": "insert_front",
+    "value": [
+     {
+      "mpl_banner@hud.mpl_banner": {}
+     }
+    ]
+   }
+  ]
+ },
+ "hud_title_text/title_frame/title_background": {
+  "bindings": [
+   {
+    "binding_name": "#hud_title_text_string",
+    "binding_type": "global"
+   },
+   {
+    "binding_type": "view",
+    "source_property_name": "((#hud_title_text_string - '§r§b§r§n§r') = #hud_title_text_string)",
+    "target_property_name": "#visible"
+   }
+  ]
+ },
+ "hud_title_text/subtitle_frame/subtitle_background": {
+  "bindings": [
+   {
+    "binding_name": "#hud_title_text_string",
+    "binding_type": "global"
+   },
+   {
+    "binding_type": "view",
+    "source_property_name": "((#hud_title_text_string - '§r§b§r§n§r') = #hud_title_text_string)",
+    "target_property_name": "#visible"
+   }
+  ]
+ },
+ "hud_actionbar_text": {
+  "texture": "textures/ui/mpl/toast",
+  "size": [
+   "100%c + 22px",
+   "100%c + 10px"
   ]
  }
 }

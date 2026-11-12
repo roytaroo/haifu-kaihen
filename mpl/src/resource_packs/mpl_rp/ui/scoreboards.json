@@ -15,8 +15,7 @@
     "source_property_name": "#font_type",
     "target_property_name": "#font_type"
    }
-  ],
-  "visible": false
+  ]
  },
  "scoreboard_sidebar_player": {
   "property_bag": {
@@ -50,5 +49,10 @@
     "target_property_name": "#font_type"
    }
   ]
+ },
+ "scoreboard_sidebar/main": {
+  "texture": "textures/ui/mpl/side",
+  "alpha": 1.0,
+  "bindings": []
  }
 }

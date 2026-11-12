@@ -7,7 +7,7 @@ import { spawnSimulatedPlayer } from "@minecraft/server-gametest";
 
 const TAG = "mmgbot";
 const NAMES = ["Aki", "Ren", "Mio", "Sora", "Yuu", "Haru", "Nagi", "Kai", "Rin", "Tomo", "Sei", "Hina"];
-const LOBBY = { x: 0.5, y: 1, z: 128.5 }; // MPL のボードの真ん中
+const LOBBY = { x: 0.5, y: 1, z: 124.5 }; // MPL のロビー
 const STRENGTH = ["よわい", "ふつう", "つよい"];
 const dim = () => world.getDimension("overworld");
 const rand = (a, b) => a + Math.random() * (b - a);

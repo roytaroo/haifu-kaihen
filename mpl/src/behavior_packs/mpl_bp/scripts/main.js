@@ -43,7 +43,7 @@ const run = { id: 0, active: false };
 const aborted = () => !run.active || score("game", "playing") !== 1 || score("game", "selectgame") !== run.id;
 function out(p, msg) {
     p.addTag("mmgplus_out");
-    p.sendMessage(msg);
+    bar(p, msg);
     p.setGameMode(SPECTATOR);
     cmd(`playsound note.bass "${p.name}"`);
 }
@@ -67,6 +67,8 @@ function clearArena() {
     cmd("kill @e[type=item,x=-24,y=-10,z=-49,dx=49,dy=40,dz=99]"); cmd("kill @e[type=arrow,x=-24,y=-10,z=-49,dx=49,dy=40,dz=99]");
     cmd("tag @a remove mmgplus_out");
 }
+const bar = (p, t) => { try { p.onScreenDisplay.setActionBar(t); } catch {} };
+const toast = (t) => world.getPlayers().forEach((p) => bar(p, t));
 const actionbar = (text, players = playing()) => players.forEach((p) => p.onScreenDisplay.setActionBar(text));
 const title = (text, sub = "", stay = 30) => playing().forEach((p) => p.onScreenDisplay.setTitle(text, { subtitle: sub, fadeInDuration: 0, stayDuration: stay, fadeOutDuration: 5 }));
 const soundAll = (s, pitch = 1) => cmd(`execute as @a[tag=playing] at @s run playsound ${s} @s ~ ~ ~ 1 ${pitch}`);
@@ -74,7 +76,7 @@ const soundAll = (s, pitch = 1) => cmd(`execute as @a[tag=playing] at @s run pla
 const records = load("records", {});
 function record(id, name, v, kind) {
     const r = records[id];
-    if (!r || (kind === "min" ? v < r.v : v > r.v)) { records[id] = { name, v, kind }; save("records", records); world.sendMessage(`§6★ ${MINIGAMES[id]} の新記録！ §f${name} ${Number.isInteger(v) ? v : v.toFixed(2)}`); }
+    if (!r || (kind === "min" ? v < r.v : v > r.v)) { records[id] = { name, v, kind }; save("records", records); toast(`§6★ ${MINIGAMES[id]} の新記録！ §f${name} ${Number.isInteger(v) ? v : v.toFixed(2)}`); }
 }
 
 // ===== 25. 計算早押し =====
@@ -110,12 +112,12 @@ async function gameQuiz() {
                 winner = p;
                 const sec = (Date.now() - asked) / 1000;
                 correct.set(p.name, (correct.get(p.name) ?? 0) + 1);
-                world.sendMessage(`§a${p.name} が正解！ §7(${sec.toFixed(2)}秒) §f${Q.text} = ${Q.ans}`);
+                toast(`§a${p.name} が正解！ §7(${sec.toFixed(2)}秒) §f${Q.text} = ${Q.ans}`);
                 record(25, p.name, sec, "min");
                 cmd(`playsound random.levelup "${p.name}"`);
                 for (const o of playing()) if (o.id !== p.id) uiManager.closeAllForms(o);
             } else {
-                p.sendMessage("§cざんねん！この問題はもう答えられません");
+                bar(p, "§cざんねん！この問題はもう答えられません");
                 cmd(`playsound note.bass "${p.name}"`);
             }
         };
@@ -137,7 +139,7 @@ async function gameQuiz() {
         players.forEach((p) => { try { uiManager.closeAllForms(p); } catch {} });
         const timedOut = !winner;
         winner ??= "時間切れ"; // あとから届いた BOT の答えを受けつけない
-        if (timedOut) world.sendMessage(`§7時間切れ！ ${Q.text} = ${Q.ans}`);
+        if (timedOut) toast(`§7時間切れ！ ${Q.text} = ${Q.ans}`);
         await wait(40);
     }
     const best = Math.max(0, ...correct.values());
@@ -227,7 +229,7 @@ async function gameSimon() {
                         s.idx++;
                         cmd(`playsound note.pling "${p.name}" ~ ~ ~ 1 ${pad.pitch}`);
                         p.onScreenDisplay.setActionBar(`§d色の記憶 §f${s.idx} / ${seq.length}`);
-                        if (s.idx >= seq.length) { p.sendMessage("§aクリア！"); left--; }
+                        if (s.idx >= seq.length) { bar(p, "§aクリア！"); left--; }
                     } else { out(p, `§cまちがえた！ §7(${seq.length}個のラウンド)`); left--; }
                 }
                 if (pad !== null || p.location.y <= 1.2) s.prev = pad; // ジャンプ中は前の床のまま
@@ -264,7 +266,7 @@ const seated = (p) => p.getComponent("minecraft:riding")?.entityRidingOn?.typeId
 
 async function gameChairs() {
     const start = playing();
-    if (start.length < 2) world.sendMessage("§7ひとりなので、イスに座れたら勝ち！");
+    if (start.length < 2) toast("§7ひとりなので、イスに座れたら勝ち！");
     for (let round = 1; !aborted(); round++) {
         const players = alive();
         if (players.length <= 1 && start.length > 1) return players;
@@ -306,7 +308,7 @@ async function gameChairs() {
         for (let t = 0; t < 120 && !aborted(); t += 2) {
             for (const c of chairs()) {
                 const riders = c.getComponent("minecraft:rideable")?.getRiders() ?? [];
-                if (c.hasTag("mmgplus_fake") && riders.length) { riders.forEach((r) => r.sendMessage("§cニセモノのイスだった！")); cmd("playsound random.pop @a 0 2 0 1 0.6"); c.remove(); continue; }
+                if (c.hasTag("mmgplus_fake") && riders.length) { riders.forEach((r) => bar(r, "§cニセモノのイスだった！")); cmd("playsound random.pop @a 0 2 0 1 0.6"); c.remove(); continue; }
                 if (c.hasTag("mmgplus_run") && !riders.length) {
                     const near = alive().map((p) => ({ p, d: Math.hypot(p.location.x - c.location.x, p.location.z - c.location.z) })).sort((a, b) => a.d - b.d)[0];
                     if (near && near.d < 4) {
@@ -367,7 +369,7 @@ async function gamePool() {
             if (!puffers.some((f) => Math.hypot(f.location.x - p.location.x, f.location.y - (p.location.y + 0.8), f.location.z - p.location.z) < 1.6)) continue;
             stung.set(p.name, system.currentTick + 40);
             const lost = Math.min(2, got.get(p.name) ?? 0);
-            if (lost) { got.set(p.name, got.get(p.name) - lost); p.sendMessage(`§cフグにさされて ${lost}点 落とした！`); cmd(`playsound mob.pufferfish.sting "${p.name}"`); }
+            if (lost) { got.set(p.name, got.get(p.name) - lost); bar(p, `§cフグにさされて ${lost}点 落とした！`); cmd(`playsound mob.pufferfish.sting "${p.name}"`); }
         }
         const list = TREASURE.flatMap((tr) => dim().getEntities({ type: tr.type }).map((e) => ({ e, tr })));
         for (let n = list.length; n < want(); n++) spawn();
@@ -378,7 +380,7 @@ async function gamePool() {
             hit.e.remove();
             got.set(p.name, (got.get(p.name) ?? 0) + hit.tr.pt);
             cmd(`playsound ${hit.tr.pt >= 5 ? "random.levelup" : "random.orb"} "${p.name}"`);
-            if (hit.tr.pt >= 5) world.sendMessage(`§a${p.name} がエメラルドを見つけた！ §f(+5点)`);
+            if (hit.tr.pt >= 5) toast(`§a${p.name} がエメラルドを見つけた！ §f(+5点)`);
         }
         if (t % 10 === 0) for (const p of playing()) p.onScreenDisplay.setActionBar(`§6宝探し §fあなた: §e${got.get(p.name) ?? 0}点  §7残り ${Math.ceil((TIME - t) / 20)}秒`);
         await wait(2);
@@ -387,7 +389,7 @@ async function gamePool() {
     if (best === 0) return [];
     const win = playing().filter((p) => got.get(p.name) === best);
     win.forEach((p) => record(28, p.name, best, "max"));
-    world.sendMessage(`§6宝探し: ${win.map((p) => p.name).join(", ")} が ${best}点で1位！`);
+    toast(`§6宝探し: ${win.map((p) => p.name).join(", ")} が ${best}点で1位！`);
     return win;
 }
 
@@ -540,7 +542,7 @@ async function gameRace() {
             if (z >= RACE_GOAL) {
                 s.done = (Date.now() - t0) / 1000;
                 order.push(p);
-                world.sendMessage(`§b${order.length}位 §f${p.name} §7${s.done.toFixed(2)}秒`);
+                toast(`§b${order.length}位 §f${p.name} §7${s.done.toFixed(2)}秒`);
                 record(30, p.name, s.done, "min");
                 cmd(`playsound random.levelup "${p.name}"`);
                 const boat = p.getComponent("minecraft:riding")?.entityRidingOn;
@@ -593,8 +595,7 @@ async function gameStop() {
     players.forEach((p) => { try { uiManager.closeAllForms(p); } catch {} });
     if (aborted() || res.size === 0) return [];
     const rows = [...res].map(([n, v]) => [n, v, Math.abs(v - target)]).sort((a, b) => a[2] - b[2]);
-    world.sendMessage(`§e§lピッタリ止め 結果 §r§7(目標 ${target}.00秒)`);
-    rows.forEach(([n, v, d], i) => world.sendMessage(`§f${i + 1}. ${n} §b${v.toFixed(2)}秒 §7(${d.toFixed(2)}秒ずれ)`));
+    toast(`§e目標 ${target}.00秒  ` + rows.slice(0, 3).map(([n, v], i) => `§f${i + 1}. ${n} §b${v.toFixed(2)}`).join("  "));
     const best = rows[0][2];
     const names = rows.filter((r) => r[2] === best).map((r) => r[0]);
     names.forEach((n) => record(31, n, Math.round(best * 100) / 100, "min"));
@@ -629,7 +630,7 @@ async function gameFarm() {
     players.forEach((p) => {
         const [cx, cz] = PENS[pen.get(p.name)];
         p.teleport({ x: cx * 0.7 + 0.5, y: 1, z: cz * 0.7 + 0.5 });
-        p.sendMessage(`§fあなたの囲いは ${PEN_COLORS[pen.get(p.name)]} の床です`);
+        bar(p, `§fあなたの囲いは ${PEN_COLORS[pen.get(p.name)]} の床です`);
     });
     cmd("give @a[tag=playing] wheat_seeds 1");
     const n = Math.min(50, Math.max(10, players.length * 5));
@@ -663,7 +664,7 @@ async function gameFarm() {
     if (best === 0) return [];
     const win = playing().filter((p) => c[pen.get(p.name)] === best);
     win.forEach((p) => record(32, p.name, best, "max"));
-    world.sendMessage(`§aニワトリ集め: ${win.map((p) => p.name).join(", ")} が ${best}羽で1位！`);
+    toast(`§aニワトリ集め: ${win.map((p) => p.name).join(", ")} が ${best}羽で1位！`);
     return win;
 }
 
@@ -701,7 +702,7 @@ async function gameColors() {
         }
         for (let t = 0; t < 200 && answered.size < players.length && !aborted(); t += 5) { actionbar(`§e一番多い色は？ §7残り ${Math.ceil((200 - t) / 20)}秒`); await wait(5); }
         players.forEach((p) => { try { uiManager.closeAllForms(p); } catch {} });
-        world.sendMessage(`§f答え: ${cols[ans][1]}§f (${cols.map((c, i) => `${c[1]}${count[i]}`).join(" ")}§f)`);
+        toast(`§f答え: ${cols[ans][1]}§f (${cols.map((c, i) => `${c[1]}${count[i]}`).join(" ")}§f)`);
         for (const [name, a] of answered) if (a === ans) correct.set(name, (correct.get(name) ?? 0) + 1);
         await wait(40);
     }
@@ -723,7 +724,7 @@ async function gameReflex() {
         const foul = new Set();
         const delay = rand(30, 120);
         for (let t = 0; t < delay && !aborted(); t++) {
-            for (const p of players) if (!foul.has(p.name) && p.isSneaking) { foul.add(p.name); p.sendMessage("§cフライング！"); cmd(`playsound note.bass "${p.name}"`); }
+            for (const p of players) if (!foul.has(p.name) && p.isSneaking) { foul.add(p.name); bar(p, "§cフライング！"); cmd(`playsound note.bass "${p.name}"`); }
             await wait(1);
         }
         cmd("fill -8 1 -13 8 10 -13 lime_concrete");
@@ -744,7 +745,7 @@ async function gameReflex() {
             const [name, ms] = order[0];
             wins.set(name, (wins.get(name) ?? 0) + 1);
             record(34, name, ms / 1000, "min");
-            world.sendMessage(`§aラウンド${r}: ${order.slice(0, 3).map(([n, v], i) => `${i + 1}位 ${n} ${(v / 1000).toFixed(2)}秒`).join(" / ")}`);
+            toast(`§aラウンド${r}: ${order.slice(0, 3).map(([n, v], i) => `${i + 1}位 ${n} ${(v / 1000).toFixed(2)}秒`).join(" / ")}`);
         }
         await wait(30);
     }
@@ -930,12 +931,12 @@ async function gameDash() {
             if (dashBars.some((b) => Math.floor(z) === b.z && Math.floor(x) >= b.x && Math.floor(x) < b.x + b.w)) {
                 if (isBot(p) && chance(0.4, 0.55, 0.7)) continue; // BOT もよけることがある
                 const c = cp(z); p.teleport({ x: 0.5, y: 1, z: c + 0.5 }, { rotation: { x: 0, y: 0 } });
-                p.sendMessage("§c当たった！ チェックポイントへ戻る"); cmd(`playsound note.bass "${p.name}"`);
+                bar(p, "§c当たった！ チェックポイントへ戻る"); cmd(`playsound note.bass "${p.name}"`);
             }
             if (z >= 44) {
                 order.push(p); p.setGameMode(SPECTATOR);
                 const sec = (Date.now() - t0) / 1000;
-                world.sendMessage(`§b${order.length}位 §f${p.name} §7${sec.toFixed(2)}秒`);
+                toast(`§b${order.length}位 §f${p.name} §7${sec.toFixed(2)}秒`);
                 record(38, p.name, sec, "min");
             }
             if (t % 10 === 0) p.onScreenDisplay.setActionBar(`§b障害物ダッシュ §fゴールまで ${Math.max(0, Math.round(44 - z))}m`);
@@ -994,7 +995,7 @@ async function gameMemory() {
             const pts = Math.max(0, ok - ng);
             score2.set(g.p.name, (score2.get(g.p.name) ?? 0) + pts);
             for (const k of lit) cmd(`setblock ${g.ox + (k % 4)} 0 ${g.oz + Math.floor(k / 4)} ${m.has(k) ? "lime_concrete" : "red_concrete"}`);
-            if (g.p.isValid) g.p.sendMessage(`§fラウンド${r}: 正解 ${ok} / まちがい ${ng} → ${pts}点`);
+            if (g.p.isValid) bar(g.p, `§fラウンド${r}: 正解 ${ok} / まちがい ${ng} → ${pts}点`);
         }
         await wait(50);
     }
@@ -1071,7 +1072,7 @@ world.afterEvents.entityHitEntity.subscribe((ev) => {
     if (!tb || tb.n <= 0 || tb.until > system.currentTick) return;
     tb.n--; tb.until = system.currentTick + 20;
     const ta = tails.get(a.name); if (ta) ta.n++;
-    a.sendMessage(`§aしっぽをうばった！ (${ta?.n ?? 0}本)`); b.sendMessage("§cしっぽをとられた！");
+    bar(a, `§aしっぽをうばった！ (${ta?.n ?? 0}本)`); bar(b, "§cしっぽをとられた！");
     cmd(`playsound random.pop "${a.name}"`);
 });
 async function gameTails() {
@@ -1157,7 +1158,7 @@ async function gamePixel() {
                 if (k >= 0 && prev.get(g.p.name) !== k) { g.cells[k] = (g.cells[k] + 1) % 4; cmd(`setblock ${g.ox + lx} 0 ${g.oz + lz} ${PIX[g.cells[k]]}_concrete`); cmd(`playsound note.hat "${g.p.name}"`); }
                 prev.set(g.p.name, k);
             }
-            if (g.cells.every((c, i) => c === target[i])) { g.done = (Date.now() - t0) / 1000; order.push(g.p); world.sendMessage(`§b${order.length}位 §f${g.p.name} §7${g.done.toFixed(1)}秒で完成！`); record(43, g.p.name, g.done, "min"); }
+            if (g.cells.every((c, i) => c === target[i])) { g.done = (Date.now() - t0) / 1000; order.push(g.p); toast(`§b${order.length}位 §f${g.p.name} §7${g.done.toFixed(1)}秒で完成！`); record(43, g.p.name, g.done, "min"); }
         }
         if (t % 20 === 0) actionbar(`§bピクセルアート §7残り ${Math.ceil((1600 - t) / 20)}秒`);
         if (grids.every((g) => g.done || !g.p.isValid)) break;
@@ -1215,7 +1216,7 @@ world.afterEvents.entityHitEntity.subscribe((ev) => {
     if (a?.typeId !== "minecraft:player" || b?.typeId !== "minecraft:player" || score("game", "selectgame") !== 45 || !run.active) return;
     const n = Math.min(3, coins.get(b.name) ?? 0); if (!n) return;
     coins.set(b.name, coins.get(b.name) - n); dropCoins(b.location.x, b.location.z, n);
-    b.sendMessage(`§cコインを${n}枚落とした！`); cmd(`playsound random.break "${b.name}"`);
+    bar(b, `§cコインを${n}枚落とした！`); cmd(`playsound random.break "${b.name}"`);
 });
 async function gameCoins() {
     coins.clear(); coinList.length = 0; safeFight();
@@ -1292,7 +1293,7 @@ world.afterEvents.entityHitEntity.subscribe((ev) => {
     if (a?.typeId !== "minecraft:player" || b?.typeId !== "mmgplus:melon" || !run.active) return;
     melonPts.set(a.name, (melonPts.get(a.name) ?? 0) + 1);
     cmd(`particle minecraft:large_explosion ${b.location.x} ${b.location.y + 0.5} ${b.location.z}`);
-    cmd(`playsound random.break "${a.name}"`); a.sendMessage(`§aスイカ割り成功！ (${melonPts.get(a.name)}個)`);
+    cmd(`playsound random.break "${a.name}"`); bar(a, `§aスイカ割り成功！ (${melonPts.get(a.name)}個)`);
     b.remove();
 });
 async function gameMelon() {
@@ -1417,7 +1418,7 @@ async function gameCroc() {
             await wait(50); reset();
         } else {
             soundAll("random.click", 1.4); teeth.splice(teeth.indexOf(hitE), 1); try { hitE.remove(); } catch {}
-            p.sendMessage("§aセーフ！");
+            bar(p, "§aセーフ！");
             await wait(12);
         }
     }
@@ -1578,8 +1579,8 @@ async function gamePlates() {
             if (isBot(p)) { s.tilt *= 0.8; if (t % 10 === 0) botGo(p, Math.max(-3, Math.min(3, p.location.x + (Math.random() - 0.5) * 2)), 1, Math.min(46, p.location.z + 4), [0.55, 0.7, 0.85][botStr()]); }
             s.v = { x: v.x, z: v.z };
             if (s.e?.isValid) { s.e.teleport({ x: p.location.x, y: p.location.y + 2.05, z: p.location.z }, { rotation: { x: 0, y: p.getRotation().y } }); s.e.setProperty("mmgplus:tilt", Math.max(-10, Math.min(10, Math.round(s.tilt)))); }
-            if (Math.abs(s.tilt) > 10) { s.tilt = 0; cmd(`playsound random.glass "${p.name}"`); p.sendMessage("§cお皿が落ちた！ スタートから"); p.teleport({ x: 0.5, y: 1, z: -40 }, { rotation: { x: 0, y: 0 } }); }
-            if (p.location.z >= 44) { order.push(p); const sec = (Date.now() - t0) / 1000; world.sendMessage(`§b${order.length}位 §f${p.name} §7${sec.toFixed(1)}秒`); record(54, p.name, sec, "min"); }
+            if (Math.abs(s.tilt) > 10) { s.tilt = 0; cmd(`playsound random.glass "${p.name}"`); bar(p, "§cお皿が落ちた！ スタートから"); p.teleport({ x: 0.5, y: 1, z: -40 }, { rotation: { x: 0, y: 0 } }); }
+            if (p.location.z >= 44) { order.push(p); const sec = (Date.now() - t0) / 1000; toast(`§b${order.length}位 §f${p.name} §7${sec.toFixed(1)}秒`); record(54, p.name, sec, "min"); }
             if (t % 5 === 0) p.onScreenDisplay.setActionBar(`§bお皿バランス §f傾き ${"■".repeat(Math.min(10, Math.round(Math.abs(s.tilt))))}${"□".repeat(10 - Math.min(10, Math.round(Math.abs(s.tilt))))}  §7ゴールまで ${Math.max(0, Math.round(44 - p.location.z))}m`);
         }
         if (players.every((p) => order.includes(p) || !p.isValid)) break;
@@ -1624,7 +1625,7 @@ async function gameBigball() {
                     if (Math.hypot(vel.x, vel.z) < [0.4, 0.5, 0.6][botStr()]) v.applyImpulse({ x: (dx / d) * 0.07, y: 0, z: (dz / d) * 0.07 });
                 } else drive(v, p, 0.06, 0.62);
             } else if (t % 20 === 0) mount(p, "mmgplus:bigball", p.location);
-            if (p.location.z >= 44) { order.push(p); cmd(`ride "${p.name}" stop_riding`); p.setGameMode(SPECTATOR); const sec = (Date.now() - t0) / 1000; world.sendMessage(`§b${order.length}位 §f${p.name} §7${sec.toFixed(1)}秒`); record(55, p.name, sec, "min"); }
+            if (p.location.z >= 44) { order.push(p); cmd(`ride "${p.name}" stop_riding`); p.setGameMode(SPECTATOR); const sec = (Date.now() - t0) / 1000; toast(`§b${order.length}位 §f${p.name} §7${sec.toFixed(1)}秒`); record(55, p.name, sec, "min"); }
             if (t % 10 === 0) p.onScreenDisplay.setActionBar(`§c大玉ころがし §fゴールまで ${Math.max(0, Math.round(44 - p.location.z))}m`);
         }
         if (t % 40 === 0) for (const b of dim().getEntities({ type: "mmgplus:bigball" })) if (!b.getComponent("minecraft:rideable")?.getRiders().length) b.remove();
@@ -1700,9 +1701,9 @@ async function gameCourse() {
             if (order.includes(p)) continue;
             const l = p.location;
             if (isBot(p) && t % [30, 22, 15][botStr()] === 0) { const i = pts.findIndex((q) => q.z > l.z + 0.5); const q = pts[i]; if (q) { if (chance(0.7, 0.82, 0.92)) p.teleport({ x: q.x + 0.5, y: q.y + 1, z: q.z + 0.5 }); else p.teleport({ x: l.x, y: 1, z: l.z }); } }
-            for (const q of pts) if (q.cp && Math.abs(l.x - (q.x + 0.5)) < 2.6 && Math.abs(l.z - (q.z + 0.5)) < 2.6 && Math.abs(l.y - (q.y + 1)) < 0.6 && (cp.get(p.name)?.z ?? -99) < q.z) { cp.set(p.name, q); p.sendMessage("§eチェックポイント！"); cmd(`playsound random.orb "${p.name}"`); }
+            for (const q of pts) if (q.cp && Math.abs(l.x - (q.x + 0.5)) < 2.6 && Math.abs(l.z - (q.z + 0.5)) < 2.6 && Math.abs(l.y - (q.y + 1)) < 0.6 && (cp.get(p.name)?.z ?? -99) < q.z) { cp.set(p.name, q); bar(p, "§eチェックポイント！"); cmd(`playsound random.orb "${p.name}"`); }
             if (l.y < 1.5) { const c = cp.get(p.name) ?? start; p.teleport({ x: c.x + 0.5, y: c.y + 1, z: c.z + 0.5 }, { rotation: { x: 0, y: 0 } }); }
-            if (l.z >= 43 && l.y >= pts[pts.length - 1].y + 0.5) { order.push(p); const sec = (Date.now() - t0) / 1000; world.sendMessage(`§a${order.length}位 §f${p.name} §7${sec.toFixed(1)}秒`); record(58, p.name, sec, "min"); }
+            if (l.z >= 43 && l.y >= pts[pts.length - 1].y + 0.5) { order.push(p); const sec = (Date.now() - t0) / 1000; toast(`§a${order.length}位 §f${p.name} §7${sec.toFixed(1)}秒`); record(58, p.name, sec, "min"); }
             if (t % 10 === 0) p.onScreenDisplay.setActionBar(`§aアスレチック コース${course} §fゴールまで ${Math.max(0, Math.round(44 - l.z))}m`);
         }
         if (players.every((p) => order.includes(p) || !p.isValid)) break;
@@ -1746,7 +1747,7 @@ async function playMinigame(id, players) {
     try { (PREP[id] ?? (() => clearArena()))(); } catch (e) { for (const p of world.getPlayers()) if (isAdmin(p)) p.sendMessage(`§7[MPL] ${MINIGAMES[id]} の会場でエラー: ${e}`); }
     cmd(`tp @a[tag=playing] ${START_AT[id] ?? (id === 30 ? `${raceX(RACE_START - 3) + 0.5} 1 ${RACE_START - 3}` : "0 1 0")}`);
     cmd("effect @a[tag=playing] night_vision 600 0 true");
-    for (const p of players) p.onScreenDisplay.setTitle(`§e§l${MINIGAMES[id]}`, { subtitle: `§f${MG_HOWTO[id] ?? ""}`, fadeInDuration: 5, stayDuration: 70, fadeOutDuration: 10 });
+    banner("card", MG_HOWTO[id] ?? "", 80, players, `§l${MINIGAMES[id]}`);
     soundAll("random.levelup", 1.2);
     await wait(80);
     // 開始
@@ -1867,10 +1868,8 @@ function buildBoard() {
     for (let i = 0; i < 90; i++) { const x = rand(-29, 29), z = rand(105, 155); if (Math.abs(x) < 24 && z > 112 && z < 148) continue; cmd(`setblock ${x} 1 ${z} ${["poppy", "dandelion", "cornflower", "oxeye_daisy", "allium", "pink_tulip"][rand(0, 5)]} keep`); }
     // マスの上の文字
     cmd("kill @e[type=mmgplus:board,tag=mpl_label]");
-    for (const s of SPACES) if (s.kind !== "blue") { const e = spawnAt("mmgplus:board", { x: s.x + 0.5, y: 1.8, z: s.z + 0.5 }); if (e) { e.addTag("mpl_label"); e.nameTag = SPACE_LOOK[s.kind][1]; } }
-    const t = spawnAt("mmgplus:board", { x: 0.5, y: 15.5, z: 134.5 }); if (t) { t.addTag("mpl_label"); t.nameTag = `§e§l${I.star} MEGAMI PARTY LAND ${I.star}`; }
     for (let i = 0; i < SPACES.length; i++) if (SPACES[i].kind === "shop") buildStall(i);
-    save("board_built", 6);
+    save("board_built", 7);
 }
 
 // ===== すごろく =====
@@ -1902,7 +1901,7 @@ function placeStar(exclude = -1) {
 async function showStar(text) {
     const s = spaceAt(G.star);
     cam.to("@a[tag=mpl_board]", { x: s.x + 6, y: 6, z: s.z + 6 }, { x: s.x + 0.5, y: 2.5, z: s.z + 0.5 }, 1.2);
-    titleAll(`§e§l${I.star} ${text}`, `§fスターはコイン ${STAR_PRICE}枚で買える`, 50); soundAllPlayers("random.levelup", 1.4);
+    banner("starappear", `${text}  ${I.coin}${STAR_PRICE}で買える`, 60); soundAllPlayers("random.levelup", 1.4);
     for (let k = 0; k < 6; k++) { cmd(`particle minecraft:totem_particle ${s.x + 0.5} 3 ${s.z + 0.5}`); await wait(10); }
 }
 const STAR_PRICE = 20;
@@ -1913,6 +1912,20 @@ const ITEMS = {
     gold: { name: "金のパイプ", price: 28, desc: "スターの手前までワープ" },
     glove: { name: "どろぼう手袋", price: 14, desc: "だれかからコインを5〜10枚うばう" },
 };
+// ===== 演出(RP の ui/hud_screen.json、tools/mpl_ui.py)=====
+// タイトルの頭に見えない印 + キー番号を入れると、ふつうの文字の代わりに専用ロゴ / 帯 / カードが出る
+const BMARK = "§r§b§r§n§r";
+const BKEYS = ["title", "turn", "yourturn", "order", "starappear", "star", "minigame", "win", "happening", "skull", "shop", "lucky", "gameset", "result", "champion", "lastspurt", "bonus", "item",
+    ...Array.from({ length: 31 }, (_, n) => `n${n}`), "r_gold", "r_blue", "r_red", "r_purple", "r_green", "r_gray", "card"];
+const bcode = (key) => { const i = Math.max(0, BKEYS.indexOf(key)); return `${BMARK}§${(i >> 4).toString(16)}§${(i & 15).toString(16)}§r`; };
+// 一度消してから出す(ロゴの登場アニメを毎回最初から)
+function banner(key, sub = "", stay = 40, players = world.getPlayers(), text = "") {
+    for (const p of players) { try { p.onScreenDisplay.clearTitle(); } catch {} }
+    system.runTimeout(() => { for (const p of players) { try { if (p.isValid) p.onScreenDisplay.setTitle(bcode(key) + text, { subtitle: sub, fadeInDuration: 0, stayDuration: stay, fadeOutDuration: 8 }); } catch {} } }, 1);
+}
+const ribbon = (color, text, sub = "", stay = 40, players = world.getPlayers()) => banner(`r_${color}`, sub, stay, players, text);
+const subAll = (t) => world.getPlayers().forEach((p) => { try { p.onScreenDisplay.updateSubtitle(t); } catch {} });
+const FORM_MARK = "§r§p§r§q§r";
 const titleAll = (t, s = "", stay = 40) => world.getPlayers().forEach((p) => p.onScreenDisplay.setTitle(t, { subtitle: s, fadeInDuration: 5, stayDuration: stay, fadeOutDuration: 10 }));
 const soundAllPlayers = (s, pitch = 1) => cmd(`execute as @a at @s run playsound ${s} @s ~ ~ ~ 1 ${pitch}`);
 const lockBoard = () => { cmd("inputpermission set @a[tag=mpl_board] lateral_movement disabled"); cmd("tag @a[tag=mpl_board] add mpl_lock"); };
@@ -1922,7 +1935,7 @@ async function startParty(turns, players) {
     if (G.on) return;
     Object.assign(G, { on: true, turn: 0, turns, players: players.map((p) => p.name).sort(() => Math.random() - 0.5), stars: {}, coins: {}, pos: {}, items: {}, mgWins: {}, coinsGot: {}, now: null });
     for (const n of G.players) { G.coins[n] = 10; G.stars[n] = 0; G.pos[n] = 0; G.items[n] = []; }
-    if ((load("board_built", 0)) < 6) buildBoard();
+    if ((load("board_built", 0)) < 7) buildBoard();
     for (const p of gp()) { p.addTag("mpl_board"); p.teleport(spot(0, G.players.indexOf(p.name)), lookCenter); p.setGameMode(ADVENTURE); }
     lockBoard(); hud();
     try {
@@ -1931,7 +1944,7 @@ async function startParty(turns, players) {
         cam.fade();
         await wait(8);
         cam.to("@a[tag=mpl_board]", { x: -40, y: 30, z: 95 }, { x: 0, y: 2, z: 130 }, 0.1);
-        titleAll(`§e§l${I.star} MEGAMI PARTY LAND ${I.star}`, `§f${turns}ターン勝負！ スターを一番多く集めよう`, 90);
+        banner("title", `${turns}ターン勝負！ スターを一番多く集めよう`, 90);
         soundAllPlayers("random.totem", 1);
         cam.to("@a[tag=mpl_board]", { x: 40, y: 22, z: 95 }, { x: 0, y: 2, z: 130 }, 3);
         await wait(60);
@@ -1939,15 +1952,14 @@ async function startParty(turns, players) {
         await wait(60);
         cam.to("@a[tag=mpl_board]", { x: 0.5, y: 14, z: 100 }, { x: 0.5, y: 4, z: 128 }, 2);
         await wait(40);
-        world.sendMessage(`§e${I.dice} 順番: ${G.players.map((n, i) => `${BADGE(i + 1)}${n}`).join("  ")}`);
-        titleAll("§l順番", `§f${G.players.join(" → ")}`, 60);
+        banner("order", G.players.map((n, i) => `${BADGE(i + 1)}${n}`).join("  "), 60);
         await wait(70);
         placeStar(); await showStar("スターがあらわれた！"); await wait(20);
         for (G.turn = 1; G.turn <= G.turns && G.on; G.turn++) {
             const last = G.turn > G.turns - 3;
             hud();
             cam.to("@a[tag=mpl_board]", { x: 0.5, y: 34, z: 131 }, { x: 0.5, y: 0, z: 130 }, 1.2);
-            titleAll(`§l${I.clock} ターン ${G.turn} / ${G.turns}`, last ? "§c§lラストスパート！ 青と赤のマスが2倍" : "", 50);
+            banner(last ? "lastspurt" : "turn", last ? `TURN ${G.turn} / ${G.turns}  青と赤のマスが2倍` : `${G.turn} / ${G.turns}`, 50);
             soundAllPlayers(last ? "mob.wither.spawn" : "random.levelup", last ? 1.6 : 0.9);
             await wait(55);
             for (let k = 0; k < G.players.length && G.on; k++) {
@@ -1978,7 +1990,7 @@ async function takeTurn(p, last, nextName) {
     G.now = name; hud();
     p.teleport(spot(G.pos[name]), lookCenter);
     follow(p, 1);
-    titleAll(`§e§l▶ ${name} の番`, `§7つぎ: ${nextName}`, 40);
+    banner("yourturn", `つぎ: ${nextName}`, 40, [p]); ribbon("gold", `${name} の番`, `つぎ: ${nextName}`, 40, world.getPlayers().filter((q) => q.name !== name));
     cmd(`playsound note.pling @a ${p.location.x} ${p.location.y} ${p.location.z} 1 1.8`);
     await wait(30);
     // アイテム
@@ -2005,34 +2017,32 @@ async function takeTurn(p, last, nextName) {
         }
         const roll = rand(1, 6);
         total += roll;
-        try { die?.setProperty("mmgplus:rolling", 0); if (die) die.nameTag = `§l§e${roll}`; } catch {}
+        try { die?.setProperty("mmgplus:rolling", 0); } catch {}
         cmd(`particle minecraft:totem_particle ${base.x} ${base.y + 2.6} ${base.z}`);
         cmd(`playsound random.anvil_land @a ${base.x} ${base.y} ${base.z} 0.5 2`); cmd(`playsound random.levelup @a ${base.x} ${base.y} ${base.z} 1 1.6`);
-        titleAll(`§e§l${roll}`, dice > 1 ? `§f合計 ${total}` : `§f${name}`, 20);
+        banner(`n${Math.min(30, roll)}`, dice > 1 ? `合計 ${total}` : name, 22);
         await wait(25);
         try { die?.remove(); } catch {}
     }
     // 1マスずつ進む
-    const counter = spawnAt("mmgplus:board", { x: p.location.x, y: p.location.y + 2.6, z: p.location.z });
     for (let k = total; k >= 1 && G.on; k--) {
         G.pos[name] = (G.pos[name] + 1) % SPACES.length;
         const s = spot(G.pos[name]);
         p.teleport({ x: s.x, y: s.y + 0.7, z: s.z }, lookCenter);
-        try { if (counter) { counter.teleport({ x: s.x, y: s.y + 3.1, z: s.z }); counter.nameTag = `§l§e${k - 1}`; } } catch {}
+        actionbar(`${I.dice} のこり §e§l${k - 1}`, world.getPlayers());
         cmd(`playsound note.pling @a ${s.x} ${s.y} ${s.z} 0.9 ${(0.8 + (total - k) * 0.08).toFixed(2)}`);
         follow(p, 0.35);
         await wait(4);
         p.teleport(s, lookCenter);
         await wait(4);
         if (G.pos[name] === G.star) await buyStar(p);
-        if (G.pos[name] === 0) { addCoins(name, 5); titleAll(`§6§lスタートを通過 +5${I.coin}`, `§f${name}`, 20); }
+        if (G.pos[name] === 0) { addCoins(name, 5); ribbon("gold", `スタート通過 +5${I.coin}`, name, 25); }
     }
-    try { counter?.remove(); } catch {}
     // 止まったマス
     const sp = spaceAt(G.pos[name]), mul = last ? 2 : 1;
-    if (sp.kind === "blue") { addCoins(name, 3 * mul); titleAll(`§9§l+${3 * mul} ${I.coin}`, `§f${name}`, 20); soundAllPlayers("random.orb", 1.4); cmd(`particle minecraft:villager_happy ${p.location.x} ${p.location.y + 1} ${p.location.z}`); }
-    else if (sp.kind === "red") { addCoins(name, -3 * mul); titleAll(`§c§l-${3 * mul} ${I.coin}`, `§f${name}`, 20); soundAllPlayers("note.bass", 0.7); cmd(`particle minecraft:villager_angry ${p.location.x} ${p.location.y + 1} ${p.location.z}`); }
-    else if (sp.kind === "lucky") { const n = rand(5, 15); addCoins(name, n); titleAll(`§6§lラッキー！ +${n} ${I.coin}`, `§f${name}`, 25); soundAllPlayers("random.levelup", 1.2); }
+    if (sp.kind === "blue") { addCoins(name, 3 * mul); ribbon("blue", `+${3 * mul} ${I.coin}`, name, 25); soundAllPlayers("random.orb", 1.4); cmd(`particle minecraft:villager_happy ${p.location.x} ${p.location.y + 1} ${p.location.z}`); }
+    else if (sp.kind === "red") { addCoins(name, -3 * mul); ribbon("red", `-${3 * mul} ${I.coin}`, name, 25); soundAllPlayers("note.bass", 0.7); cmd(`particle minecraft:villager_angry ${p.location.x} ${p.location.y + 1} ${p.location.z}`); }
+    else if (sp.kind === "lucky") { const n = rand(5, 15); addCoins(name, n); banner("lucky", `+${n} ${I.coin}  ${name}`, 35); soundAllPlayers("random.levelup", 1.2); }
     else if (sp.kind === "event") await happening(p);
     else if (sp.kind === "shop") await shop(p);
     else if (sp.kind === "skull") await skull(p);
@@ -2045,7 +2055,7 @@ async function useItem(p) {
     let pick = null;
     if (isBot(p)) { if (Math.random() < 0.6) pick = bag[0]; }
     else {
-        const f = new ActionFormData().title(`${I.bag} アイテム`).body("サイコロの前にアイテムを使う？");
+        const f = new ActionFormData().title(`${FORM_MARK}${I.bag} アイテム`).body("サイコロの前にアイテムを使う？");
         bag.forEach((k) => f.button(`§l${ITEMS[k].name}\n§r§7${ITEMS[k].desc}`));
         f.button("§7使わない");
         const r = await Promise.race([f.show(p).catch(() => ({ canceled: true })), wait(240).then(() => ({ canceled: true }))]);
@@ -2054,11 +2064,11 @@ async function useItem(p) {
     }
     if (!pick) return null;
     bag.splice(bag.indexOf(pick), 1);
-    titleAll(`§d§l${ITEMS[pick].name}！`, `§f${name}`, 30); soundAllPlayers("random.orb", 0.8);
+    banner("item", `${ITEMS[pick].name}  ${name}`, 35); soundAllPlayers("random.orb", 0.8);
     const others = G.players.filter((n) => n !== name);
-    if (pick === "pipe" && others.length) { const t = others[rand(0, others.length - 1)]; [G.pos[name], G.pos[t]] = [G.pos[t], G.pos[name]]; for (const n of [name, t]) world.getPlayers({ name: n })[0]?.teleport(spot(G.pos[n]), lookCenter); world.sendMessage(`§d${name} と ${t} が場所をこうかん！`); }
+    if (pick === "pipe" && others.length) { const t = others[rand(0, others.length - 1)]; [G.pos[name], G.pos[t]] = [G.pos[t], G.pos[name]]; for (const n of [name, t]) world.getPlayers({ name: n })[0]?.teleport(spot(G.pos[n]), lookCenter); ribbon("purple", `${name} と ${t} が場所をこうかん！`, "", 40); }
     if (pick === "gold") { G.pos[name] = (G.star - 1 + SPACES.length) % SPACES.length; p.teleport(spot(G.pos[name]), lookCenter); follow(p, 0.8); }
-    if (pick === "glove" && others.length) { const t = others.sort((a, b) => (G.coins[b] ?? 0) - (G.coins[a] ?? 0))[0], n = Math.min(rand(5, 10), G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n); world.sendMessage(`§d${name} が ${t} から ${n}枚うばった！`); }
+    if (pick === "glove" && others.length) { const t = others.sort((a, b) => (G.coins[b] ?? 0) - (G.coins[a] ?? 0))[0], n = Math.min(rand(5, 10), G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n); ribbon("purple", `${t} から ${n}${I.coin} うばった！`, name, 40); }
     return pick;
 }
 // ===== 屋台のショップ =====
@@ -2084,7 +2094,7 @@ function buildStall(i) {
     fillRel(f, 6, -2, 1, 6, 2, 3, "barrel");                         // 奥のたな
     const lamp = f.at(4, 0, 4); cmd(`setblock ${lamp.x} ${lamp.y} ${lamp.z} lantern`);
     stallShutter(i, true);
-    const lb = f.at(3, 0, 6.2); const e = spawnAt("mmgplus:board", { x: lb.x + 0.5, y: lb.y, z: lb.z + 0.5 }); if (e) { e.addTag("mpl_label"); e.nameTag = `§d§l${I.bag} SHOP`; }
+    
 }
 // シャッター: カウンターの上(高さ 2〜4)。開ける時は下の段から消える
 async function stallShutter(i, close, animate = false) {
@@ -2101,31 +2111,31 @@ async function shop(p) {
     await wait(16);
     await stallShutter(i, false, true);
     const vpos = f.at(4.5, 0, 1); const v = spawnAt("minecraft:villager_v2", { x: vpos.x + 0.5, y: 1, z: vpos.z + 0.5 });
-    try { v?.addEffect("slowness", 600, { amplifier: 255, showParticles: false }); v?.setRotation({ x: 0, y: Math.atan2(f.n[0], -f.n[1]) * 180 / Math.PI }); if (v) v.nameTag = "§eお店の人"; v?.addTag("mpl_shopkeeper"); } catch {}
+    try { v?.addEffect("slowness", 600, { amplifier: 255, showParticles: false }); v?.setRotation({ x: 0, y: Math.atan2(f.n[0], -f.n[1]) * 180 / Math.PI }); v?.addTag("mpl_shopkeeper"); } catch {}
     cmd(`playsound mob.villager.haggle @a ${vpos.x} 1 ${vpos.z} 1 1`);
     // 今日の3品(5つからランダム)を、カウンターの上に
     const keys = Object.keys(ITEMS).sort(() => Math.random() - 0.5).slice(0, 3);
     const shown = keys.map((k, j) => { const q = f.at(3, j - 1, 2.15); return spawnAt(`mpl:item_${k}`, { x: q.x + 0.5, y: q.y, z: q.z + 0.5 }); });
-    titleAll(`§d§l${I.bag} いらっしゃい！`, `§f${name}`, 30);
+    banner("shop", name, 40);
     await wait(15);
     let buy = null;
-    if (bag.length >= 3) p.sendMessage("§7アイテムはもう3つ持っている(3つまで)");
+    if (bag.length >= 3) ribbon("gray", "アイテムはもう3つ持っている", "3つまで", 30, [p]);
     else if (isBot(p)) { const ok = keys.filter((k) => ITEMS[k].price <= (G.coins[name] ?? 0) - 5); if (ok.length && Math.random() < 0.7) buy = ok[rand(0, ok.length - 1)]; await wait(30); }
     else {
-        const fm = new ActionFormData().title(`${I.bag} §d§lSHOP`).body(`§fいらっしゃい！ どれにする？ §6${I.coin}${G.coins[name] ?? 0}§f 持っている`);
+        const fm = new ActionFormData().title(`${FORM_MARK}${I.bag} SHOP`).body(`§fいらっしゃい！ どれにする？ §6${I.coin}${G.coins[name] ?? 0}§f 持っている`);
         keys.forEach((k) => fm.button(`§l${ITEMS[k].name}  §6${I.coin}${ITEMS[k].price}\n§r§7${ITEMS[k].desc}`));
         fm.button("§7立ち去る");
         const r = await Promise.race([fm.show(p).catch(() => ({ canceled: true })), wait(300).then(() => ({ canceled: true }))]);
         try { uiManager.closeAllForms(p); } catch {}
         if (!r.canceled && r.selection < keys.length) buy = keys[r.selection];
     }
-    if (buy && (G.coins[name] ?? 0) < ITEMS[buy].price) { titleAll("§cコインが足りない…", `§f${name}`, 25); buy = null; await wait(20); }
+    if (buy && (G.coins[name] ?? 0) < ITEMS[buy].price) { ribbon("gray", "コインが足りない…", name, 25); buy = null; await wait(20); }
     if (buy) {
         addCoins(name, -ITEMS[buy].price); bag.push(buy);
         const j = keys.indexOf(buy); try { shown[j]?.remove(); } catch {}
         cmd(`playsound mob.villager.yes @a ${vpos.x} 1 ${vpos.z} 1 1`); cmd(`playsound random.orb @a ${vpos.x} 1 ${vpos.z} 1 1.4`);
-        titleAll(`§d§l${ITEMS[buy].name} を買った！`, `§fまいど！`, 30);
-    } else { cmd(`playsound mob.villager.no @a ${vpos.x} 1 ${vpos.z} 1 1`); titleAll("§7また来てね", `§f${name}`, 20); }
+        ribbon("purple", `${ITEMS[buy].name} を買った！`, "まいど！", 30);
+    } else { cmd(`playsound mob.villager.no @a ${vpos.x} 1 ${vpos.z} 1 1`); ribbon("gray", "また来てね", name, 25); }
     await wait(25);
     try { v?.remove(); } catch {}
     shown.forEach((e) => { try { e?.remove(); } catch {} });
@@ -2139,10 +2149,10 @@ async function buyStar(p) {
     const name = p.name;
     const s = spaceAt(G.star);
     cam.to("@a[tag=mpl_board]", { x: s.x + 4, y: 4, z: s.z + 4 }, { x: s.x + 0.5, y: 2, z: s.z + 0.5 }, 0.8);
-    if ((G.coins[name] ?? 0) < STAR_PRICE) { titleAll(`§e${I.star}`, `§7${name}: コインが足りない…(${STAR_PRICE}枚必要)`, 30); await wait(30); return; }
+    if ((G.coins[name] ?? 0) < STAR_PRICE) { ribbon("gray", `コインが足りない…`, `${name}: スターは ${I.coin}${STAR_PRICE}`, 30); await wait(30); return; }
     let yes = isBot(p) ? Math.random() < 0.92 : false;
     if (!isBot(p)) {
-        const r = await Promise.race([new MessageFormData().title(`§e${I.star} スター`).body(`コイン ${STAR_PRICE}枚でスターを買う？\n§7(今 ${I.coin}${G.coins[name]})`).button1("やめる").button2(`§e§l${I.star} 買う！`).show(p).catch(() => ({ selection: 0 })), wait(200).then(() => ({ selection: 0 }))]);
+        const r = await Promise.race([new ActionFormData().title(`${FORM_MARK}${I.star} スター`).body(`コイン ${STAR_PRICE}枚でスターを買う？\n§7(今 ${I.coin}${G.coins[name]})`).button(`§l${I.star} 買う！`).button("やめる").show(p).then((r) => ({ selection: r.canceled ? 0 : r.selection === 0 ? 1 : 0 })).catch(() => ({ selection: 0 })), wait(200).then(() => ({ selection: 0 }))]);
         try { uiManager.closeAllForms(p); } catch {}
         yes = r.selection === 1;
     }
@@ -2156,7 +2166,7 @@ async function buyStar(p) {
     for (let k = 0; k <= 6; k++) {
         const a = (k / 6) * Math.PI * 2 + Math.PI / 2;
         cam.to("@a[tag=mpl_board]", { x: c.x + Math.cos(a) * 4.5, y: c.y + 2.2 + (k % 2) * 0.6, z: c.z + Math.sin(a) * 4.5 }, { x: c.x, y: c.y + 1.4, z: c.z }, 1, "linear");
-        if (k === 1) titleAll(`§e§l${I.star} スターゲット！ ${I.star}`, `§f${name}`, 100);
+        if (k === 1) banner("star", name, 100);
         if (k % 2 === 0) cmd(`particle minecraft:totem_particle ${c.x} ${c.y + 1} ${c.z}`);
         await wait(20);
     }
@@ -2172,16 +2182,16 @@ async function buyStar(p) {
 // ? マスのできごと
 async function happening(p) {
     const name = p.name, others = G.players.filter((n) => n !== name);
-    titleAll("§a§l? ハプニング", "", 20); soundAllPlayers("random.orb", 0.6);
+    banner("happening", "", 25); soundAllPlayers("random.orb", 0.6);
     for (let i = 0; i < 8; i++) { cmd(`particle minecraft:villager_happy ${p.location.x} ${p.location.y + 1.5} ${p.location.z}`); await wait(3); }
     const ev = rand(1, 7);
-    if (ev === 1) { const n = rand(5, 12); addCoins(name, n); titleAll(`§a§lコインのシャワー！ +${n}${I.coin}`, `§f${name}`, 30); }
-    else if (ev === 2 && others.length) { const t = others[rand(0, others.length - 1)], n = Math.min(5, G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n); titleAll(`§d§lコインどろぼう！`, `§f${name} が ${t} から ${n}${I.coin}`, 40); }
-    else if (ev === 3) { G.pos[name] = (G.star - 1 + SPACES.length) % SPACES.length; cam.fade(); await wait(8); p.teleport(spot(G.pos[name]), lookCenter); follow(p, 0.6); titleAll("§b§lワープ！", `§f${name} がスターの手前へ`, 40); }
-    else if (ev === 4 && others.length) { const t = others[rand(0, others.length - 1)]; [G.pos[name], G.pos[t]] = [G.pos[t], G.pos[name]]; cam.fade(); await wait(8); for (const n of [name, t]) world.getPlayers({ name: n })[0]?.teleport(spot(G.pos[n]), lookCenter); titleAll("§e§l場所こうかん！", `§f${name} ⇔ ${t}`, 40); }
-    else if (ev === 5) { const n = Math.min(8, G.coins[name] ?? 0); addCoins(name, -n); titleAll(`§c§lおとしもの… -${n}${I.coin}`, `§f${name}`, 30); }
-    else if (ev === 6) { const k = Object.keys(ITEMS)[rand(0, 4)]; if ((G.items[name] ?? []).length < 3) { G.items[name].push(k); titleAll(`§d§lプレゼント！`, `§f${name} に ${ITEMS[k].name}`, 40); } }
-    else { const total = G.players.reduce((s, n) => s + (G.coins[n] ?? 0), 0), each = Math.floor(total / G.players.length); for (const n of G.players) G.coins[n] = each; hud(); titleAll("§6§lみんな平等！", `§fコインを全員 ${each}${I.coin} に`, 40); }
+    if (ev === 1) { const n = rand(5, 12); addCoins(name, n); ribbon("green", `コインのシャワー！ +${n}${I.coin}`, `${name}`, 30); }
+    else if (ev === 2 && others.length) { const t = others[rand(0, others.length - 1)], n = Math.min(5, G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n); ribbon("purple", `コインどろぼう！`, `${name} が ${t} から ${n}${I.coin}`, 40); }
+    else if (ev === 3) { G.pos[name] = (G.star - 1 + SPACES.length) % SPACES.length; cam.fade(); await wait(8); p.teleport(spot(G.pos[name]), lookCenter); follow(p, 0.6); ribbon("blue", `ワープ！`, `${name} がスターの手前へ`, 40); }
+    else if (ev === 4 && others.length) { const t = others[rand(0, others.length - 1)]; [G.pos[name], G.pos[t]] = [G.pos[t], G.pos[name]]; cam.fade(); await wait(8); for (const n of [name, t]) world.getPlayers({ name: n })[0]?.teleport(spot(G.pos[n]), lookCenter); ribbon("gold", `場所こうかん！`, `${name} ⇔ ${t}`, 40); }
+    else if (ev === 5) { const n = Math.min(8, G.coins[name] ?? 0); addCoins(name, -n); ribbon("red", `おとしもの… -${n}${I.coin}`, `${name}`, 30); }
+    else if (ev === 6) { const k = Object.keys(ITEMS)[rand(0, 4)]; if ((G.items[name] ?? []).length < 3) { G.items[name].push(k); ribbon("purple", `プレゼント！`, `${name} に ${ITEMS[k].name}`, 40); } }
+    else { const total = G.players.reduce((s, n) => s + (G.coins[n] ?? 0), 0), each = Math.floor(total / G.players.length); for (const n of G.players) G.coins[n] = each; hud(); ribbon("gold", `みんな平等！`, `コインを全員 ${each}${I.coin} に`, 40); }
     soundAllPlayers("mob.villager.yes", 1.2);
     await wait(50);
 }
@@ -2190,8 +2200,8 @@ async function skull(p) {
     const name = p.name;
     cmd(`camera @a fade time 0.2 0.6 0.4 color 80 0 0`); soundAllPlayers("mob.wither.ambient", 0.8);
     await wait(20);
-    if ((G.stars[name] ?? 0) > 0 && Math.random() < 0.25) { G.stars[name]--; hud(); titleAll(`§4§lドクロ！ ${I.star} を1つ失った…`, `§f${name}`, 50); }
-    else { const n = Math.floor((G.coins[name] ?? 0) / 2); addCoins(name, -n); titleAll(`§4§lドクロ！ コインが半分に… -${n}${I.coin}`, `§f${name}`, 50); }
+    if ((G.stars[name] ?? 0) > 0 && Math.random() < 0.25) { G.stars[name]--; hud(); banner("skull", `${I.star} を1つ失った…  ${name}`, 50); }
+    else { const n = Math.floor((G.coins[name] ?? 0) / 2); addCoins(name, -n); banner("skull", `コインが半分… -${n}${I.coin}  ${name}`, 50); }
     await wait(50);
 }
 // ターンの最後のミニゲーム(ルーレットで決める)
@@ -2199,8 +2209,9 @@ async function minigameRound() {
     const list = mgOn(); if (!list.length) return;
     cam.to("@a[tag=mpl_board]", { x: 0.5, y: 8, z: 118 }, { x: 0.5, y: 8, z: 134 }, 1);
     let id = list[0];
-    for (let i = 0; i < 22; i++) { id = list[rand(0, list.length - 1)]; titleAll("§d§lミニゲーム！", `§f${MINIGAMES[id]}`, 6); soundAllPlayers("random.click", 1 + i * 0.03); await wait(2 + Math.floor(i / 4)); }
-    titleAll("§d§lミニゲーム！", `§e§l${MINIGAMES[id]}`, 50); soundAllPlayers("random.levelup", 1);
+    banner("minigame", "", 150); await wait(4);
+    for (let i = 0; i < 22; i++) { id = list[rand(0, list.length - 1)]; subAll(`§f${MINIGAMES[id]}`); soundAllPlayers("random.click", 1 + i * 0.03); await wait(2 + Math.floor(i / 4)); }
+    subAll(`§e§l${MINIGAMES[id]}`); soundAllPlayers("random.levelup", 1);
     await wait(40);
     cam.fade(); await wait(8);
     cam.clear(); unlockAll();
@@ -2215,7 +2226,7 @@ async function minigameRound() {
     for (const p of gp()) { p.addTag("mpl_board"); p.teleport(spot(G.pos[p.name], G.players.indexOf(p.name)), lookCenter); }
     lockBoard();
     cam.to("@a[tag=mpl_board]", { x: 0.5, y: 30, z: 106 }, { x: 0.5, y: 0, z: 130 }, 1);
-    titleAll(names.length ? `§a§l勝ち！ +10${I.coin}` : "§7勝った人はいなかった", `§f${names.join(", ")}`, 50);
+    if (names.length) banner("win", `+10${I.coin}  ${names.join(", ")}`, 50); else ribbon("gray", "勝った人はいなかった", "", 45);
     await wait(30);
     showStandings(`TURN ${G.turn} RESULTS`);
     await wait(150);
@@ -2243,14 +2254,15 @@ function showStandings(head) {
 // 最後: ボーナススター → 結果発表(ドラムロール 8.8秒に合わせて全員の前をカメラが流れ、鳴り終わりで優勝者にズーム)→ 順位の画面
 async function finale() {
     bgm(null);
-    titleAll("§e§lゲーム終了！", "§fボーナススターの発表", 60);
+    banner("gameset", "ボーナススターの発表", 60);
     cam.to("@a[tag=mpl_board]", { x: 0.5, y: 6, z: 116 }, { x: 0.5, y: 5, z: 134 }, 1.5);
     await wait(70);
+    banner("bonus", "", 45); soundAllPlayers("random.levelup", 1.2); await wait(50);
     for (const [label, m] of [["ミニゲーム王", G.mgWins], ["コイン王", G.coinsGot]]) {
         const best = Math.max(0, ...G.players.map((n) => m[n] ?? 0)); if (!best) continue;
         const win = G.players.filter((n) => (m[n] ?? 0) === best);
         for (const n of win) G.stars[n] = (G.stars[n] ?? 0) + 1;
-        hud(); titleAll(`§e§l${I.crown} ${label}`, `§f${win.join(", ")} に ${I.star}+1`, 60); soundAllPlayers("random.totem", 1.4);
+        hud(); ribbon("gold", `${I.crown} ${label}`, `${win.join(", ")} に ${I.star}+1`, 60); soundAllPlayers("random.totem", 1.4);
         await wait(80);
     }
     const rows = rankRows();
@@ -2261,7 +2273,7 @@ async function finale() {
     line.forEach((n, i) => world.getPlayers({ name: n })[0]?.teleport({ x: 0.5 + (i - (line.length - 1) / 2) * 2, y: 1, z: 128.5 }, { facingLocation: { x: 0.5 + (i - (line.length - 1) / 2) * 2, y: 1.6, z: 118 } }));
     const left = 0.5 - (line.length - 1), right = 0.5 + (line.length - 1);
     cam.to("@a", { x: left - 2, y: 2.2, z: 124 }, { x: left, y: 1.6, z: 128.5 }, 0.2);
-    titleAll("§e§l結果発表…", "", 160);
+    banner("result", "", 160);
     await wait(6);
     cmd("execute as @a at @s run playsound mpl.drumroll @s ~ ~ ~ 1 1");
     // ドラムロールの間(約8秒): 左から右へゆっくり流れながら少し引く
@@ -2271,7 +2283,7 @@ async function finale() {
     const w0 = world.getPlayers({ name: winners[0] })[0], wl = w0?.location ?? { x: 0.5, y: 1, z: 128.5 };
     cam.to("@a", { x: wl.x, y: wl.y + 1.7, z: wl.z - 2.6 }, { x: wl.x, y: wl.y + 1.6, z: wl.z }, 0.6, "out_back");
     await wait(12);
-    titleAll(`§6§l${I.crown} 優勝 ${winners.join(" & ")} ${I.crown}`, "§fおめでとう！", 120);
+    banner("champion", `${I.crown} ${winners.join(" & ")} ${I.crown}`, 120);
     soundAllPlayers("random.totem", 1);
     for (let i = 0; i < 16; i++) {
         for (const n of winners) { const w = world.getPlayers({ name: n })[0]; if (!w) continue; const l = w.location; cmd(`particle minecraft:totem_particle ${l.x} ${l.y + 1} ${l.z}`); if (i % 3 === 0) spawnAt("minecraft:fireworks_rocket", { x: l.x + rand(-4, 4), y: l.y + 1, z: l.z + rand(-4, 4) }); }
@@ -2290,11 +2302,11 @@ async function minigameTour(ids) {
     try {
         for (let i = 0; i < ids.length && G.on; i++) {
             const id = ids[i];
-            if (ids.length > 1) { titleAll(`§d§l${i + 1} / ${ids.length}`, `§f${MINIGAMES[id]}`, 40); await wait(45); }
+            if (ids.length > 1) { ribbon("purple", `${i + 1} / ${ids.length}`, MINIGAMES[id], 40); await wait(45); }
             bgm("minigame");
             const w = await playMinigame(id, world.getPlayers());
             bgm(null);
-            titleAll(w.length ? "§a§l勝ち" : "§7勝った人なし", `§f${w.map((p) => p.name).join(", ")}`, 40);
+            if (w.length) banner("win", w.map((p) => p.name).join(", "), 45); else ribbon("gray", "勝った人はいなかった", "", 40);
             for (const p of world.getPlayers()) p.teleport(LOBBY);
             await wait(50);
         }
@@ -2304,11 +2316,11 @@ async function minigameTour(ids) {
 // ===== メニュー(MPL のメニューのアイテム: mpl:menu)=====
 world.afterEvents.itemUse.subscribe((ev) => { if (ev.itemStack?.typeId === "mpl:menu") menu(ev.source); });
 async function menu(p) {
-    if (!isAdmin(p)) { p.sendMessage("§cメニューは管理者だけ使えます"); return; }
+    if (!isAdmin(p)) { bar(p, "§cメニューは管理者だけ使えます"); return; }
     const items = G.on
         ? [["§c§lすごろくを終わる", stopParty], ["§cミニゲームをスキップ", skipNow], ["BOT", (q) => q.runCommand("scriptevent mmgbot:ui")]]
         : [["§e§lすごろくを始める", startUI], ["ミニゲームを1つ選んで遊ぶ", pickUI], ["ミニゲームを全部順番に遊ぶ", tourUI], ["ミニゲームの ON/OFF", mgUI], ["BOT", (q) => q.runCommand("scriptevent mmgbot:ui")], ["BGM の ON/OFF", bgmUI], ["ボードを建て直す", () => buildBoard()]];
-    const f = new ActionFormData().title(`§l${I.star} MEGAMI PARTY LAND`).body(G.on ? `§7ターン ${G.turn} / ${G.turns}` : "§7何をする？");
+    const f = new ActionFormData().title(`${FORM_MARK}${I.star} MEGAMI PARTY LAND`).body(G.on ? `§7ターン ${G.turn} / ${G.turns}` : "§7何をする？");
     items.forEach(([t]) => f.button(t));
     const r = await f.show(p); if (r.canceled) return;
     items[r.selection][1](p);
@@ -2324,7 +2336,7 @@ async function startUI(p) {
 }
 async function pickUI(p) {
     const ids = MG_IDS;
-    const f = new ActionFormData().title("ミニゲームを選ぶ").body("遊ぶミニゲームを選んでね");
+    const f = new ActionFormData().title(`${FORM_MARK}ミニゲームを選ぶ`).body("遊ぶミニゲームを選んでね");
     ids.forEach((id) => f.button(`§l${MINIGAMES[id]}\n§r§7${MG_HOWTO[id] ?? ""}`));
     const r = await f.show(p); if (r.canceled) return;
     minigameTour([ids[r.selection]]);
@@ -2340,22 +2352,22 @@ async function mgUI(p) {
     MG_IDS.forEach((id) => f.toggle(MINIGAMES[id], { defaultValue: !off.includes(id) }));
     const r = await f.show(p); if (r.canceled) return;
     const next = MG_IDS.filter((_, i) => !r.formValues[i]);
-    if (next.length === MG_IDS.length) { p.sendMessage("§c1つ以上ONにしてください"); return; }
-    save("mg_off", next); p.sendMessage(`§aON ${MG_IDS.length - next.length} / OFF ${next.length}`);
+    if (next.length === MG_IDS.length) { bar(p, "§c1つ以上ONにしてください"); return; }
+    save("mg_off", next); bar(p, `§aON ${MG_IDS.length - next.length} / OFF ${next.length}`);
 }
-async function bgmUI(p) { const off = !load("bgm_off", true); save("bgm_off", off); p.sendMessage(off ? "§7BGM を OFF にしました" : "§aBGM を ON にしました"); if (off) bgm(null); }
+async function bgmUI(p) { const off = !load("bgm_off", true); save("bgm_off", off); bar(p, off ? "§7BGM を OFF にしました" : "§aBGM を ON にしました"); if (off) bgm(null); }
 async function skipNow(p) {
-    if (!run.active) { p.sendMessage("§c今はミニゲーム中ではありません"); return; }
+    if (!run.active) { bar(p, "§c今はミニゲーム中ではありません"); return; }
     const r = await new MessageFormData().title("ミニゲームをスキップ").body(`「${MINIGAMES[run.id]}」をスキップしますか？\n§7だれにもコインは入りません`).button1("やめる").button2("§cスキップする").show(p);
     if (r.selection !== 1 || !run.active) return;
-    world.sendMessage(`§e${p.name} が「${MINIGAMES[run.id]}」をスキップしました`);
+    toast(`§e${p.name} が「${MINIGAMES[run.id]}」をスキップしました`);
     run.active = false;
 }
 async function stopParty(p) {
     const r = await new MessageFormData().title("すごろくを終わる").body("今のすごろくを途中で終わりますか？\n§7結果は残りません").button1("やめる").button2("§c終わる").show(p);
     if (r.selection !== 1) return;
     G.on = false; run.active = false;
-    world.sendMessage(`§e${p.name} がすごろくを終わりました`);
+    toast(`§e${p.name} がすごろくを終わりました`);
 }
 
 // ===== ワールドの準備・入ってきた人 =====
@@ -2364,7 +2376,7 @@ system.runTimeout(() => {
     for (const c of ["gamerule dodaylightcycle false", "time set 6000", "gamerule doweathercycle false", "weather clear", "gamerule domobspawning false", "gamerule pvp false",
         "gamerule falldamage false", "gamerule keepinventory true", "gamerule doimmediaterespawn true", "gamerule sendcommandfeedback false", "gamerule commandblockoutput false",
         "gamerule showcoordinates false", `setworldspawn ${LOBBY.x | 0} ${LOBBY.y} ${LOBBY.z | 0}`, "tickingarea add -24 -5 -49 25 40 0 mpl_field1 true", "tickingarea add -24 -5 1 25 40 50 mpl_field2 true"]) cmd(c);
-    if ((load("board_built", 0)) < 6) buildBoard();
+    if ((load("board_built", 0)) < 7) buildBoard();
 }, 60);
 world.afterEvents.playerSpawn.subscribe((ev) => {
     const p = ev.player;
@@ -2373,7 +2385,7 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
     if (isAdmin(p) && !p.getComponent("minecraft:inventory")?.container?.getItem(8)) p.getComponent("minecraft:inventory")?.container?.setItem(8, new ItemStack("mpl:menu"));
     if (ev.initialSpawn) {
         if (!G.on) p.teleport(LOBBY, lookCenter);
-        p.onScreenDisplay.setTitle(`§e§l${I.star} MEGAMI PARTY LAND ${I.star}`, { subtitle: "§fようこそ！", fadeInDuration: 10, stayDuration: 60, fadeOutDuration: 20 });
+        banner("title", "ようこそ！", 70, [p]);
     }
 });
 // ワニの口の中に入らない(入ったら前へ押し出す)
