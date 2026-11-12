@@ -65,6 +65,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         case "mmgplus:start": startGame(); break;
         case "mmgplus:games_ui": if (p) gamesUI(p); break;
         case "mmgplus:board_ui": if (p) boardUI(p); break;
+        case "mmgplus:round_end": system.runTimeout(showRoundResult, 5); break; // nextgame.mcfunction から(毎ラウンドの終わりに1回)
     }
 });
 
@@ -1997,13 +1998,6 @@ system.runInterval(() => {
         seenPts[name] = v; allPts[name] = v;
     }
 }, 5);
-// ラウンド結果: 次のゲームの準備に入った時に、今の順位と上がり下がりを出す
-let wasNext = 0;
-system.runInterval(() => {
-    const nx = score("game", "game_next_ready") ?? 0;
-    if (nx === 1 && wasNext !== 1 && score("game", "playing") === 1) showRoundResult();
-    wasNext = nx;
-}, 5);
 // 専用の画面(RP の ui/server_form.json、tools/rank_ui.py で作る)。タイトルに RANK_MARK を入れたフォームがこの見た目になる
 // ボタン2つで1行: 左「順位 名前」(アイコン = 行の背景: 順位の色・上がった/下がった・自分)、右「点数 +このラウンドの点」
 const RANK_MARK = "§r§m§r§n§r";
@@ -2022,7 +2016,7 @@ function showRoundResult() {
             const tier = ["gold", "silver", "bronze"][rank] ?? "normal";
             const kind = before === undefined || before === rank ? "same" : before > rank ? "up" : "down";
             const gain = v - (prevPtsRound[n] ?? 0);
-            f.button(`§l${rank + 1}§r  ${n === p.name ? "§e" : "§f"}${n}${before !== undefined && before !== rank ? ` §7(${before + 1}→${rank + 1})` : ""}`, `textures/ui/mmgplus_rank/${tier}_${kind}${n === p.name ? "_me" : ""}`);
+            f.button(`§l${rank + 1}§r  ${n === p.name ? "§e" : "§f"}${n}`, `textures/ui/mmgplus_rank/${tier}_${kind}${n === p.name ? "_me" : ""}`);
             f.button(`§f${v}pt${gain > 0 ? ` §a+${gain}` : ""}`);
         });
         f.show(p).catch(() => {});

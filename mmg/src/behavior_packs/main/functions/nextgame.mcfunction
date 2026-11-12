@@ -1,3 +1,5 @@
+# ラウンド結果の画面(mmg_plus)
+scriptevent mmgplus:round_end
 scoreboard players add round game 1
 
 execute if score round-auto setting matches 1 if score round game = m2 game run setblock -2 -14 20 redstone_block

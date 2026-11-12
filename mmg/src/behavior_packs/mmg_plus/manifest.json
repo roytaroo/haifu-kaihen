@@ -4,7 +4,7 @@
         "name": "MMG Plus",
         "description": "追加ミニゲーム・ON/OFF設定・ランキング掲示板",
         "uuid": "b06f1bb8-5f2c-46d2-b1df-807e2417ee90",
-        "version": [1, 0, 11],
+        "version": [1, 0, 12],
         "min_engine_version": [1, 21, 20]
     },
     "modules": [
@@ -12,7 +12,7 @@
         { "type": "script", "language": "javascript", "uuid": "a4d1f0f6-3c1e-4f0a-9a57-1b7c2f5e8d21", "version": [1, 0, 0], "entry": "scripts/main.js" }
     ],
     "dependencies": [
-        { "uuid": "627ebf8f-14a5-4355-9f42-7c71d249e04c", "version": [1, 0, 8] },
+        { "uuid": "627ebf8f-14a5-4355-9f42-7c71d249e04c", "version": [1, 0, 9] },
         { "module_name": "@minecraft/server", "version": "2.0.0" },
         { "module_name": "@minecraft/server-ui", "version": "2.1.0" }
     ]

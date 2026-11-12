@@ -11,7 +11,7 @@ RP = os.path.join(ROOT, 'mmg', 'src', 'resource_packs', 'mmg_plus_r')
 UI = os.path.join(RP, 'ui'); TEX = os.path.join(RP, 'textures', 'ui', 'mmgplus_rank')
 os.makedirs(UI, exist_ok=True); os.makedirs(TEX, exist_ok=True)
 MARK = '§r§m§r§n§r'  # scripts/main.js の RANK_MARK と同じ
-ROWS, W, RH = 12, 300, 20
+ROWS, W, RH = 12, 230, 18
 
 # ===== 行の背景の絵: 順位の色(金・銀・銅・ふつう)× 上がった/下がった/そのまま × 自分かどうか =====
 TIER = {'gold': (232, 180, 40), 'silver': (180, 190, 205), 'bronze': (196, 120, 70), 'normal': (70, 80, 110)}
@@ -26,8 +26,8 @@ for tier, col in TIER.items():
             im = Image.new('RGBA', (W * k, RH * k)); d = ImageDraw.Draw(im)
             d.rounded_rectangle((0, 0, W * k - 1, RH * k - 1), 5 * k, fill=(24, 28, 44, 235) if not me else (44, 52, 90, 245),
                                 outline=(255, 255, 255, 255) if me else None, width=k if me else 0)
-            d.rounded_rectangle((0, 0, 30 * k, RH * k - 1), 5 * k, fill=col + (255,))  # 左の順位の帯
-            d.rectangle((24 * k, 0, 30 * k, RH * k - 1), fill=col + (255,))
+            d.rounded_rectangle((0, 0, 16 * k, RH * k - 1), 5 * k, fill=col + (255,))  # 左の順位の帯
+            d.rectangle((10 * k, 0, 16 * k, RH * k - 1), fill=col + (255,))
             im = im.resize((W * 2, RH * 2), Image.LANCZOS)
             arrow(ImageDraw.Draw(im), kind, W * 2 - 34, 10)
             im.save(os.path.join(TEX, f'{tier}_{kind}{"_me" if me else ""}.png'))
@@ -45,10 +45,10 @@ for i in range(ROWS):
     left = {'type': 'panel', 'size': [W, RH], 'collection_index': i * 2, 'bindings': [coll('#form_button_text'), {'binding_type': 'view', 'source_property_name': "(not (#form_button_text = ''))", 'target_property_name': '#visible'}],
             'controls': [
                 {'bg': {'type': 'image', 'size': ['100%', '100%'], 'layer': 1, 'bindings': [coll('#form_button_texture', '#texture'), coll('#form_button_texture_file_system', '#texture_file_system')]}},
-                {'t': {'type': 'label', 'text': '#form_button_text', 'layer': 2, 'anchor_from': 'left_middle', 'anchor_to': 'left_middle', 'offset': [7, 1], 'size': [200, 'default'], 'shadow': True, 'localize': False, 'font_type': 'MinecraftTen', 'bindings': [coll('#form_button_text')]}}]}
-    right = {'type': 'label', 'text': '#form_button_text', 'layer': 3, 'collection_index': i * 2 + 1, 'anchor_from': 'right_middle', 'anchor_to': 'right_middle', 'offset': [-26, 1],
-             'size': [90, 'default'], 'text_alignment': 'right', 'shadow': True, 'localize': False, 'font_type': 'MinecraftTen', 'bindings': [coll('#form_button_text')]}
-    rows.append({f'row{i}': {'type': 'panel', 'size': [W, RH + 3], 'anims': [f'@server_form.mmg_row_o{i}'],
+                {'t': {'type': 'label', 'text': '#form_button_text', 'layer': 2, 'anchor_from': 'left_middle', 'anchor_to': 'left_middle', 'offset': [5, 1], 'size': [W - 70, 'default'], 'shadow': True, 'localize': False, 'font_type': 'MinecraftTen', 'bindings': [coll('#form_button_text')]}}]}
+    right = {'type': 'label', 'text': '#form_button_text', 'layer': 3, 'collection_index': i * 2 + 1, 'anchor_from': 'right_middle', 'anchor_to': 'right_middle', 'offset': [-22, 1],
+             'size': [70, 'default'], 'text_alignment': 'right', 'shadow': True, 'localize': False, 'font_type': 'MinecraftTen', 'bindings': [coll('#form_button_text')]}
+    rows.append({f'row{i}': {'type': 'panel', 'size': [W, RH + 3], 'collection_name': 'form_buttons', 'anims': [f'@server_form.mmg_row_o{i}'],
                              'controls': [{'l': left}, {'r': right}]}})
 ui['mmg_row_o'] = {'anim_type': 'offset', 'from': [-400, 0], 'to': [0, 0], 'duration': 0.35, 'easing': 'out_back'}
 ui['mmg_rank_form'] = {
@@ -56,11 +56,11 @@ ui['mmg_rank_form'] = {
     'bindings': [{'binding_name': '#title_text'}, {'binding_type': 'view', 'source_property_name': f"(not ((#title_text - '{MARK}') = #title_text))", 'target_property_name': '#visible'}],
     'controls': [
         {'shade': {'type': 'image', 'texture': 'textures/ui/mmgplus_rank/shade', 'size': ['100%', '100%'], 'layer': 0}},
-        {'card': {'type': 'image', 'texture': 'textures/ui/mmgplus_rank/card', 'size': [W + 24, 'children'], 'layer': 1, 'controls': [{'stack': {
-            'type': 'stack_panel', 'orientation': 'vertical', 'size': [W, 'children'], 'offset': [0, 0],
+        {'card': {'type': 'image', 'texture': 'textures/ui/mmgplus_rank/card', 'size': [W + 24, 'children'], 'layer': 1, 'collection_name': 'form_buttons', 'controls': [{'stack': {
+            'type': 'stack_panel', 'orientation': 'vertical', 'size': [W, 'children'], 'offset': [0, 0], 'collection_name': 'form_buttons',
             'controls': [
                 {'pad0': {'type': 'panel', 'size': ['100%', 10]}},
-                {'head': {'type': 'label', 'text': '#title_text', 'size': ['100%', 'default'], 'text_alignment': 'center', 'font_type': 'MinecraftTen', 'font_scale_factor': 1.6, 'color': [1, 0.85, 0.3], 'shadow': True, 'localize': False,
+                {'head': {'type': 'label', 'text': '#title_text', 'size': ['100%', 'default'], 'text_alignment': 'center', 'font_type': 'MinecraftTen', 'font_scale_factor': 1.3, 'color': [1, 0.85, 0.3], 'shadow': True, 'localize': False,
                           'bindings': [{'binding_name': '#title_text'}]}},
                 {'sub': {'type': 'label', 'text': '#form_text', 'size': ['100%', 'default'], 'text_alignment': 'center', 'font_type': 'MinecraftTen', 'color': [0.8, 0.85, 1], 'localize': False,
                          'bindings': [{'binding_name': '#form_text'}]}},
