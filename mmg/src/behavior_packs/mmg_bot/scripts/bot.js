@@ -6,7 +6,7 @@ import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { spawnSimulatedPlayer } from "@minecraft/server-gametest";
 
 const TAG = "mmgbot";
-const NAMES = ["Bot_Aki", "Bot_Ren", "Bot_Mio", "Bot_Sora", "Bot_Yuu", "Bot_Haru", "Bot_Nagi", "Bot_Kai", "Bot_Rin", "Bot_Tomo", "Bot_Sei", "Bot_Hina"];
+const NAMES = ["Aki", "Ren", "Mio", "Sora", "Yuu", "Haru", "Nagi", "Kai", "Rin", "Tomo", "Sei", "Hina"];
 const LOBBY = { x: 48, y: 13, z: 1 };
 const STRENGTH = ["よわい", "ふつう", "つよい"];
 const dim = () => world.getDimension("overworld");
@@ -147,7 +147,7 @@ system.runInterval(() => {
         if (p.getGameMode() === (GameMode.Spectator ?? GameMode.spectator)) continue;
         if (!p.hasTag("playing")) { let b = brain.get(name); if (!b || b.sg !== -1) { b = { sg: -1 }; brain.set(name, b); } try { lobbyRoam(p, b); } catch {} continue; }
         let b = brain.get(name);
-        if (!b || b.sg !== sg) { b = { sg }; brain.set(name, b); } // ゲームが変わったら考え直す
+        if (!b || b.sg !== sg) { b = { sg }; brain.set(name, b); try { p.stopSwimming(); p.stopMoving(); } catch {} } // ゲームが変わったら考え直す(泳ぐポーズも直す)
         try { think(p, b, sg, players); } catch (e) { /* 動けない場面は無視 */ }
     }
 }, 4);
@@ -166,6 +166,12 @@ function think(p, b, sg, players) {
         if (t) return chase(p, t);
     }
     if (ATTACK.has(sg)) { const t = nearest(p, others); if (t) return chase(p, t); }
+    if (sg === 19) {
+        // 色塗りバトル: 近くの相手チームに雪玉を投げながら歩き回る
+        const t = nearest(p, others);
+        if (t && t.d < 14 && system.currentTick % [24, 16, 10][strength()] === 0) { p.lookAtEntity(t.e); try { p.useItem(new ItemStack("minecraft:snowball", 1)); } catch {} }
+        return roam(p, b, 8);
+    }
     if (sg === 1) {
         // Escape Lava: ダイヤブロックに乗ると上の階へ
         const dia = findBlock(p, ["minecraft:diamond_block"], 6, [-1]);

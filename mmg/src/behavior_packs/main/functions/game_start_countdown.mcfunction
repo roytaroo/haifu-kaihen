@@ -1,9 +1,6 @@
 scoreboard players add start_countdown game -1
 
-titleraw @a title {"rawtext":[{"text":". . . ."},{"score":{"name":"start_countdown","objective":"game"}},{"text":". . . ."}]}
 
-execute if score start_countdown game > constant0 constant as @a at @s run playsound note.pling @s ~~~ 1 0.8 1
-execute if score start_countdown game = constant0 constant as @a at @s run playsound note.pling @s ~~~ 1 1.05 1
 
 
 execute if score start_countdown game matches 3 run structure load screen-countdown-3 -85 31 -31 180_degrees

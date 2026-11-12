@@ -1,0 +1,28 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:laser_beam",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/mmgplus_laser_beam"
+   },
+   "geometry": {
+    "default": "geometry.mmgplus.laser_beam"
+   },
+   "render_controllers": [
+    "controller.render.default"
+   ],
+   "animations": {
+    "a": "animation.mmgplus.laser_beam"
+   },
+   "scripts": {
+    "animate": [
+     "a"
+    ]
+   }
+  }
+ }
+}

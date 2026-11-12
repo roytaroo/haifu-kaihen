@@ -15,7 +15,7 @@ def C(origin, size, color, faces=None, bone='root', inflate=0, rot=None, pivot=N
     return dict(origin=origin, size=size, color=color, faces=faces or {}, bone=bone, inflate=inflate, rot=rot, pivot=pivot, decal=decal or {}, flat=flat)
 
 # 名前: (説明, 箱, 骨(名前→pivot), アニメ, BPの追加, 当たり判定 [w,h], 座る位置, プロパティ)
-RIDE = lambda y: {"minecraft:rideable": {"seat_count": 1, "family_types": ["player"], "interact_text": "乗る", "pull_in_entities": False, "seats": {"position": [0, y, 0]}}}
+RIDE = lambda y: {"minecraft:health": {"value": 1, "max": 1}, "minecraft:rideable": {"seat_count": 1, "family_types": ["player"], "interact_text": "乗る", "pull_in_entities": False, "seats": {"position": [0, y, 0]}}}
 MODELS = {}
 def model(name, desc, cubes, bones=None, anim=None, extra=None, box=(0.6, 0.6), gravity=False, props=None, scale=1.0, pose=None):
     # pose: プレビューの絵だけで骨を回す(例: ワニの口を開けた絵)
@@ -54,8 +54,7 @@ def eyes(x, y, z, gap=4, size=3):
 
 # 風船: まんまるの本体・光・結び目・くねった糸(大きさは mmgplus:size)
 model('balloon', '風船(ふくらむ風船・風船割り合戦)', [
-    *rounded(0, 16, 0, 6.5, 7.5, 6.5, RED, step=1.5),
-    C([-4, 19, -5.6], [2, 3, 0.4], (255, 190, 195), flat=True), C([-4.5, 22.2, -4.8], [1.2, 1.2, 0.4], SHINE, flat=True),
+    *rounded(0, 16, 0, 6.5, 7.5, 6.5, RED, step=0.75),
     C([-1.5, 7.5, -1.5], [3, 1.2, 3], (190, 35, 45)), C([-1, 6.5, -1], [2, 1, 2], (190, 35, 45)),
     C([-0.3, 3.5, -0.3], [0.6, 3, 0.6], WHITE, flat=True, rot=[0, 0, 12], pivot=[0, 6.5, 0]),
     C([-0.3, 0.5, -0.3], [0.6, 3, 0.6], WHITE, flat=True, rot=[0, 0, -10], pivot=[0, 3.5, 0])],
@@ -193,6 +192,10 @@ model('tail', 'しっぽ(しっぽ取り・叩いてうばう)', [
 model('laser', 'レーザーの発射台(レーザー回避)', [*disc(0, 0, 0, 5, 2, (70, 72, 82)), *disc(0, 2, 0, 4, 1, (240, 200, 40), faces={'stripes': (30, 30, 30)}),
     C([-2.5, 3, -2.5], [5, 4, 5], (90, 92, 104)), C([-1.5, 4, -3.2], [3, 2, 0.8], (255, 50, 50), flat=True), C([-0.8, 4.6, -3.4], [1, 1, 0.3], (255, 200, 200), flat=True),
     C([-3, 7, -3], [6, 1, 6], (60, 62, 72))])
+model('laser_beam', 'レーザー(レーザー回避・端から端まで)', [
+    *[C([-152 + i * 16, -1, -1], [16, 2, 2], (255, 40, 40), flat=True) for i in range(19)],
+    *[C([-152 + i * 16, -0.4, -0.4], [16, 0.8, 0.8], (255, 230, 230), flat=True, inflate=0.05) for i in range(19)]],
+    anim={'root': {'scale': [1, "1 + math.sin(q.life_time * 1600) * 0.25", "1 + math.sin(q.life_time * 1600) * 0.25"]}}, box=(0.2, 0.2))
 # イス: 木のイス(脚4本・すじ入りの背もたれ・赤いクッション)
 WOOD, WOOD2 = (170, 115, 65), (130, 85, 45)
 model('chair', 'イス(椅子取りゲーム・座れる)', [
