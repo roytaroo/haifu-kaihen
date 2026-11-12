@@ -54,6 +54,28 @@
      "is3D": false
     }
    ]
+  },
+  "mpl.star_get": {
+   "category": "record",
+   "sounds": [
+    {
+     "name": "sounds/mpl/star_get",
+     "stream": true,
+     "volume": 1.0,
+     "is3D": false
+    }
+   ]
+  },
+  "mpl.drumroll": {
+   "category": "record",
+   "sounds": [
+    {
+     "name": "sounds/mpl/drumroll",
+     "stream": true,
+     "volume": 1.0,
+     "is3D": false
+    }
+   ]
   }
  }
 }

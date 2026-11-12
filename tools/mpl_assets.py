@@ -41,3 +41,37 @@ json.dump({'format_version': '1.20.50', 'minecraft:item': {'description': {'iden
            'components': {'minecraft:max_stack_size': 1, 'minecraft:icon': {'texture': 'mpl_menu'}, 'minecraft:display_name': {'value': '§eMPLのメニュー\n§7右クリック/タップ'}, 'minecraft:hand_equipped': True}}},
           open(os.path.join(models.BP, 'items', 'menu.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 print('ok')
+
+# ===== 屋台の商品(カウンターの上に浮かぶアイテム)=====
+from PIL import Image as _I, ImageDraw as _D
+def icon(name, draw):
+    im = _I.new('RGBA', (32, 32)); draw(_D.Draw(im)); im.save(os.path.join(models.RP, 'textures', 'entity', f'mpl_item_{name}.png'))
+def die(d, x, y, s, n):
+    d.rounded_rectangle((x, y, x + s, y + s), 3, fill=(250, 250, 250), outline=(40, 40, 50), width=1)
+    for (a, b) in {1: [(.5, .5)], 2: [(.28, .28), (.72, .72)], 3: [(.25, .25), (.5, .5), (.75, .75)]}[n]: d.ellipse((x + s * a - 2, y + s * b - 2, x + s * a + 2, y + s * b + 2), fill=(30, 30, 40))
+icon('double', lambda d: (die(d, 2, 8, 15, 2), die(d, 14, 12, 15, 3)))
+icon('triple', lambda d: (die(d, 1, 14, 12, 1), die(d, 10, 4, 12, 2), die(d, 19, 15, 12, 3)))
+def pipe(d, col, dark):
+    d.rectangle((8, 12, 24, 31), fill=col, outline=dark); d.rectangle((5, 6, 27, 13), fill=col, outline=dark); d.rectangle((9, 7, 12, 30), fill=tuple(min(255, c + 50) for c in col))
+icon('pipe', lambda d: pipe(d, (60, 180, 70), (20, 80, 30)))
+icon('gold', lambda d: pipe(d, (245, 200, 40), (150, 100, 0)))
+def glove(d):
+    d.rounded_rectangle((7, 10, 25, 30), 5, fill=(240, 240, 240), outline=(80, 80, 90)); d.rectangle((7, 4, 11, 14), fill=(240, 240, 240), outline=(80, 80, 90))
+    for x in (12, 16, 20): d.rectangle((x, 3, x + 4, 12), fill=(240, 240, 240), outline=(80, 80, 90))
+    d.ellipse((13, 17, 21, 25), fill=(255, 205, 40), outline=(160, 110, 0))
+icon('glove', glove)
+plane = lambda: [{'origin': [-6, 0, 0], 'size': [12, 12, 0], 'uv': {'north': {'uv': [0, 0], 'uv_size': [32, 32]}, 'south': {'uv': [32, 0], 'uv_size': [-32, 32]}}},
+                 {'origin': [0, 0, -6], 'size': [0, 12, 12], 'uv': {'east': {'uv': [0, 0], 'uv_size': [32, 32]}, 'west': {'uv': [32, 0], 'uv_size': [-32, 32]}}}]
+json.dump({'format_version': '1.12.0', 'minecraft:geometry': [{'description': {'identifier': 'geometry.mpl.icon', 'texture_width': 32, 'texture_height': 32}, 'bones': [{'name': 'root', 'pivot': [0, 0, 0], 'cubes': plane()}]}]},
+          open(os.path.join(models.RP, 'models', 'entity', 'mpl_icon.geo.json'), 'w'), indent=1)
+json.dump({'format_version': '1.8.0', 'animations': {'animation.mpl.icon': {'loop': True, 'bones': {'root': {'rotation': [0, 'q.life_time * 90', 0], 'position': [0, 'math.sin(q.life_time * 150) * 0.8', 0]}}}}},
+          open(os.path.join(models.RP, 'animations', 'mpl_icon.animation.json'), 'w'), indent=1)
+for k in ['double', 'triple', 'pipe', 'gold', 'glove']:
+    json.dump({'format_version': '1.10.0', 'minecraft:client_entity': {'description': {'identifier': f'mpl:item_{k}', 'materials': {'default': 'entity_alphatest'}, 'textures': {'default': f'textures/entity/mpl_item_{k}'},
+              'geometry': {'default': 'geometry.mpl.icon'}, 'render_controllers': ['controller.render.default'], 'animations': {'a': 'animation.mpl.icon'}, 'scripts': {'animate': ['a']}}}},
+              open(os.path.join(models.RP, 'entity', f'mpl_item_{k}.entity.json'), 'w'), indent=1)
+    json.dump({'format_version': '1.21.20', 'minecraft:entity': {'description': {'identifier': f'mpl:item_{k}', 'is_spawnable': False, 'is_summonable': True},
+              'components': {'minecraft:collision_box': {'width': 0.3, 'height': 0.3}, 'minecraft:physics': {'has_gravity': False, 'has_collision': False},
+                             'minecraft:damage_sensor': {'triggers': [{'cause': 'all', 'deals_damage': 'no'}]}, 'minecraft:pushable': {'is_pushable': False, 'is_pushable_by_piston': False}}}},
+              open(os.path.join(models.BP, 'entities', f'mpl_item_{k}.json'), 'w'), indent=1)
+print('shop items ok')
