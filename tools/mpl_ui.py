@@ -5,8 +5,7 @@
 #   4) アクションバーとサイドバーの背景を差しかえ
 #   使い方: MPL_RP=... RANK_SCALE=8 python3 tools/rank_ui.py の「あと」に python3 tools/mpl_ui.py
 #   スクリプト側は main.js の BANNER(キー一覧)/ banner() / ribbon() / FORM_MARK と合わせる
-import json, os, math, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import json, os, math
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,45 +43,65 @@ def dil(m, r):
         k = min(r, 6); m = m.filter(ImageFilter.MaxFilter(2 * k + 1)); r -= k
     return m
 
-from mpl_pixfont import glyph
-def logo(text, theme, W=1024, H=256, jp=False, tilt=False):
-    """太字のドット文字のロゴ。小さく描いて、ドットのまま(ぼかさず)大きくする"""
-    gs = [glyph(c) for c in text]
-    tw = sum(len(g[0]) for g in gs) + 2 * (len(gs) - 1)
-    P = 5  # まわりの余白(ふち・厚み)
-    w, h = tw + P * 2, 7 + P * 2 + 2
-    mask = Image.new('L', (w, h)); fill = Image.new('RGB', (w, h))
-    x = P; px = mask.load(); fp = fill.load()
-    for i, g in enumerate(gs):
+def logo(text, theme, W=1280, H=320, jp=True, tilt=True):
+    """文字をロゴにする。返り値は (RGBA 画像, 文字の塗りマスク)"""
+    S = 1  # 大きめに描いて縮める
+    W2, H2 = W * S, H * S
+    font = ImageFont.truetype(JP if jp else EN, 230 * S)
+    chars = list(text)
+    # 文字ごとの大きさ
+    imgs = []
+    for i, ch in enumerate(chars):
+        bb = font.getbbox(ch)
+        cw, chh = max(1, bb[2] - bb[0]), max(1, bb[3] - bb[1])
+        m = Image.new('L', (cw + 40 * S, chh + 40 * S)); ImageDraw.Draw(m).text((20 * S - bb[0], 20 * S - bb[1]), ch, font=font, fill=255)
+        if not ch.strip(): m = Image.new('L', (110 * S, 40 * S))
+        if jp: m = dil(m, 5 * S)  # ゴシックを太く
+        if tilt and ch.strip(): m = m.rotate((-5 if i % 2 else 5), resample=Image.BICUBIC, expand=True)
+        imgs.append(m)
+    gap = -34 * S
+    tw = sum(m.width for m in imgs) + gap * (len(imgs) - 1)
+    th = max(m.height for m in imgs)
+    canvas_w, canvas_h = tw + 120 * S, th + 120 * S
+    full = Image.new('L', (canvas_w, canvas_h)); fill = Image.new('RGB', (canvas_w, canvas_h))
+    x = 60 * S
+    for i, m in enumerate(imgs):
+        bob = (-10 * S if i % 2 else 6 * S) if tilt else 0
+        y = 60 * S + (th - m.height) // 2 + bob
+        full.paste(255, (x, y), m)
         t = theme if isinstance(theme, str) else theme[i % len(theme)]
         top, bot, _ = TH[t]
-        for yy, row in enumerate(g):
-            for xx, on in enumerate(row):
-                if not on: continue
-                X, Y = x + xx, P + yy
-                k = (0, 0, 0.35, 0.35, 0.7, 1, 1)[yy]  # 3段のグラデ
-                col = tuple(int(top[c] + (bot[c] - top[c]) * k) for c in range(3))
-                if yy == 0: col = tuple(min(255, int(c * 0.4 + 255 * 0.6)) for c in col)  # 一番上の列だけ光らせる
-                px[X, Y] = 255; fp[X, Y] = col
-        x += len(g[0]) + 2
+        fill.paste(grad(m.width, m.height, top, bot), (x, y), m)
+        x += m.width + gap
     inner = TH[theme if isinstance(theme, str) else 'gold'][2]
     if not isinstance(theme, str): inner = (40, 20, 70)
-    sq = lambda m: m.filter(ImageFilter.MaxFilter(3))
-    o3 = sq(mask); o2 = sq(o3); o1 = sq(o2)
-    out = Image.new('RGBA', (w, h))
-    dk = tuple(int(c * 0.5) for c in inner)
-    out.paste((12, 8, 28, 255), (0, 3), o1)           # 厚み
-    out.paste((12, 8, 28, 255), (0, 2), o1)
-    out.paste((12, 8, 28, 255), (0, 1), o1)
-    out.paste((22, 14, 44, 255), (0, 0), o1)          # 外の黒いふち
-    out.paste((255, 255, 255, 255), (0, 0), o2)       # 白いふち
-    out.paste(inner + (255,), (0, 0), o3)             # 内側のふち
-    out.paste(fill, (0, 0), mask)
-    out = out.crop(out.getbbox())
-    k = max(1, min((W - 8) // out.width, (H - 8) // out.height))
-    big = out.resize((out.width * k, out.height * k), Image.NEAREST)
-    a = Image.new('RGBA', (W, H)); a.paste(big, ((W - big.width) // 2, (H - big.height) // 2))
-    m = Image.new('L', (W, H)); return a, m
+    o3 = dil(full, 5 * S); o2 = dil(full, 15 * S); o1 = dil(full, 22 * S)
+    out = Image.new('RGBA', (canvas_w, canvas_h))
+    sh = o1.filter(ImageFilter.GaussianBlur(6 * S)).point(lambda v: v * 0.55)
+    out.paste((0, 0, 0, 255), (0, 16 * S), sh)
+    # 厚み(下に押し出した立体)
+    dk = tuple(max(0, int(c * 0.45)) for c in inner)
+    for k in range(12 * S, 0, -1):
+        out.paste(dk + (255,), (0, k), o1)
+    out.paste((25, 15, 50, 255), (0, 0), o1)
+    out.paste((255, 255, 255, 255), (0, 0), o2)
+    out.paste(inner + (255,), (0, 0), o3)
+    out.paste(fill, (0, 0), full)
+    # 上半分のつや
+    hl = Image.new('L', (canvas_w, canvas_h))
+    d = ImageDraw.Draw(hl)
+    for y in range(canvas_h):
+        a = max(0, 1 - abs(y - canvas_h * 0.36) / (canvas_h * 0.12))
+        d.line([(0, y), (canvas_w, y)], fill=int(90 * a))
+    out.paste((255, 255, 255, 255), (0, 0), ImageChops.multiply(hl, full.filter(ImageFilter.MinFilter(9))))
+    # 収める
+    bb = out.getbbox(); out = out.crop(bb); full = full.crop(bb)
+    k = min((W2 - 20 * S) / out.width, (H2 - 10 * S) / out.height)
+    nw, nh = int(out.width * k), int(out.height * k)
+    out = out.resize((nw, nh), Image.LANCZOS); full = full.resize((nw, nh), Image.LANCZOS)
+    a = Image.new('RGBA', (W2, H2)); a.paste(out, ((W2 - nw) // 2, (H2 - nh) // 2))
+    f = Image.new('L', (W2, H2)); f.paste(full, ((W2 - nw) // 2, (H2 - nh) // 2))
+    return a.resize((W, H), Image.LANCZOS), f.resize((W, H), Image.LANCZOS)
 
 FR = 14  # 光が走るコマ数
 def shine_strip(img, mask):
