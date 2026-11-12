@@ -332,6 +332,19 @@ sf['mpl_form'] = {
                 {'buttons': {'type': 'stack_panel', 'orientation': 'vertical', 'size': ['100%', '100%c'], 'layer': 2,
                              'factory': {'name': 'buttons', 'control_ids': {'button': 'server_form.mpl_btn'}}, 'collection_name': 'form_buttons',
                              'bindings': [{'binding_name': '#form_button_contents', 'binding_name_override': '#collection_length'}]}}]}}]}}]}
+# ボタンが多い時(6個以上)は、決まった高さのカードの中でスクロールする
+_card = sf['mpl_form']['controls'][1]['card']
+_small = json.loads(json.dumps(_card)); _small['bindings'] = [{'binding_name': '#form_button_length'}, vis('(#form_button_length < 6)')]
+_big = json.loads(json.dumps(_card)); _big['size'] = [250, '88%']; _big['bindings'] = [{'binding_name': '#form_button_length'}, vis('(#form_button_length > 5)')]
+_st = _big['controls'][0]['st']; _st['size'] = [226, '100% - 16px']; _st['offset'] = [0, 2]
+_btns = _st['controls'].pop()['buttons']
+sf['mpl_form_scroll'] = {'type': 'stack_panel', 'orientation': 'vertical', 'size': ['100% - 6px', '100%c'], 'anchor_from': 'top_left', 'anchor_to': 'top_left',
+                         'controls': [{'buttons': _btns}]}
+_st['controls'].append({'scroll': {'type': 'panel', 'size': ['100%', 'fill'], 'layer': 2, 'controls': [{'sp@common.scrolling_panel': {
+    'anchor_to': 'top_left', 'anchor_from': 'top_left', '$show_background': False, 'size': ['100%', '100%'],
+    '$scrolling_content': 'server_form.mpl_form_scroll', '$scroll_size': [5, '100% - 4px'], '$scrolling_pane_size': ['100% - 4px', '100% - 2px'],
+    '$scrolling_pane_offset': [2, 0], '$scroll_bar_right_padding_size': [0, 0]}}]}})
+sf['mpl_form']['controls'][1:2] = [{'card': _small}, {'card_big': _big}]
 lf = sf['long_form']['controls']
 lf[0]['long_form@common_dialogs.main_panel_no_buttons']['bindings'][1] = vis(f"({hasnt(RANK_MARK, TT)} and {hasnt(FORM_MARK, TT)})")
 if not any('mpl_form@server_form.mpl_form' in c for c in lf): lf.append({'mpl_form@server_form.mpl_form': {}})
