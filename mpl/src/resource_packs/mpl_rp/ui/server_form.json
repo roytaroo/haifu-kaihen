@@ -242,7 +242,7 @@
             "default"
            ],
            "text_alignment": "center",
-           "font_type": "MinecraftTen",
+           "font_type": "unicode",
            "font_scale_factor": 1.0,
            "color": [
             1,
@@ -267,7 +267,7 @@
             "default"
            ],
            "text_alignment": "center",
-           "font_type": "MinecraftTen",
+           "font_type": "unicode",
            "color": [
             0.8,
             0.85,
@@ -364,7 +364,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -396,7 +396,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -483,7 +483,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -515,7 +515,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -602,7 +602,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -634,7 +634,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -721,7 +721,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -753,7 +753,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -840,7 +840,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -872,7 +872,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -959,7 +959,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -991,7 +991,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -1078,7 +1078,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -1110,7 +1110,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -1197,7 +1197,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -1229,7 +1229,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -1316,7 +1316,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -1348,7 +1348,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -1435,7 +1435,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -1467,7 +1467,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -1554,7 +1554,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -1586,7 +1586,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -1673,7 +1673,7 @@
                  ],
                  "shadow": true,
                  "localize": false,
-                 "font_type": "MinecraftTen",
+                 "font_type": "unicode",
                  "bindings": [
                   {
                    "binding_name": "#form_button_text",
@@ -1705,7 +1705,7 @@
               "text_alignment": "right",
               "shadow": true,
               "localize": false,
-              "font_type": "MinecraftTen",
+              "font_type": "unicode",
               "bindings": [
                {
                 "binding_name": "#form_button_text",
@@ -1860,10 +1860,7 @@
        "t": {
         "type": "label",
         "text": "#form_button_text",
-        "property_bag": {
-         "#font_type": "classic"
-        },
-        "font_type": "#font_type",
+        "font_type": "unicode",
         "layer": 4,
         "shadow": true,
         "localize": false,
@@ -1882,11 +1879,6 @@
           "binding_name": "#form_button_text",
           "binding_type": "collection",
           "binding_collection_name": "form_buttons"
-         },
-         {
-          "binding_type": "view",
-          "source_property_name": "#font_type",
-          "target_property_name": "#font_type"
          }
         ]
        }
@@ -1974,10 +1966,7 @@
              "t": {
               "type": "label",
               "text": "#title_text",
-              "property_bag": {
-               "#font_type": "classic"
-              },
-              "font_type": "#font_type",
+              "font_type": "unicode",
               "layer": 3,
               "shadow": true,
               "localize": false,
@@ -1990,11 +1979,6 @@
               "bindings": [
                {
                 "binding_name": "#title_text"
-               },
-               {
-                "binding_type": "view",
-                "source_property_name": "#font_type",
-                "target_property_name": "#font_type"
                }
               ]
              }
@@ -2015,10 +1999,7 @@
           "body": {
            "type": "label",
            "text": "#form_text",
-           "property_bag": {
-            "#font_type": "classic"
-           },
-           "font_type": "#font_type",
+           "font_type": "unicode",
            "size": [
             "100%",
             "default"
@@ -2035,11 +2016,6 @@
            "bindings": [
             {
              "binding_name": "#form_text"
-            },
-            {
-             "binding_type": "view",
-             "source_property_name": "#font_type",
-             "target_property_name": "#font_type"
             }
            ]
           }

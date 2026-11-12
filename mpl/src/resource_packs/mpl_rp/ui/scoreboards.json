@@ -1,54 +1,33 @@
 {
  "namespace": "scoreboard",
  "scoreboard_sidebar_score": {
-  "property_bag": {
-   "#font_type": "classic"
-  },
   "bindings": [
    {
     "binding_name": "#player_score_sidebar",
     "binding_type": "collection",
     "binding_collection_name": "scoreboard_scores"
-   },
-   {
-    "binding_type": "view",
-    "source_property_name": "#font_type",
-    "target_property_name": "#font_type"
    }
-  ]
+  ],
+  "font_type": "unicode"
  },
  "scoreboard_sidebar_player": {
-  "property_bag": {
-   "#font_type": "classic"
-  },
   "bindings": [
    {
     "binding_name": "#player_name_sidebar",
     "binding_type": "collection",
     "binding_collection_name": "scoreboard_players"
-   },
-   {
-    "binding_type": "view",
-    "source_property_name": "#font_type",
-    "target_property_name": "#font_type"
    }
-  ]
+  ],
+  "font_type": "unicode"
  },
  "scoreboard_sidebar/main/displayed_objective": {
-  "property_bag": {
-   "#font_type": "classic"
-  },
   "bindings": [
    {
     "binding_name": "#objective_sidebar_name",
     "binding_type": "global"
-   },
-   {
-    "binding_type": "view",
-    "source_property_name": "#font_type",
-    "target_property_name": "#font_type"
    }
-  ]
+  ],
+  "font_type": "unicode"
  },
  "scoreboard_sidebar/main": {
   "texture": "textures/ui/mpl/side",

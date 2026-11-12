@@ -1,21 +1,10 @@
 {
  "namespace": "hud",
  "hud_actionbar_text/actionbar_message": {
-  "property_bag": {
-   "#font_type": "classic"
-  },
-  "bindings": [
-   {
-    "binding_type": "view",
-    "source_property_name": "#font_type",
-    "target_property_name": "#font_type"
-   }
-  ]
+  "bindings": [],
+  "font_type": "unicode"
  },
  "hud_title_text/title_frame/title": {
-  "property_bag": {
-   "#font_type": "classic"
-  },
   "bindings": [
    {
     "binding_name": "#hud_title_text_string",
@@ -24,30 +13,18 @@
    },
    {
     "binding_type": "view",
-    "source_property_name": "#font_type",
-    "target_property_name": "#font_type"
-   },
-   {
-    "binding_type": "view",
     "source_property_name": "((#text - '§r§b§r§n§r') = #text)",
     "target_property_name": "#visible"
    }
-  ]
+  ],
+  "font_type": "unicode"
  },
  "hud_title_text/subtitle_frame/subtitle": {
-  "property_bag": {
-   "#font_type": "classic"
-  },
   "bindings": [
    {
     "binding_name": "#hud_subtitle_text_string",
     "binding_type": "global",
     "binding_name_override": "#text"
-   },
-   {
-    "binding_type": "view",
-    "source_property_name": "#font_type",
-    "target_property_name": "#font_type"
    },
    {
     "binding_name": "#hud_title_text_string",
@@ -58,12 +35,10 @@
     "source_property_name": "((#hud_title_text_string - '§r§b§r§n§r') = #hud_title_text_string)",
     "target_property_name": "#visible"
    }
-  ]
+  ],
+  "font_type": "unicode"
  },
  "chat_label": {
-  "property_bag": {
-   "#font_type": "classic"
-  },
   "bindings": [
    {
     "binding_name": "#chat_text",
@@ -71,64 +46,38 @@
     "binding_type": "collection",
     "binding_collection_name": "chat_text_grid",
     "binding_condition": "once"
-   },
-   {
-    "binding_type": "view",
-    "source_property_name": "#font_type",
-    "target_property_name": "#font_type"
    }
   ],
-  "font_type": "#font_type",
+  "font_type": "unicode",
   "font_scale_factor": 1.0
  },
  "item_name_text_root/item_text_aligner/item_text_control/item_text_label": {
-  "property_bag": {
-   "#font_type": "classic"
-  },
   "bindings": [
    {
     "binding_name": "$text_binding",
     "binding_name_override": "#text"
-   },
-   {
-    "binding_type": "view",
-    "source_property_name": "#font_type",
-    "target_property_name": "#font_type"
    }
-  ]
+  ],
+  "font_type": "unicode"
  },
  "hud_tip_text/item_text_label": {
-  "property_bag": {
-   "#font_type": "classic"
-  },
   "bindings": [
    {
     "binding_name": "#tip_text",
     "binding_name_override": "#text"
-   },
-   {
-    "binding_type": "view",
-    "source_property_name": "#font_type",
-    "target_property_name": "#font_type"
    }
-  ]
+  ],
+  "font_type": "unicode"
  },
  "boss_name_panel/boss_name": {
-  "property_bag": {
-   "#font_type": "classic"
-  },
   "bindings": [
    {
     "binding_name": "#bossName",
     "binding_type": "collection",
     "binding_collection_name": "boss_bars"
-   },
-   {
-    "binding_type": "view",
-    "source_property_name": "#font_type",
-    "target_property_name": "#font_type"
    }
-  ]
+  ],
+  "font_type": "unicode"
  },
  "mpl_pop1": {
   "anim_type": "size",
@@ -291,7 +240,8 @@
        "binding_name": "#hud_subtitle_text_string",
        "binding_type": "global"
       }
-     ]
+     ],
+     "font_type": "unicode"
     }
    }
   ],
@@ -4102,7 +4052,8 @@
                    "binding_name": "#hud_title_text_string",
                    "binding_type": "global"
                   }
-                 ]
+                 ],
+                 "font_type": "unicode"
                 }
                }
               ]
@@ -4215,7 +4166,8 @@
                    "binding_name": "#hud_title_text_string",
                    "binding_type": "global"
                   }
-                 ]
+                 ],
+                 "font_type": "unicode"
                 }
                }
               ]
@@ -4328,7 +4280,8 @@
                    "binding_name": "#hud_title_text_string",
                    "binding_type": "global"
                   }
-                 ]
+                 ],
+                 "font_type": "unicode"
                 }
                }
               ]
@@ -4441,7 +4394,8 @@
                    "binding_name": "#hud_title_text_string",
                    "binding_type": "global"
                   }
-                 ]
+                 ],
+                 "font_type": "unicode"
                 }
                }
               ]
@@ -4554,7 +4508,8 @@
                    "binding_name": "#hud_title_text_string",
                    "binding_type": "global"
                   }
-                 ]
+                 ],
+                 "font_type": "unicode"
                 }
                }
               ]
@@ -4667,7 +4622,8 @@
                    "binding_name": "#hud_title_text_string",
                    "binding_type": "global"
                   }
-                 ]
+                 ],
+                 "font_type": "unicode"
                 }
                }
               ]
@@ -4782,7 +4738,8 @@
                    "binding_name": "#hud_title_text_string",
                    "binding_type": "global"
                   }
-                 ]
+                 ],
+                 "font_type": "unicode"
                 }
                }
               ]
@@ -4820,7 +4777,8 @@
                 "binding_name": "#hud_subtitle_text_string",
                 "binding_type": "global"
                }
-              ]
+              ],
+              "font_type": "unicode"
              }
             }
            ]

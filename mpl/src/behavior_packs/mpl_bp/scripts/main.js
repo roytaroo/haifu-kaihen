@@ -3,8 +3,31 @@
 // ミニゲームの共通の約束(下の「ミニゲーム」の部分はこれを使う):
 //   スコアボード game に selectgame(今のミニゲームの番号)・playing(1 = 遊んでいる)・level(むずかしさ 1〜5)
 //   参加している人はタグ playing。脱落はタグ mmgplus_out。BOT はタグ mmgbot(BOT パックがつける)
-import { world, system, GameMode, ItemStack, ItemLockMode } from "@minecraft/server";
+import { world, system, GameMode, ItemStack, ItemLockMode, ScreenDisplay, World, Player } from "@minecraft/server";
 import { ActionFormData, ModalFormData, MessageFormData, uiManager } from "@minecraft/server-ui";
+
+// ===== 文字を全部太字に(タイトル・お知らせ・チャット・フォーム)=====
+// 頭の見えない印(§のつづき)はそのまま残して、そのあとを太字にする。色を変えても太字が切れないように §x のあとにも §l
+const boldText = (t) => {
+    if (typeof t !== "string") return t;
+    const m = t.match(/^(?:§.)*/)[0];
+    return m + "§l" + t.slice(m.length).replace(/§([0-9a-fr])/g, "§$1§l");
+};
+const wrapBold = (proto, names, argIdx = [0]) => {
+    for (const n of names) {
+        const f = proto?.[n]; if (typeof f !== "function") continue;
+        proto[n] = function (...a) { for (const i of argIdx) if (i < a.length) a[i] = typeof a[i] === "object" && a[i] && "subtitle" in a[i] ? { ...a[i], subtitle: boldText(a[i].subtitle) } : boldText(a[i]); return f.apply(this, a); };
+    }
+};
+try {
+    wrapBold(ScreenDisplay.prototype, ["setActionBar", "updateSubtitle"]);
+    wrapBold(ScreenDisplay.prototype, ["setTitle"], [0, 1]);
+    wrapBold(World.prototype, ["sendMessage"]); wrapBold(Player.prototype, ["sendMessage"]);
+    wrapBold(ActionFormData.prototype, ["title", "body", "button"]);
+    wrapBold(MessageFormData.prototype, ["title", "body", "button1", "button2"]);
+    wrapBold(ModalFormData.prototype, ["title", "toggle", "slider", "dropdown", "textField"]);
+} catch {}
+
 
 const SPECTATOR = GameMode.Spectator ?? GameMode.spectator;
 const ADVENTURE = GameMode.Adventure ?? GameMode.adventure;
@@ -1886,7 +1909,7 @@ function hud() {
     try { world.scoreboard.removeObjective("mpl_hud"); } catch {}
     const o = world.scoreboard.addObjective("mpl_hud", `§e§l${I.crown} TURN ${Math.max(1, G.turn)}/${G.turns}`);
     const rows = rankRows();
-    rows.forEach(([n, st, co]) => o.setScore(`${G.now === n ? "§e▶" : " "}${BADGE(rankOfName(n))} §f${n.slice(0, 10)}  §e${I.star}${st} §6${I.coin}${co}`, st * 1000 + co));
+    rows.forEach(([n, st, co]) => o.setScore(boldText(`${G.now === n ? "§e▶" : " "}${BADGE(rankOfName(n))} §f${n.slice(0, 10)}  §e${I.star}${st} §6${I.coin}${co}`), st * 1000 + co));
     cmd("scoreboard objectives setdisplay sidebar mpl_hud descending");
 }
 let starEntity;

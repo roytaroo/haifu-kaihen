@@ -1,8 +1,12 @@
 // MMG Bot: ダミーのプレイヤー(SimulatedPlayer)を BOT として出し入れし、ゲームごとにざっくり動かす
 // BOT は本物のプレイヤー扱いなので、元のゲームの @a[tag=playing] などにそのまま入る。目印のタグは "mmgbot"
 // mmg_plus からの指示: scriptevent mmgbot:jump <名前>(縄跳び)
-import { world, system, GameMode, ItemStack } from "@minecraft/server";
+import { world, system, GameMode, ItemStack, Player } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
+// 文字を全部太字に(main.js と同じ)
+const boldText = (t) => { if (typeof t !== "string") return t; const m = t.match(/^(?:§.)*/)[0]; return m + "§l" + t.slice(m.length).replace(/§([0-9a-fr])/g, "§$1§l"); };
+for (const [proto, names] of [[ModalFormData.prototype, ["title", "slider", "dropdown", "toggle"]], [ActionFormData.prototype, ["title", "body", "button"]], [Player.prototype, ["sendMessage"]]])
+    for (const n of names) { const f = proto?.[n]; if (typeof f === "function") proto[n] = function (...a) { a[0] = boldText(a[0]); return f.apply(this, a); }; }
 import { spawnSimulatedPlayer } from "@minecraft/server-gametest";
 
 const TAG = "mmgbot";
@@ -103,11 +107,19 @@ function nearest(p, list) {
 function roam(p, b, radius = 7, inArena = true) {
     const l = p.location;
     lively(p);
-    if (b.goal && Math.hypot(b.goal.x - l.x, b.goal.z - l.z) > 1.2 && system.currentTick < b.next) return;
+    const v = p.getVelocity(), stuck = Math.hypot(v.x, v.z) < 0.01 && system.currentTick > (b.since ?? 0) + 8;
+    if (b.goal && !stuck && Math.hypot(b.goal.x - l.x, b.goal.z - l.z) > 1.2 && system.currentTick < b.next) return;
+    b.since = system.currentTick;
     const goal = { x: l.x + rand(-radius, radius), y: l.y, z: l.z + rand(-radius, radius) };
     if (inArena && !IN_ARENA(goal)) { goal.x = rand(-6, 6); goal.z = rand(-6, 6); }
     b.goal = goal; b.next = system.currentTick + Math.floor(rand(20, 45));
-    try { p.navigateToLocation(goal, speed()); } catch { p.moveToLocation(goal, { speed: speed() }); }
+    p.moveToLocation(goal, { speed: speed(), faceTarget: true });
+}
+// 道さがしで歩く。道が見つからない時は まっすぐ歩く
+function walk(p, goal) {
+    let ok = false;
+    try { const r = p.navigateToLocation(goal, speed()); ok = !!r?.isFullPath; } catch {}
+    if (!ok) p.moveToLocation(goal, { speed: speed(), faceTarget: true });
 }
 function lively(p) {
     try { const v = p.getVelocity(); p.isSprinting = Math.hypot(v.x, v.z) > 0.05; } catch {}
@@ -122,7 +134,7 @@ function lobbyRoam(p, b) {
     const base = far ? LOBBY : l;
     const goal = { x: base.x + rand(-6, 6), y: l.y, z: base.z + rand(-6, 6) };
     b.goal = goal; b.next = system.currentTick + Math.floor(rand(25, 60));
-    try { p.navigateToLocation(goal, speed()); } catch { p.moveToLocation(goal, { speed: speed() }); }
+    walk(p, goal);
 }
 function chase(p, target, hit = true) {
     lively(p);

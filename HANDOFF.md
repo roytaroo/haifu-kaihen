@@ -116,3 +116,10 @@
 - keepMenu(p): 管理者のスロット9(一番右)に mpl:menu を「スロットに固定(ItemLockMode.slot)+ 死んでも残る(keepOnDeath)」で置く
 - 0.5秒ごとに確認して、消された(ミニゲームの clear など)・ちがう物がある時は戻す。スロット9にあった物はほかの場所へよける。ほかの場所のメニューは消す
 - 未確認
+
+## MPL v14(フォント統一・太字 / BOT が動かない)
+- フォント: MPL の UI の全ラベルを font_type "unicode"(英語設定と同じマイクラのドット文字。漢字・かなもドット)に。mpl_ui.py の最後の unify() で hud・フォーム・サイドバー・チャットをまとめて変える(前の "#font_type: classic" はやめた)
+- 太字: main.js / bot.js で setTitle・setActionBar・updateSubtitle・sendMessage・フォームの文字を包んで §l をつける(boldText)。先頭の見えない印はそのまま残す。色コードのあとにも §l。サイドバーの行も太字
+  - ふつうのフォーム(ModalForm の設定など)は文字だけ太字。フォントは標準のまま(未対応)
+- BOT: navigateToLocation は道が見つからないと何もしない → 会場の中は moveToLocation でまっすぐ歩く。ロビーは道さがし → だめならまっすぐ。止まったままなら行き先を変える(ファイアバーで同じ場所でジャンプし続けていた)
+- 未確認

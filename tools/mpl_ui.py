@@ -338,3 +338,26 @@ if not any('mpl_form@server_form.mpl_form' in c for c in lf): lf.append({'mpl_fo
 json.dump(sf, open(os.path.join(UI, 'server_form.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 open(os.path.join(ROOT, 'mpl', 'banner_keys.txt'), 'w').write('\n'.join(KEYS))
 print('ui ok', len(KEYS))
+
+# ===== 文字を全部「英語設定と同じマイクラのドット文字」(unicode)にそろえる =====
+# 日本語設定だと丸いフォントになるので、ラベルに font_type: unicode を直接つける(漢字・かなもドット文字になる)
+FONT = 'unicode'
+def unify(o):
+    if isinstance(o, dict):
+        pb = o.get('property_bag')
+        if isinstance(pb, dict) and '#font_type' in pb:
+            pb.pop('#font_type')
+            if not pb: o.pop('property_bag')
+            o['font_type'] = FONT
+        if 'bindings' in o and isinstance(o['bindings'], list):
+            o['bindings'] = [b for b in o['bindings'] if not (isinstance(b, dict) and b.get('target_property_name') == '#font_type')]
+        if o.get('type') == 'label' or 'font_type' in o: o['font_type'] = FONT
+        for v in o.values(): unify(v)
+    elif isinstance(o, list):
+        for v in o: unify(v)
+for fn in ('hud_screen.json', 'server_form.json', 'scoreboards.json', 'chat_screen.json'):
+    f = os.path.join(UI, fn)
+    if not os.path.exists(f): continue
+    d = json.load(open(f, encoding='utf-8')); unify(d)
+    json.dump(d, open(f, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+print('font ok')
