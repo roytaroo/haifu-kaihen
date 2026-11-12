@@ -20,7 +20,7 @@
   - `game.js`: ランダムTP・投票UI・game4/10/12/17/22/24 の補助。`ranking` を 1 にするとチャットに point の順位を出す。
   - 設定: スコア `setting`(round, round-auto, testmode 等)、レベル `level game`(1〜5)。
 - ゲーム一覧(selectgame): 1 Escape Lava / 2 熱帯魚相撲 / 3 High and Low / 4 TNT RUN / 5 Adventure PVP / 6 TNT TAG / 7 Drop PVP / 8 降下デスマッチ / 9 逆らえ！ / 10 金床避け / 11 読みぶろぱ / 12 TNT避け / 13 アスレチック / 14 どうぶつリレー / 15 Block Party / 16 鉱石バトル / 17 崩れる床で生き延びろ / 18 穴落とし / 19 色塗りバトル / 20 クラフトマスター / 21 Warden Escape / 22 マグマノックバック / 23 村人数え / 24 モンスターバトル
-- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v10。
+- ビルド: `python3 tools/build_mmg.py v<番号>` → `dist/MMG-v<番号>.mcworld`(dist は git に入れない。毎回番号を上げる)。最新 v11。
 - 改変(v1、ゲーム内は未確認):
   - 追加パック `mmg_plus`(BP、scripts/main.js)+ `mmg_plus_r`(RP、掲示板の見えないエンティティ)。
   - 抽選をスクリプトへ: `select_game` → `scriptevent mmgplus:select`(OFFを除いて抽選、同じゲームの連続なし)→ `select_game_body`(元の残り+25〜27の説明)。
@@ -46,6 +46,8 @@
 - v8(未確認): モデル16個すべてを作り込み版に(tools/models.py の rounded/disc/eyes で丸み・目・模様)。イスも models.py に移した(props.geo.json から外した)。
 - v9(未確認): ワニの歯を巨大ワニに(scale 4、長さ約14マス、当たり判定は胴の真ん中だけ)。叩く歯8本(scale 2)を開いた口の下あごに並べる(TOOTH_SPOTS)。かまれると画面がゆれる。
 - v10: v7〜v9 でオペレーターアイテムのフォームが見えなくなった件の修正(未確認)。server_form.json の long_form を modifications で足すのをやめて、BOWFLIT と同じく long_form をまるごと定義。推測で書いたボタン/タイトルのフォント上書き(ui_template_buttons/dialogs)を削除。結果画面の alpha アニメを削除(offset だけ)。
+- v11(未確認): BOT がロビーでも歩き回る・走る/跳ぶ(lively, lobbyRoam)。初めから OFF: 1,2,4,5,6,7,14,15,18,20,22(DEFAULT_OFF、保存済みの設定にも offv=2 で一度だけ足す)。全ゲーム順番モード(ON/OFF 画面の一番上のトグル → seq を保存して main_start、round を本数に。DEFAULT_OFF は入れない)。頭脳系(計算・色の記憶・一番多い色・配置の記憶・ピクセル・旗あげ・ピッタリ止め)と早押し反射の BOT を弱く。
+  - 確認リスト: https://claude.ai/artifact/8GN43ZJKurVTvMCWRsUPw3(db "checks")
 - 次の候補: 記録系を既存ゲーム(アスレのタイム等)にも広げる。
 
 ## だいきが選んだもの(100ゲーム計画 https://claude.ai/artifact/UCiagkMnba3rgPeyUqeSmV の db "picks")

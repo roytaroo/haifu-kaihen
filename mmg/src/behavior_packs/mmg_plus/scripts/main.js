@@ -20,6 +20,14 @@ const FIRST_PLUS = 25;
 // だいきの指示で消したゲーム(抽選・ON/OFF・ランキングに出さない)
 const REMOVED = [3, 8, 10, 11, 12, 13, 16, 17]; // 13 は「アスレチック(5コース)」(58)に置きかえ
 const ACTIVE = GAMES.map((_, i) => i + 1).filter((id) => !REMOVED.includes(id));
+// だいきの指示で、初めは OFF(ON/OFF で ON にはできる)。全ゲーム順番モードには入れない
+const DEFAULT_OFF = [1, 2, 4, 5, 6, 7, 14, 15, 18, 20, 22];
+const SEQ_IDS = ACTIVE.filter((id) => !DEFAULT_OFF.includes(id));
+function offList() {
+    // 前に保存した設定にも、初めから OFF のゲームを一度だけ足す
+    if ((load("offv", 0)) < 2) { save("off", [...new Set([...load("off", []), ...DEFAULT_OFF])]); save("offv", 2); }
+    return load("off", []);
+}
 const SPECTATOR = GameMode.Spectator ?? GameMode.spectator;
 const ADVENTURE = GameMode.Adventure ?? GameMode.adventure;
 const dim = () => world.getDimension("overworld");
@@ -61,7 +69,16 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
 });
 
 function selectGame() {
-    const off = load("off", []);
+    // 全ゲーム順番モード: 決まった順に1回ずつ
+    const seq = load("seq", null);
+    if (seq && seq.i < seq.ids.length) {
+        const id = seq.ids[seq.i++]; save("seq", seq);
+        world.sendMessage(`§e[全ゲーム順番モード] ${seq.i} / ${seq.ids.length}: ${GAMES[id - 1]}`);
+        setScore("game", "selectgame", id);
+        cmd("function select_game_body");
+        return;
+    }
+    const off = offList();
     let ids = ACTIVE.filter((id) => !off.includes(id));
     if (ids.length === 0) ids = ACTIVE;
     // 同じゲームが2回続かないように(選べるのが1つの時は別)
@@ -72,13 +89,22 @@ function selectGame() {
 }
 
 async function gamesUI(player) {
-    const off = load("off", []);
+    const off = offList();
     const form = new ModalFormData().title("ミニゲームのON/OFF");
+    form.toggle(`§e全ゲーム順番モードで試合を始める§r\n§7(バグ確認用: ${SEQ_IDS.length}ゲームを1回ずつ順番に。下のON/OFFは関係なし)`, { defaultValue: false });
     ACTIVE.forEach((id) => form.toggle(`${id}. ${GAMES[id - 1]}${id >= FIRST_PLUS ? " §e(追加)" : ""}`, { defaultValue: !off.includes(id) }));
     const res = await form.show(player);
     if (res.canceled) return;
+    const [seqOn, ...vals] = res.formValues;
+    if (seqOn) {
+        save("seq", { ids: SEQ_IDS, i: 0 });
+        setScore("setting", "round", SEQ_IDS.length); setScore("setting", "round-auto", 0);
+        player.sendMessage(`§e全ゲーム順番モードで始めます(${SEQ_IDS.length}ゲーム)`);
+        cmd("function main_start");
+        return;
+    }
     const next = [];
-    res.formValues.forEach((on, i) => { if (!on) next.push(ACTIVE[i]); });
+    vals.forEach((on, i) => { if (!on) next.push(ACTIVE[i]); });
     if (next.length === ACTIVE.length) { player.sendMessage("§c全部OFFにはできません。1つ以上ONにしてください"); return; }
     save("off", next);
     player.sendMessage(`§aミニゲームの設定を保存しました(ON ${ACTIVE.length - next.length} / OFF ${next.length})`);
@@ -255,8 +281,8 @@ async function gameQuiz() {
         };
         for (const p of players) {
             if (isBot(p)) {
-                const delay = rand(...[[100, 260], [70, 180], [40, 110]][botStr()]);
-                const ok = chance(0.5, 0.7, 0.88);
+                const delay = rand(...[[140, 290], [110, 260], [80, 220]][botStr()]);
+                const ok = chance(0.3, 0.45, 0.6);
                 system.runTimeout(() => answer(p, ok ? Q.ans : Q.choices.find((c) => c !== Q.ans)), delay);
                 continue;
             }
@@ -347,8 +373,8 @@ async function gameSimon() {
                 if (!s || s.idx >= seq.length) continue;
                 left++;
                 if (isBot(p)) {
-                    if (t % [16, 12, 8][botStr()] !== 0) continue;
-                    const miss = [0.08, 0.04, 0.015][botStr()] + seq.length * [0.012, 0.006, 0.003][botStr()];
+                    if (t % [22, 18, 14][botStr()] !== 0) continue;
+                    const miss = [0.15, 0.1, 0.06][botStr()] + seq.length * [0.03, 0.02, 0.012][botStr()];
                     const i = Math.random() < miss ? (seq[s.idx] + rand(1, 4)) % 5 : seq[s.idx];
                     p.teleport({ x: PADS[i].cx + 0.5, y: 1, z: PADS[i].cz + 0.5 });
                     if (i === seq[s.idx]) { s.idx++; if (s.idx >= seq.length) left--; }
@@ -711,7 +737,7 @@ async function gameStop() {
     const players = playing();
     title("§a§lスタート！", "§f頭の中で数えよう", 20); soundAll("random.levelup", 1.4);
     const t0 = Date.now();
-    for (const p of players.filter(isBot)) res.set(p.name, Math.max(0.5, target + (Math.random() * 2 - 1) * [1.6, 0.9, 0.35][botStr()]));
+    for (const p of players.filter(isBot)) res.set(p.name, Math.max(0.5, target + (Math.random() * 2 - 1) * [2.2, 1.5, 0.9][botStr()]));
     const forms = Promise.all(players.filter((p) => !isBot(p)).map((p) =>
         new ActionFormData().title("ピッタリ止め").body(`§a§lもうスタートしています！§r\n\n§l${target}.00秒§r ぴったりで押そう`).button("§l§cストップ！").show(p)
             .then((r) => { if (!r.canceled && !aborted()) res.set(p.name, (Date.now() - t0) / 1000); }).catch(() => {})));
@@ -820,7 +846,7 @@ async function gameColors() {
         const answered = new Map();
         const players = playing();
         for (const p of players) {
-            if (isBot(p)) { answered.set(p.name, chance(0.5, 0.7, 0.85) ? ans : rand(0, n - 1)); continue; }
+            if (isBot(p)) { answered.set(p.name, chance(0.3, 0.45, 0.6) ? ans : rand(0, n - 1)); continue; }
             const f = new ActionFormData().title(`一番多い色は？ Q${q}`).body("一番多かった色は？");
             cols.forEach((c) => f.button(`§l${c[1]}`));
             f.show(p).then((r) => { if (!r.canceled) answered.set(p.name, r.selection); }).catch(() => {});
@@ -856,7 +882,8 @@ async function gameReflex() {
         soundAll("note.pling", 2);
         const t0 = system.currentTick, times = new Map();
         // BOT の反応時間(tick)
-        const botT = new Map(players.filter(isBot).map((p) => [p.name, rand(...[[7, 14], [5, 10], [4, 7]][botStr()])]));
+        const botT = new Map(players.filter(isBot).map((p) => [p.name, rand(...[[12, 22], [9, 17], [7, 13]][botStr()])]));
+        for (const p of players.filter(isBot)) if (Math.random() < 0.12) foul.add(p.name); // BOT もたまにフライング
         for (let t = 0; t < 60 && !aborted(); t++) {
             for (const p of players) {
                 if (foul.has(p.name) || times.has(p.name)) continue;
@@ -1085,7 +1112,7 @@ async function gameMemory() {
             for (const g of grids) {
                 if (!g.p.isValid) continue;
                 const m = marks.get(g.p.name);
-                if (isBot(g.p)) { if (t === 100) for (const k of lit) if (chance(0.6, 0.8, 0.92)) m.add(k); continue; }
+                if (isBot(g.p)) { if (t === 100) { for (const k of lit) if (chance(0.45, 0.6, 0.72)) m.add(k); if (Math.random() < 0.6) m.add(rand(0, 15)); } continue; }
                 const lx = Math.floor(g.p.location.x) - g.ox, lz = Math.floor(g.p.location.z) - g.oz;
                 const k = lx >= 0 && lx < 4 && lz >= 0 && lz < 4 && g.p.location.y < 1.3 ? lz * 4 + lx : -1;
                 if (k >= 0 && prev.get(g.p.name) !== k) {
@@ -1247,7 +1274,7 @@ async function gamePixel() {
     for (let t = 0; t < 1600 && !aborted(); t += 2) {
         for (const g of grids) {
             if (!g.p.isValid || g.done) continue;
-            if (isBot(g.p)) { if (t % [24, 16, 10][botStr()] === 0) { const k = g.cells.findIndex((c, i) => c !== target[i]); if (k >= 0) { g.cells[k] = target[k]; cmd(`setblock ${g.ox + (k % 4)} 0 ${g.oz + Math.floor(k / 4)} ${PIX[target[k]]}_concrete`); } } }
+            if (isBot(g.p)) { if (t % [44, 34, 26][botStr()] === 0) { const k = g.cells.findIndex((c, i) => c !== target[i]); if (k >= 0) { g.cells[k] = target[k]; cmd(`setblock ${g.ox + (k % 4)} 0 ${g.oz + Math.floor(k / 4)} ${PIX[target[k]]}_concrete`); } } }
             else {
                 const lx = Math.floor(g.p.location.x) - g.ox, lz = Math.floor(g.p.location.z) - g.oz;
                 const k = lx >= 0 && lx < 4 && lz >= 0 && lz < 4 && g.p.location.y < 1.3 ? lz * 4 + lx : -1;
@@ -1621,7 +1648,7 @@ async function gameFlags() {
         const want = FLAG_Q[(state[0] ? 0 : 2) + (state[1] ? 0 : 1)];
         for (const p of alive()) {
             const q = FLAG_Q[(p.location.z < 0.5 ? 0 : 2) + (p.location.x < 0.5 ? 0 : 1)];
-            if (isBot(p)) { if (chance(0.75, 0.88, 0.96)) p.teleport({ x: want[1] + 0.5, y: 1, z: want[2] + 0.5 }); else out(p, "§cまちがえた！"); continue; }
+            if (isBot(p)) { if (chance(0.6, 0.72, 0.82)) p.teleport({ x: want[1] + 0.5, y: 1, z: want[2] + 0.5 }); else out(p, "§cまちがえた！"); continue; }
             if (q !== want) out(p, `§cまちがえた！ 正しくは ${want[0]}`);
         }
         actionbar(`§f今の旗: §l${want[0]}`);
@@ -1950,6 +1977,7 @@ system.runInterval(() => {
 }, 10);
 
 function endMatch() {
+    if (load("seq", null)) { world.setDynamicProperty("seq", undefined); world.sendMessage("§e全ゲーム順番モードが終わりました"); }
     const rows = Object.entries(allPts), top = Math.max(0, ...rows.map(([, v]) => v));
     if (top > 0) celebrate(rows.filter(([, v]) => v === top).map(([n]) => n));
     allPts = {}; prevRank = {}; prevPtsRound = {};

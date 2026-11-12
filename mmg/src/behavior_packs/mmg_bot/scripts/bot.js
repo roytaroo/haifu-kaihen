@@ -23,7 +23,7 @@ function saveSetting(s) {
     try { world.scoreboard.getObjective("setting")?.setScore("bot_strength", s.strength ?? 1); } catch {}
 }
 const strength = () => setting().strength ?? 1; // 0 よわい / 1 ふつう / 2 つよい
-const speed = () => [0.7, 0.9, 1][strength()];
+const speed = () => [0.85, 1, 1.15][strength()];
 function score(objective, name) {
     try { return world.scoreboard.getObjective(objective)?.getScore(name); } catch { return undefined; }
 }
@@ -89,15 +89,33 @@ function nearest(p, list) {
     }
     return best ? { e: best, d: Math.sqrt(bd) } : undefined;
 }
-function roam(p, b, radius = 7) {
+// 歩き回る: 1〜2秒ごとに行き先を変えて、走ったり跳んだりする(止まって見えないように)
+function roam(p, b, radius = 7, inArena = true) {
     const l = p.location;
+    lively(p);
     if (b.goal && Math.hypot(b.goal.x - l.x, b.goal.z - l.z) > 1.2 && system.currentTick < b.next) return;
     const goal = { x: l.x + rand(-radius, radius), y: l.y, z: l.z + rand(-radius, radius) };
-    if (!IN_ARENA(goal)) { goal.x = rand(-6, 6); goal.z = rand(-6, 6); }
-    b.goal = goal; b.next = system.currentTick + 60;
-    p.moveToLocation(goal, { speed: speed() });
+    if (inArena && !IN_ARENA(goal)) { goal.x = rand(-6, 6); goal.z = rand(-6, 6); }
+    b.goal = goal; b.next = system.currentTick + Math.floor(rand(20, 45));
+    try { p.navigateToLocation(goal, speed()); } catch { p.moveToLocation(goal, { speed: speed() }); }
+}
+function lively(p) {
+    try { p.isSprinting = Math.random() < 0.6; } catch {}
+    if (Math.random() < 0.06) { try { p.jump(); } catch {} }
+}
+// ロビー: スタート地点のまわりを歩き回る(遠くへ行きすぎたら戻る)
+function lobbyRoam(p, b) {
+    const l = p.location;
+    lively(p);
+    if (b.goal && Math.hypot(b.goal.x - l.x, b.goal.z - l.z) > 1.2 && system.currentTick < b.next) return;
+    const far = Math.hypot(l.x - LOBBY.x, l.z - LOBBY.z) > 12;
+    const base = far ? LOBBY : l;
+    const goal = { x: base.x + rand(-6, 6), y: l.y, z: base.z + rand(-6, 6) };
+    b.goal = goal; b.next = system.currentTick + Math.floor(rand(25, 60));
+    try { p.navigateToLocation(goal, speed()); } catch { p.moveToLocation(goal, { speed: speed() }); }
 }
 function chase(p, target, hit = true) {
+    lively(p);
     p.lookAtEntity(target.e);
     p.moveToLocation(target.e.location, { speed: speed() });
     if (hit && target.d < 3 && Math.random() < [0.25, 0.45, 0.7][strength()]) p.attackEntity(target.e);
@@ -126,7 +144,8 @@ system.runInterval(() => {
     const players = world.getPlayers({ tags: ["playing"] });
     for (const [name, p] of bots) {
         if (!p.isValid) { bots.delete(name); continue; }
-        if (!p.hasTag("playing") || p.getGameMode() === (GameMode.Spectator ?? GameMode.spectator)) continue;
+        if (p.getGameMode() === (GameMode.Spectator ?? GameMode.spectator)) continue;
+        if (!p.hasTag("playing")) { let b = brain.get(name); if (!b || b.sg !== -1) { b = { sg: -1 }; brain.set(name, b); } try { lobbyRoam(p, b); } catch {} continue; }
         let b = brain.get(name);
         if (!b || b.sg !== sg) { b = { sg }; brain.set(name, b); } // ゲームが変わったら考え直す
         try { think(p, b, sg, players); } catch (e) { /* 動けない場面は無視 */ }
