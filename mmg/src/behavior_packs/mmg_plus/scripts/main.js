@@ -65,6 +65,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         case "mmgplus:start": startGame(); break;
         case "mmgplus:games_ui": if (p) gamesUI(p); break;
         case "mmgplus:board_ui": if (p) boardUI(p); break;
+        case "mmgplus:skip_ui": if (p) skipUI(p); break;
         case "mmgplus:round_end": system.runTimeout(showRoundResult, 5); break; // nextgame.mcfunction から(毎ラウンドの終わりに1回)
     }
 });
@@ -109,6 +110,31 @@ async function gamesUI(player) {
     if (next.length === ACTIVE.length) { player.sendMessage("§c全部OFFにはできません。1つ以上ONにしてください"); return; }
     save("off", next);
     player.sendMessage(`§aミニゲームの設定を保存しました(ON ${ACTIVE.length - next.length} / OFF ${next.length})`);
+}
+
+// ===== 今のゲームをスキップ(バグった時用。OPのメニュー → 確認 → スキップ) =====
+// ポイントは入れずに、ゲームの回路を止めて片付け、次のラウンドへ進む
+async function skipUI(player) {
+    if (score("game", "playing") !== 1) { player.sendMessage("§c今は試合中ではありません"); return; }
+    const sg = score("game", "selectgame") ?? 0;
+    const r = await new MessageFormData().title("ゲームをスキップ").body(`今のゲーム「${GAMES[sg - 1] ?? "?"}」をスキップして次へ進みますか？\n§7ポイントは入りません`).button1("やめる").button2("§cスキップする").show(player);
+    if (r.selection !== 1 || score("game", "playing") !== 1) return;
+    world.sendMessage(`§e${player.name} が「${GAMES[sg - 1] ?? "?"}」をスキップしました`);
+    run.active = false; // 追加ゲームのループを止める
+    cmd("inputpermission set @a movement enabled"); cmd("ride @a stop_riding");
+    // 元のゲームの回路を止める(main_finish2 と同じ)
+    cmd("fill -6 -14 6 -34 -12 -32 air replace redstone_block"); cmd("fill 9 -14 10 47 -8 62 air replace redstone_block");
+    // ポイントの行が動かないよう selectgame を 0 にしてから共通の後片付け
+    setScore("game", "selectgame", 0); setScore("game", "stopgame", 1);
+    cmd("function finish_game");
+    clearArena();
+    for (let y = 9; y <= 57; y += 8) { cmd(`fill -24 ${y} -49 25 ${y + 7} 0 air`); cmd(`fill -24 ${y} 1 25 ${y + 7} 50 air`); }
+    cmd("gamemode adventure @a[tag=playing]"); cmd("effect @a[tag=playing] clear"); cmd("clear @a[tag=playing]");
+    for (const t of ["died", "lose", "goal", "game_finish_a", "mmgplus_out"]) cmd(`tag @a remove ${t}`);
+    cmd("tp @a[tag=playing] 0 1 0");
+    await wait(40);
+    setScore("game", "game_ready", 0);
+    setScore("game", "game_next_ready", 1);
 }
 
 // ===== 追加ゲームの共通処理 =====

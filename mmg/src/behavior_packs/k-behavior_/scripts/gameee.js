@@ -222,7 +222,8 @@ function settingUI_main(player) {
         .button("ゲーム設定")
         .button("ミニゲームのON/OFF")
         .button("ランキング掲示板")
-        .button("BOT");
+        .button("BOT")
+        .button("§cこのゲームをスキップ");
 
     gui.show(player).then((result) => {
         if (result.canceled) return;
@@ -251,12 +252,13 @@ function settingUI_main(player) {
             case 3:
             case 4:
             case 5:
+            case 6:
                 // mmg_plus パックの画面を開く
                 if (!hasPermission(player, "admin_game-setting")) {
                     player.sendMessage("§cあなたはこれを編集する権限がありません！");
                     return;
                 }
-                player.runCommand(["scriptevent mmgplus:games_ui", "scriptevent mmgplus:board_ui", "scriptevent mmgbot:ui"][result.selection - 3]);
+                player.runCommand(["scriptevent mmgplus:games_ui", "scriptevent mmgplus:board_ui", "scriptevent mmgbot:ui", "scriptevent mmgplus:skip_ui"][result.selection - 3]);
                 break;
         }
     });

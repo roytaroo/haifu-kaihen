@@ -4,7 +4,7 @@
         "description": "琥珀が作ったゲームに共通して入っているものです",
         "name": "kohaku behavior pack",
         "uuid": "20d9aab3-dcd1-4f4a-a18a-cdddfd1a7df8",
-        "version": [0, 1, 3],
+        "version": [0, 1, 4],
         "min_engine_version": [ 1, 21, 20 ]
     },
     "modules": [
