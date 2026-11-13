@@ -154,15 +154,32 @@
   ]
  },
  "mpl_rays": {
-  "anim_type": "flip_book",
-  "initial_uv": [
-   0,
-   0
+  "anim_type": "size",
+  "easing": "in_out_sine",
+  "duration": 0.7,
+  "from": [
+   "88%",
+   "88%"
   ],
-  "frame_count": 8,
-  "frame_step": 256,
-  "fps": 12,
-  "looping": true
+  "to": [
+   "112%",
+   "112%"
+  ],
+  "next": "@hud.mpl_rays2"
+ },
+ "mpl_rays2": {
+  "anim_type": "size",
+  "easing": "in_out_sine",
+  "duration": 0.7,
+  "from": [
+   "112%",
+   "112%"
+  ],
+  "to": [
+   "88%",
+   "88%"
+  ],
+  "next": "@hud.mpl_rays"
  },
  "mpl_slide": {
   "anim_type": "offset",
@@ -284,30 +301,33 @@
      "controls": [
       {
        "rays": {
-        "type": "image",
-        "texture": "textures/ui/mpl/rays",
-        "uv_size": [
-         256,
-         256
-        ],
-        "uv": [
-         0,
-         0
-        ],
+        "type": "panel",
         "size": [
-         190,
-         190
+         200,
+         200
         ],
         "offset": [
          0,
-         -55
+         -60
         ],
-        "layer": 1,
-        "alpha": 0.85,
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
-        "anims": [
-         "@hud.mpl_rays"
+        "controls": [
+         {
+          "img": {
+           "type": "image",
+           "texture": "textures/ui/mpl/rays",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 1,
+           "alpha": 0.85,
+           "anims": [
+            "@hud.mpl_rays"
+           ]
+          }
+         }
         ]
        }
       },
@@ -515,30 +535,33 @@
      "controls": [
       {
        "rays": {
-        "type": "image",
-        "texture": "textures/ui/mpl/rays",
-        "uv_size": [
-         256,
-         256
-        ],
-        "uv": [
-         0,
-         0
-        ],
+        "type": "panel",
         "size": [
-         190,
-         190
+         200,
+         200
         ],
         "offset": [
          0,
-         -55
+         -60
         ],
-        "layer": 1,
-        "alpha": 0.85,
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
-        "anims": [
-         "@hud.mpl_rays"
+        "controls": [
+         {
+          "img": {
+           "type": "image",
+           "texture": "textures/ui/mpl/rays",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 1,
+           "alpha": 0.85,
+           "anims": [
+            "@hud.mpl_rays"
+           ]
+          }
+         }
         ]
        }
       },
@@ -746,30 +769,33 @@
      "controls": [
       {
        "rays": {
-        "type": "image",
-        "texture": "textures/ui/mpl/rays",
-        "uv_size": [
-         256,
-         256
-        ],
-        "uv": [
-         0,
-         0
-        ],
+        "type": "panel",
         "size": [
-         190,
-         190
+         200,
+         200
         ],
         "offset": [
          0,
-         -55
+         -60
         ],
-        "layer": 1,
-        "alpha": 0.85,
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
-        "anims": [
-         "@hud.mpl_rays"
+        "controls": [
+         {
+          "img": {
+           "type": "image",
+           "texture": "textures/ui/mpl/rays",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 1,
+           "alpha": 0.85,
+           "anims": [
+            "@hud.mpl_rays"
+           ]
+          }
+         }
         ]
        }
       },
@@ -876,30 +902,33 @@
      "controls": [
       {
        "rays": {
-        "type": "image",
-        "texture": "textures/ui/mpl/rays",
-        "uv_size": [
-         256,
-         256
-        ],
-        "uv": [
-         0,
-         0
-        ],
+        "type": "panel",
         "size": [
-         190,
-         190
+         200,
+         200
         ],
         "offset": [
          0,
-         -55
+         -60
         ],
-        "layer": 1,
-        "alpha": 0.85,
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
-        "anims": [
-         "@hud.mpl_rays"
+        "controls": [
+         {
+          "img": {
+           "type": "image",
+           "texture": "textures/ui/mpl/rays",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 1,
+           "alpha": 0.85,
+           "anims": [
+            "@hud.mpl_rays"
+           ]
+          }
+         }
         ]
        }
       },
@@ -1006,30 +1035,33 @@
      "controls": [
       {
        "rays": {
-        "type": "image",
-        "texture": "textures/ui/mpl/rays",
-        "uv_size": [
-         256,
-         256
-        ],
-        "uv": [
-         0,
-         0
-        ],
+        "type": "panel",
         "size": [
-         190,
-         190
+         200,
+         200
         ],
         "offset": [
          0,
-         -55
+         -60
         ],
-        "layer": 1,
-        "alpha": 0.85,
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
-        "anims": [
-         "@hud.mpl_rays"
+        "controls": [
+         {
+          "img": {
+           "type": "image",
+           "texture": "textures/ui/mpl/rays",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 1,
+           "alpha": 0.85,
+           "anims": [
+            "@hud.mpl_rays"
+           ]
+          }
+         }
         ]
        }
       },
@@ -1136,30 +1168,33 @@
      "controls": [
       {
        "rays": {
-        "type": "image",
-        "texture": "textures/ui/mpl/rays",
-        "uv_size": [
-         256,
-         256
-        ],
-        "uv": [
-         0,
-         0
-        ],
+        "type": "panel",
         "size": [
-         190,
-         190
+         200,
+         200
         ],
         "offset": [
          0,
-         -55
+         -60
         ],
-        "layer": 1,
-        "alpha": 0.85,
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
-        "anims": [
-         "@hud.mpl_rays"
+        "controls": [
+         {
+          "img": {
+           "type": "image",
+           "texture": "textures/ui/mpl/rays",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 1,
+           "alpha": 0.85,
+           "anims": [
+            "@hud.mpl_rays"
+           ]
+          }
+         }
         ]
        }
       },
@@ -1569,30 +1604,33 @@
      "controls": [
       {
        "rays": {
-        "type": "image",
-        "texture": "textures/ui/mpl/rays",
-        "uv_size": [
-         256,
-         256
-        ],
-        "uv": [
-         0,
-         0
-        ],
+        "type": "panel",
         "size": [
-         190,
-         190
+         200,
+         200
         ],
         "offset": [
          0,
-         -55
+         -60
         ],
-        "layer": 1,
-        "alpha": 0.85,
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
-        "anims": [
-         "@hud.mpl_rays"
+        "controls": [
+         {
+          "img": {
+           "type": "image",
+           "texture": "textures/ui/mpl/rays",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 1,
+           "alpha": 0.85,
+           "anims": [
+            "@hud.mpl_rays"
+           ]
+          }
+         }
         ]
        }
       },
@@ -1800,30 +1838,33 @@
      "controls": [
       {
        "rays": {
-        "type": "image",
-        "texture": "textures/ui/mpl/rays",
-        "uv_size": [
-         256,
-         256
-        ],
-        "uv": [
-         0,
-         0
-        ],
+        "type": "panel",
         "size": [
-         190,
-         190
+         200,
+         200
         ],
         "offset": [
          0,
-         -55
+         -60
         ],
-        "layer": 1,
-        "alpha": 0.85,
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
-        "anims": [
-         "@hud.mpl_rays"
+        "controls": [
+         {
+          "img": {
+           "type": "image",
+           "texture": "textures/ui/mpl/rays",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 1,
+           "alpha": 0.85,
+           "anims": [
+            "@hud.mpl_rays"
+           ]
+          }
+         }
         ]
        }
       },
@@ -1930,30 +1971,33 @@
      "controls": [
       {
        "rays": {
-        "type": "image",
-        "texture": "textures/ui/mpl/rays",
-        "uv_size": [
-         256,
-         256
-        ],
-        "uv": [
-         0,
-         0
-        ],
+        "type": "panel",
         "size": [
-         190,
-         190
+         200,
+         200
         ],
         "offset": [
          0,
-         -55
+         -60
         ],
-        "layer": 1,
-        "alpha": 0.85,
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
-        "anims": [
-         "@hud.mpl_rays"
+        "controls": [
+         {
+          "img": {
+           "type": "image",
+           "texture": "textures/ui/mpl/rays",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 1,
+           "alpha": 0.85,
+           "anims": [
+            "@hud.mpl_rays"
+           ]
+          }
+         }
         ]
        }
       },
@@ -2161,30 +2205,33 @@
      "controls": [
       {
        "rays": {
-        "type": "image",
-        "texture": "textures/ui/mpl/rays",
-        "uv_size": [
-         256,
-         256
-        ],
-        "uv": [
-         0,
-         0
-        ],
+        "type": "panel",
         "size": [
-         190,
-         190
+         200,
+         200
         ],
         "offset": [
          0,
-         -55
+         -60
         ],
-        "layer": 1,
-        "alpha": 0.85,
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
-        "anims": [
-         "@hud.mpl_rays"
+        "controls": [
+         {
+          "img": {
+           "type": "image",
+           "texture": "textures/ui/mpl/rays",
+           "size": [
+            "100%",
+            "100%"
+           ],
+           "layer": 1,
+           "alpha": 0.85,
+           "anims": [
+            "@hud.mpl_rays"
+           ]
+          }
+         }
         ]
        }
       },

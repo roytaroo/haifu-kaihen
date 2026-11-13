@@ -177,7 +177,7 @@ if not os.environ.get('MPL_UI_JSON_ONLY'):
         fade = fade.filter(ImageFilter.GaussianBlur(R * 0.35))
         im.putalpha(ImageChops.multiply(im.getchannel('A'), fade))
         strip.paste(im.resize((R, R), Image.LANCZOS), (0, R * f))
-    strip.save(os.path.join(TEX, 'rays.png'))
+    strip.crop((0, 0, R, R)).save(os.path.join(TEX, 'rays.png'))  # 1枚だけ使う(コマ送りはゲームで効かなかった)
     # 光のフラッシュ
     fl = Image.new('L', (256, 128)); ImageDraw.Draw(fl).ellipse((20, 20, 236, 108), fill=255); fl = fl.filter(ImageFilter.GaussianBlur(22))
     Image.merge('RGBA', (Image.new('L', fl.size, 255), Image.new('L', fl.size, 250), Image.new('L', fl.size, 220), fl)).save(os.path.join(TEX, 'flash.png'))
@@ -236,7 +236,8 @@ hud.update({
     'mpl_glint': {'anim_type': 'size', 'duration': 0.45, 'from': [0, 0], 'to': [0, 0], 'next': '@hud.mpl_glint2'},
     'mpl_glint2': {'anim_type': 'size', 'easing': 'out_quad', 'duration': 0.18, 'from': [0, 0], 'to': [34, 34], 'next': '@hud.mpl_glint3'},
     'mpl_glint3': {'anim_type': 'size', 'easing': 'in_quad', 'duration': 0.3, 'from': [34, 34], 'to': [0, 0]},
-    'mpl_rays': {'anim_type': 'flip_book', 'initial_uv': [0, 0], 'frame_count': 8, 'frame_step': 256, 'fps': 12, 'looping': True},
+    'mpl_rays': {'anim_type': 'size', 'easing': 'in_out_sine', 'duration': 0.7, 'from': ['88%', '88%'], 'to': ['112%', '112%'], 'next': '@hud.mpl_rays2'},
+    'mpl_rays2': {'anim_type': 'size', 'easing': 'in_out_sine', 'duration': 0.7, 'from': ['112%', '112%'], 'to': ['88%', '88%'], 'next': '@hud.mpl_rays'},
     'mpl_slide': {'anim_type': 'offset', 'easing': 'out_back', 'duration': 0.35, 'from': [-420, 0], 'to': [0, 0]},
     'mpl_drop': {'anim_type': 'offset', 'easing': 'out_back', 'duration': 0.4, 'from': [0, -60], 'to': [0, 0]},
     'mpl_fadein': {'anim_type': 'alpha', 'easing': 'linear', 'duration': 0.25, 'from': 0.0, 'to': 1.0},
@@ -271,8 +272,8 @@ for i, key in enumerate(KEYS):
         rays = [k for k, *_, r in LOGOS if r]
         body = []
         if key in rays:
-            body.append({'rays': {'type': 'image', 'texture': 'textures/ui/mpl/rays', 'uv_size': [256, 256], 'uv': [0, 0], 'size': [190, 190], 'offset': [0, -55], 'layer': 1, 'alpha': 0.85,
-                                  'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'anims': ['@hud.mpl_rays']}})
+            body.append({'rays': {'type': 'panel', 'size': [200, 200], 'offset': [0, -60], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'controls': [
+                {'img': {'type': 'image', 'texture': 'textures/ui/mpl/rays', 'size': ['100%', '100%'], 'layer': 1, 'alpha': 0.85, 'anims': ['@hud.mpl_rays']}}]}})
         body += [{'flash': {'type': 'image', 'texture': 'textures/ui/mpl/flash', 'size': [300, 110], 'offset': [0, -20], 'layer': 2, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'anims': ['@hud.mpl_flash']}},
                  {'box': {'type': 'panel', 'size': [280, 70], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'controls': [
                      {'logo': {'type': 'image', 'texture': f'textures/ui/mpl/logo_{key}', 'size': ['100%', '100%'], 'layer': 3, 'anims': ['@hud.mpl_pop1']}},
