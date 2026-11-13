@@ -1936,7 +1936,7 @@ function setBridge(down) { const b = BD.bridge; if (b) cmd(`fill ${b[0]} ${b[1]}
 async function chooseWay(p, all) {
     const name = p.name, s = SPACES[G.pos[name]];
     cam.to("@a[tag=mpl_board]", { x: s.x + 0.5, y: s.y + 15, z: s.z - 9 }, { x: s.x + 0.5, y: s.y, z: s.z + 0.5 }, 0.8);
-    const why = (j) => SPACES[j].gate === "bridge" && !bridgeDown() ? "はね橋が上がっている" : SPACES[j].gate === "toll" && (G.coins[name] ?? 0) < BD.toll ? `関所はコイン${BD.toll}枚` : null;
+    const why = (j) => SPACES[j].gate === "bridge" && !bridgeDown() ? "ドローブリッジが上がっている" : SPACES[j].gate === "toll" && (G.coins[name] ?? 0) < BD.toll ? `関所はコイン${BD.toll}枚` : null;
     const opts = all.filter((j) => !why(j));
     const closed = all.find((j) => why(j));
     if (opts.length < 2) {
@@ -2056,7 +2056,7 @@ async function startParty(turns, players) {
             const last = G.turn > G.turns - 3;
             hud();
             cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); setBridge(bridgeDown());
-            banner(last ? "lastspurt" : "turn", (last ? `TURN ${G.turn} / ${G.turns}  青と赤のマスが2倍` : `${G.turn} / ${G.turns}`) + (bridgeDown() ? "   §aはね橋: 通れる" : "   §cはね橋: 通行止め"), 55);
+            banner(last ? "lastspurt" : "turn", (last ? `TURN ${G.turn} / ${G.turns}  青と赤のマスが2倍` : `${G.turn} / ${G.turns}`) + (bridgeDown() ? "   §aドローブリッジ: 通れる" : "   §cドローブリッジ: 通行止め"), 55);
             soundAllPlayers(last ? "mob.wither.spawn" : "random.levelup", last ? 1.6 : 0.9);
             await wait(55);
             for (let k = 0; k < G.players.length && G.on; k++) {
