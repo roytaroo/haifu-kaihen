@@ -2,17 +2,18 @@
  "format_version": "1.14.0",
  "sound_definitions": {
   "mmgplus.chair_music": {
-   "category": "record",
+   "category": "ui",
    "sounds": [
     {
      "name": "sounds/mmgplus/chair_music",
      "stream": true,
-     "volume": 1.0
+     "volume": 1.0,
+     "is3D": false
     }
    ]
   },
   "mpl.bgm_board": {
-   "category": "record",
+   "category": "ui",
    "sounds": [
     {
      "name": "sounds/mpl/bgm_board",
@@ -23,7 +24,7 @@
    ]
   },
   "mpl.bgm_minigame": {
-   "category": "record",
+   "category": "ui",
    "sounds": [
     {
      "name": "sounds/mpl/bgm_minigame",
@@ -34,7 +35,7 @@
    ]
   },
   "mpl.bgm_finale": {
-   "category": "record",
+   "category": "ui",
    "sounds": [
     {
      "name": "sounds/mpl/bgm_finale",
@@ -45,7 +46,7 @@
    ]
   },
   "mpl.fanfare_star": {
-   "category": "record",
+   "category": "ui",
    "sounds": [
     {
      "name": "sounds/mpl/fanfare_star",
@@ -56,7 +57,7 @@
    ]
   },
   "mpl.star_get": {
-   "category": "record",
+   "category": "ui",
    "sounds": [
     {
      "name": "sounds/mpl/star_get",
@@ -67,12 +68,440 @@
    ]
   },
   "mpl.drumroll": {
-   "category": "record",
+   "category": "ui",
    "sounds": [
     {
      "name": "sounds/mpl/drumroll",
      "stream": true,
      "volume": 1.0,
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.ambient.weather.thunder": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/ambient/weather/thunder1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/ambient/weather/thunder2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/ambient/weather/thunder3",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.block.barrel.close": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/block/barrel/close",
+     "volume": 1,
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.block.barrel.open": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/block/barrel/open1",
+     "volume": 1,
+     "pitch": 1,
+     "is3D": false
+    },
+    {
+     "name": "sounds/block/barrel/open2",
+     "volume": 1,
+     "pitch": 1,
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.block.grindstone.use": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/block/grindstone/grindstone1",
+     "volume": 0.5,
+     "is3D": false
+    },
+    {
+     "name": "sounds/block/grindstone/grindstone2",
+     "volume": 0.5,
+     "is3D": false
+    },
+    {
+     "name": "sounds/block/grindstone/grindstone3",
+     "volume": 0.5,
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.blaze.shoot": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/ghast/fireball4",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.cow.hurt": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/cow/hurt1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/cow/hurt2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/cow/hurt3",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.endermen.portal": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/endermen/portal",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/endermen/portal2",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.fox.screech": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/fox/screech1",
+     "volume": 0.9,
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/fox/screech2",
+     "volume": 0.9,
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/fox/screech3",
+     "volume": 0.9,
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/fox/screech4",
+     "volume": 0.8,
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.ravager.bite": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/ravager/bite1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/ravager/bite2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/ravager/bite3",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.shulker.teleport": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/endermen/portal",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/endermen/portal2",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.slime.big": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/slime/big1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/slime/big2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/slime/big3",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/slime/big4",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.slime.small": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/slime/small1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/slime/small2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/slime/small3",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/slime/small4",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/slime/small5",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.villager.haggle": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/villager/haggle1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/villager/haggle2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/villager/haggle3",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.villager.no": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/villager/no1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/villager/no2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/villager/no3",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.villager.yes": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/villager/yes1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/villager/yes2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/villager/yes3",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.wither.ambient": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/wither/idle1",
+     "volume": 0.2,
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/wither/idle2",
+     "volume": 0.2,
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/wither/idle3",
+     "volume": 0.2,
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/wither/idle4",
+     "volume": 0.2,
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.wither.spawn": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/wither/spawn",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.note.bass": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/note/bass",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.note.hat": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/note/hat",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.note.pling": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/note/pling",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.anvil_land": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/anvil_land",
+     "volume": 0.6,
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.break": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/break",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.click": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/click",
+     "volume": 0.2,
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.explode": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/explode1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/random/explode2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/random/explode3",
+     "is3D": false
+    },
+    {
+     "name": "sounds/random/explode4",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.glass": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/glass1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/random/glass2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/random/glass3",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.levelup": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/levelup",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.orb": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/orb",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.pop": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/pop",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.splash": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/splash",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.totem": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/use_totem",
      "is3D": false
     }
    ]

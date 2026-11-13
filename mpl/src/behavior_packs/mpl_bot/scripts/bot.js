@@ -1,7 +1,7 @@
 // MMG Bot: ダミーのプレイヤー(SimulatedPlayer)を BOT として出し入れし、ゲームごとにざっくり動かす
 // BOT は本物のプレイヤー扱いなので、元のゲームの @a[tag=playing] などにそのまま入る。目印のタグは "mmgbot"
 // mmg_plus からの指示: scriptevent mmgbot:jump <名前>(縄跳び)
-import { world, system, GameMode, ItemStack, Player } from "@minecraft/server";
+import { world, system, GameMode, ItemStack, Player, EquipmentSlot } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 // 文字を全部太字に(main.js と同じ)
 const boldText = (t) => { if (typeof t !== "string") return t; const m = t.match(/^(?:§.)*/)[0]; return m + "§l" + t.slice(m.length).replace(/§([0-9a-fr])/g, "§$1§l"); };
@@ -87,6 +87,21 @@ async function botUI(player) {
     setCount(n);
     player.sendMessage(`§aBOT ${bots.size}人(${STRENGTH[st]})にしました`);
 }
+
+// ===== 見た目 =====
+// BOT のスキンはスクリプトから変えられない(初期スキンのどれかになる)。かわりに、BOT ごとに色のちがう服(染めた革の服・ズボン・くつ)を着せて見分けやすくする
+const BOT_COLORS = [[0.9, 0.2, 0.2], [0.2, 0.45, 0.95], [0.2, 0.75, 0.3], [0.95, 0.8, 0.15], [0.65, 0.3, 0.9], [0.95, 0.5, 0.1], [0.1, 0.75, 0.8], [0.95, 0.45, 0.7], [0.95, 0.95, 0.95], [0.25, 0.25, 0.3], [0.55, 0.35, 0.2], [0.5, 0.9, 0.2]];
+function dress(p, name) {
+    const eq = p.getComponent("minecraft:equippable"); if (!eq) return;
+    if (eq.getEquipment(EquipmentSlot.Chest)?.typeId === "minecraft:leather_chestplate") return;
+    const [r, g, b] = BOT_COLORS[Math.max(0, NAMES.indexOf(name)) % BOT_COLORS.length];
+    for (const [slot, id] of [[EquipmentSlot.Chest, "leather_chestplate"], [EquipmentSlot.Legs, "leather_leggings"], [EquipmentSlot.Feet, "leather_boots"]]) {
+        const it = new ItemStack(`minecraft:${id}`, 1);
+        try { const d = it.getComponent("minecraft:dyeable"); if (d) d.color = { red: r, green: g, blue: b }; } catch {}
+        try { eq.setEquipment(slot, it); } catch {}
+    }
+}
+system.runInterval(() => { for (const [name, p] of bots) { try { if (p.isValid) dress(p, name); } catch {} } }, 40);
 
 // ===== 動き =====
 // ゲームの種類ごとにざっくり動かす。細かい判断がいるゲーム(投票・数え・クラフト)は歩き回るだけ

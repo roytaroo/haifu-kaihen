@@ -6,6 +6,7 @@
 import { world, system, GameMode, ItemStack, ItemLockMode, ScreenDisplay, World, Player } from "@minecraft/server";
 import { ActionFormData, ModalFormData, MessageFormData, uiManager } from "@minecraft/server-ui";
 import { BOARD_DATA as BD } from "./board_data.js";
+import { SOUND_IDS } from "./sound_ids.js";
 
 // ===== 文字を全部太字に(タイトル・お知らせ・チャット・フォーム)=====
 // 頭の見えない印(§のつづき)はそのまま残して、そのあとを太字にする。色を変えても太字が切れないように §x のあとにも §l
@@ -33,7 +34,18 @@ try {
 const SPECTATOR = GameMode.Spectator ?? GameMode.spectator;
 const ADVENTURE = GameMode.Adventure ?? GameMode.adventure;
 const dim = () => world.getDimension("overworld");
-const cmd = (c) => { try { dim().runCommand(c); } catch (e) { console.warn(`[MPL] ${c}: ${e}`); } };
+// 音: カメラ演出中は聞く位置がカメラ側になるので、場所つきの音は遠いと聞こえない。
+// → playsound は全部「距離なしの音(mplx.名前、tools/mpl_sounds.py)」に差しかえて、聞く人それぞれに同じ音量で鳴らす
+// 方向が大事な音だけ "playsound3d ..." と書くと、ふつうの場所つきの音のまま鳴る
+function fixSound(c) {
+    if (c.includes("playsound3d ")) return c.replace("playsound3d ", "playsound ");
+    const k = c.indexOf("playsound "), pre = c.slice(0, k), t = c.slice(k + 10).match(/"[^"]*"|\S+/g) ?? [];
+    const id = SOUND_IDS.has(t[0]) ? `mplx.${t[0]}` : t[0];
+    if (pre) return `${pre}playsound ${id} ${t.slice(1).join(" ")}`;                 // execute ... run playsound → 名前だけ差しかえ
+    const rest = t.slice(2), [vol, pitch] = rest.length >= 3 ? rest.slice(3) : rest;   // 場所(x y z)は捨てる
+    return `execute as ${t[1] ?? "@a"} at @s run playsound ${id} @s ~ ~ ~ ${Math.min(1, Number(vol ?? 1) || 1)} ${pitch ?? 1}`;
+}
+const cmd = (c) => { if (c.includes("playsound")) c = fixSound(c); try { dim().runCommand(c); } catch (e) { console.warn(`[MPL] ${c}: ${e}`); } };
 const wait = (ticks) => new Promise((r) => system.runTimeout(r, Math.max(1, Math.floor(ticks))));
 const rand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 function load(key, def) { try { const v = world.getDynamicProperty(key); return typeof v === "string" ? JSON.parse(v) : def; } catch { return def; } }
@@ -1329,7 +1341,7 @@ async function gameMelon() {
     for (let t = 0; t < 900 && !aborted(); t += 5) {
         const ms = dim().getEntities({ type: "mmgplus:melon" }).filter((m) => m.isValid);
         for (let n = ms.length; n < Math.max(3, Math.ceil(playing().length / 2)); n++) spawnAt("mmgplus:melon", { x: rand(-9, 9) + 0.5, y: 1, z: rand(-9, 9) + 0.5 });
-        if (t % 15 === 0) for (const m of ms) if (m.isValid) cmd(`playsound note.bell @a ${m.location.x} ${m.location.y + 1} ${m.location.z} 1.5 ${(0.8 + Math.random() * 0.4).toFixed(2)}`);
+        if (t % 15 === 0) for (const m of ms) if (m.isValid) cmd(`playsound3d note.bell @a ${m.location.x} ${m.location.y + 1} ${m.location.z} 1.5 ${(0.8 + Math.random() * 0.4).toFixed(2)}`);
         if (t % 20 === 0) for (const p of playing().filter(isBot)) { const m = ms[rand(0, Math.max(0, ms.length - 1))]; if (m?.isValid && chance(0.15, 0.25, 0.4)) { melonPts.set(p.name, (melonPts.get(p.name) ?? 0) + 1); try { m.remove(); } catch {} } }
         if (t % 10 === 0) for (const p of playing()) p.onScreenDisplay.setActionBar(`§2スイカ割り §fあなた: ${melonPts.get(p.name) ?? 0}個  §7残り ${Math.ceil((900 - t) / 20)}秒`);
         await wait(5);
@@ -1842,7 +1854,7 @@ function blocked(a, b) {
 }
 // 人の前(ボードの真ん中の方向)からのカメラ位置。見えなければ角度・高さを変えて探す
 function frontShot(p, dist = 3.2, h = 1.65) {
-    const l = p.location, head = { x: l.x, y: l.y + 1.5, z: l.z };
+    const l = p.location, head = { x: l.x, y: l.y + 2.15, z: l.z };
     const base = Math.atan2(BOARD.z - l.z, BOARD.x - l.x);
     for (const up of [0, 1.2, 2.6]) for (const da of [0, 0.5, -0.5, 1, -1, 1.6, -1.6, 2.4, -2.4, Math.PI]) {
         const a = base + da, pos = { x: l.x + Math.cos(a) * dist, y: l.y + h + up, z: l.z + Math.sin(a) * dist };
@@ -1859,10 +1871,8 @@ async function react(p, good, sec = 0.6) {
     try { p.teleport(p.location, { facingLocation: { x: pos.x, y: p.location.y + 1.6, z: pos.z } }); } catch {}
     await wait(Math.round(sec * 20));
     pose(p, good ? "cheer" : "sad");
-    const l = p.location;
-    if (good) { cmd(`particle minecraft:totem_particle ${l.x} ${l.y + 1.2} ${l.z}`); cmd(`playsound random.levelup @a ${l.x} ${l.y} ${l.z} 0.8 1.5`); }
-    else { cmd(`particle minecraft:villager_angry ${l.x} ${l.y + 2} ${l.z}`); cmd(`playsound mob.villager.no @a ${l.x} ${l.y} ${l.z} 0.8 0.7`); }
-    for (let i = 0; i < 6; i++) { const q = p.location; if (good) cmd(`particle minecraft:villager_happy ${q.x + rand(-1, 1) * 0.6} ${q.y + 1.8} ${q.z + rand(-1, 1) * 0.6}`); else cmd(`particle minecraft:falling_dust_dragon_egg_particle ${q.x} ${q.y + 2.3} ${q.z}`); await wait(6); }
+    cmd(`playsound ${good ? "random.levelup" : "mob.villager.no"} @a 0 0 0 0.7 ${good ? 1.5 : 0.7}`);
+    await wait(38);
 }
 // ワープ: その場で光って浮き上がる → 暗転 → 行き先で光る
 async function warpOut(p) {
@@ -1983,7 +1993,7 @@ function hud() {
     try { world.scoreboard.removeObjective("mpl_hud"); } catch {}
     const o = world.scoreboard.addObjective("mpl_hud", `§e§l${I.crown} TURN ${Math.max(1, G.turn)}/${G.turns}`);
     const rows = rankRows();
-    rows.forEach(([n, st, co], i) => o.setScore(boldText(`${G.now === n ? "§e▶" : " "}${BADGE(rankOfName(n))} §f${n.slice(0, 10)}  §e${I.star}${st} §6${I.coin}${co}`), rows.length - i));
+    rows.forEach(([n, st, co], i) => o.setScore(boldText(`${G.now === n ? "§e▶" : " "}${BADGE(rankOfName(n))} §e${I.star}${st} §6${I.coin}${String(co).padStart(2, " ")} §f${n.length > 9 ? n.slice(0, 8) + "…" : n}`), rows.length - i));
     cmd("scoreboard objectives setdisplay sidebar mpl_hud descending");
 }
 let starEntity;
@@ -2484,7 +2494,7 @@ async function finale() {
     await wait(152);
     // 鳴り終わり: 優勝した人にズーム → 花火
     const w0 = world.getPlayers({ name: winners[0] })[0], wl = w0?.location ?? { x: 0.5, y: 1, z: BD.finaleZ };
-    cam.to("@a", { x: wl.x, y: wl.y + 1.7, z: wl.z - 2.6 }, { x: wl.x, y: wl.y + 1.6, z: wl.z }, 0.6, "out_back");
+    cam.to("@a", { x: wl.x, y: wl.y + 1.9, z: wl.z - 3.2 }, { x: wl.x, y: wl.y + 2.2, z: wl.z }, 0.6, "out_back"); // 少し上を見て、人は画面の下半分に(ロゴと重ならない)
     await wait(12);
     banner("champion", `${I.crown} ${winners.join(" & ")} ${I.crown}`, 120);
     soundAllPlayers("random.totem", 1);

@@ -279,7 +279,7 @@ for i, key in enumerate(KEYS):
                      {'logo': {'type': 'image', 'texture': f'textures/ui/mpl/logo_{key}', 'size': ['100%', '100%'], 'layer': 3, 'anims': ['@hud.mpl_pop1']}},
                      {'glint': {'type': 'image', 'texture': 'textures/ui/mpl/glint', 'size': [0, 0], 'offset': [96, -18], 'layer': 4, 'anims': ['@hud.mpl_glint']}}]}},
                  {'sub@hud.mpl_sub': {'offset': [0, 72]}}]
-    ctrls.append({f'k_{key}': {'type': 'panel', 'size': ['100%', 0], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, -24],
+    ctrls.append({f'k_{key}': {'type': 'panel', 'size': ['100%', 0], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, -86],  # 画面の上の方(人の顔に重ならない)
                                 'bindings': [col(T), vis(has(mark))], 'controls': body}})
 hud['mpl_sub'] = dict(SUB, offset=[0, 0])
 hud['mpl_banner'] = {'type': 'panel', 'size': ['100%', 0], 'controls': ctrls}
@@ -299,6 +299,8 @@ json.dump(hud, open(os.path.join(UI, 'hud_screen.json'), 'w', encoding='utf-8'),
 sb = json.load(open(os.path.join(UI, 'scoreboards.json'), encoding='utf-8'))
 sb['scoreboard_sidebar/main'] = {'texture': 'textures/ui/mpl/side', 'alpha': 1.0, 'bindings': []}
 sb.setdefault('scoreboard_sidebar_score', {})['visible'] = False  # 並び順用の数字はかくす
+sb.setdefault('scoreboard_sidebar_player', {})['max_size'] = [220, 10]  # 長い行が切れないように
+sb.setdefault('scoreboard_sidebar/main/displayed_objective', {})['max_size'] = [220, 10]
 json.dump(sb, open(os.path.join(UI, 'scoreboards.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
 # ===== 専用フォーム =====

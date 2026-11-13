@@ -19,6 +19,10 @@
     "binding_collection_name": "scoreboard_players"
    }
   ],
+  "max_size": [
+   220,
+   10
+  ],
   "font_type": "unicode"
  },
  "scoreboard_sidebar/main/displayed_objective": {
@@ -27,6 +31,10 @@
     "binding_name": "#objective_sidebar_name",
     "binding_type": "global"
    }
+  ],
+  "max_size": [
+   220,
+   10
   ],
   "font_type": "unicode"
  },
