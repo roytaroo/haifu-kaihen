@@ -2532,15 +2532,29 @@ function keepMenu(p) {
 }
 system.runInterval(() => { for (const p of world.getPlayers()) if (isAdmin(p)) { try { keepMenu(p); } catch {} } }, 10);
 world.afterEvents.itemUse.subscribe((ev) => { if (ev.itemStack?.typeId === "mpl:menu") menu(ev.source); });
+// ボタンが多いメニューは 5個ずつのページ送り(画面からはみ出さない)。選んだ番号を返す。閉じたら -1
+async function paged(p, title, body, labels, per = 5) {
+    const pages = Math.ceil(labels.length / per);
+    for (let pg = 0; ;) {
+        const from = pg * per, part = labels.slice(from, from + per);
+        const f = new ActionFormData().title(`${FORM_MARK}§l${title}`).body(`§l${body}${pages > 1 ? `  §7(${pg + 1}/${pages})` : ""}`);
+        part.forEach((t) => f.button(`§l${t}`));
+        const nav = [];
+        if (pg < pages - 1) { f.button("§l§e次のページ ▶"); nav.push(1); }
+        if (pg > 0) { f.button("§l§e◀ 前のページ"); nav.push(-1); }
+        const r = await f.show(p).catch(() => ({ canceled: true }));
+        if (r.canceled) return -1;
+        if (r.selection < part.length) return from + r.selection;
+        pg += nav[r.selection - part.length] ?? 0;
+    }
+}
 async function menu(p) {
     if (!isAdmin(p)) { bar(p, "§cメニューは管理者だけ使えます"); return; }
     const items = G.on
         ? [["§c§lすごろくを終わる", stopParty], ["§cミニゲームをスキップ", skipNow], ["BOT", (q) => q.runCommand("scriptevent mmgbot:ui")]]
         : [["§e§lすごろくを始める", startUI], ["ミニゲームを1つ選んで遊ぶ", pickUI], ["ミニゲームを全部順番に遊ぶ", tourUI], ["ミニゲームの ON/OFF", mgUI], ["BOT", (q) => q.runCommand("scriptevent mmgbot:ui")], ["BGM の ON/OFF", bgmUI], ["ボードを建て直す", () => { buildBoard(); }]];
-    const f = new ActionFormData().title(`${FORM_MARK}§lMEGAMI PARTY LAND`).body(G.on ? `§l§7ターン ${G.turn} / ${G.turns}` : "§l§7何をする？");
-    items.forEach(([t]) => f.button(`§l${t}`));
-    const r = await f.show(p); if (r.canceled) return;
-    items[r.selection][1](p);
+    const k = await paged(p, "MEGAMI PARTY LAND", G.on ? `§7ターン ${G.turn} / ${G.turns}` : "§7何をする？", items.map(([t]) => t));
+    if (k >= 0) items[k][1](p);
 }
 async function startUI(p) {
     const r = await new ModalFormData().title("すごろくを始める")
@@ -2553,10 +2567,8 @@ async function startUI(p) {
 }
 async function pickUI(p) {
     const ids = MG_IDS;
-    const f = new ActionFormData().title(`${FORM_MARK}§lミニゲームを選ぶ`).body("§l遊ぶミニゲームを選んでね");
-    ids.forEach((id) => f.button(`§l${MINIGAMES[id]}\n§7${MG_HOWTO[id] ?? ""}`));
-    const r = await f.show(p); if (r.canceled) return;
-    minigameTour([ids[r.selection]]);
+    const k = await paged(p, "ミニゲームを選ぶ", "遊ぶミニゲームを選んでね", ids.map((id) => `${MINIGAMES[id]}\n§7${MG_HOWTO[id] ?? ""}`));
+    if (k >= 0) minigameTour([ids[k]]);
 }
 async function tourUI(p) {
     const ids = mgOn();
