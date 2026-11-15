@@ -3232,14 +3232,17 @@ system.runTimeout(() => {
     if ((load("board_built", 0)) < BD.version) buildBoard();
 }, 60);
 // タイトル画面: 島の上空をカメラが回り、ロゴ。ジャンプでスタート
+const titleBgm = new Map(); // 名前 → 曲を鳴らし始めた tick
 function titleScreen(p) { if (!p?.isValid || isBot(p)) return; p.addTag("mpl_title"); p.teleport(LOBBY, lookCenter); }
 system.runInterval(() => {
     const ps = world.getPlayers({ tags: ["mpl_title"] }); if (!ps.length) return;
     const a = (system.currentTick / 20) * 0.12, c = BOARD;
     for (const p of ps) {
-        if (p.isJumping || G.on && G.players.includes(p.name)) { p.removeTag("mpl_title"); cmd(`camera "${p.name}" clear`); try { p.onScreenDisplay.clearTitle(); } catch {} cmd(`execute as "${p.name}" at @s run playsound random.levelup @s ~ ~ ~ 1 1.5`); continue; }
+        if (p.isJumping || G.on && G.players.includes(p.name)) { p.removeTag("mpl_title"); titleBgm.delete(p.name); cmd(`stopsound "${p.name}" mpl.bgm_board`); cmd(`camera "${p.name}" clear`); try { p.onScreenDisplay.clearTitle(); } catch {} cmd(`execute as "${p.name}" at @s run playsound random.levelup @s ~ ~ ~ 1 1.5`); continue; }
         cmd(`camera "${p.name}" set minecraft:free ease 0.5 linear pos ${(c.x + Math.cos(a) * 85).toFixed(1)} 55 ${(c.z + Math.sin(a) * 85).toFixed(1)} facing ${c.x} 6 ${c.z}`);
         if (system.currentTick % 120 === 0) banner("title", "ジャンプでスタート", 130, [p]);
+        // タイトル画面の BGM(ボードの曲)。1曲ぶん(600tick)ごとに鳴らし直す
+        if (!G.on && (titleBgm.get(p.name) ?? -1e9) + 600 <= system.currentTick) { titleBgm.set(p.name, system.currentTick); if (!load("bgm_off", false)) cmd(`execute as "${p.name}" at @s run playsound mpl.bgm_board @s ~ ~ ~ 0.55 1`); }
     }
 }, 10);
 // エリアの環境音: ボードの上で、自分のいるエリアの音が小さく流れる

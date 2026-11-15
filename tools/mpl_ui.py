@@ -282,14 +282,16 @@ for i, key in enumerate(KEYS):
     else:  # ロゴ
         rays = [k for k, *_, r in LOGOS if r]
         body = []
-        if key in rays:
+        if False and key in rays:  # 光の放射はやめた(はしが切れて見えるため)
             body.append({'rays': {'type': 'panel', 'size': [200, 200], 'offset': [0, -60], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'controls': [
                 {'img': {'type': 'image', 'texture': 'textures/ui/mpl/rays', 'size': ['100%', '100%'], 'layer': 1, 'alpha': 0.85, 'anims': ['@hud.mpl_rays']}}]}})
         body += [{'flash': {'type': 'image', 'texture': 'textures/ui/mpl/flash', 'size': [300, 110], 'offset': [0, -20], 'layer': 2, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'anims': ['@hud.mpl_flash']}},
                  {'box': {'type': 'panel', 'size': [230, 118] if key == 'title' else [280, 70], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'controls': [
                      {'logo': {'type': 'image', 'texture': 'textures/ui/mpl/logo_venus' if key == 'title' else f'textures/ui/mpl/logo_{key}', 'size': ['100%', '100%'], 'layer': 3, 'anims': ['@hud.mpl_pop1']}},
                      {'glint': {'type': 'image', 'texture': 'textures/ui/mpl/glint', 'size': [0, 0], 'offset': [96, -18], 'layer': 4, 'anims': ['@hud.mpl_glint']}}]}},
-                 {'sub@hud.mpl_sub': {'offset': [0, 120 if key == 'title' else 72]}}]
+                 ({'tsub': {'type': 'label', 'text': '#hud_subtitle_text_string', 'offset': [0, 150], 'layer': 5, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
+                            'shadow': True, 'localize': False, 'font_scale_factor': 0.9, 'color': [1, 1, 1], 'anims': ['@hud.mpl_fadein'], 'bindings': [col('#hud_subtitle_text_string')]}}
+                  if key == 'title' else {'sub@hud.mpl_sub': {'offset': [0, 72]}})]  # タイトルの下は背景なし・小さめ
     ctrls.append({f'k_{key}': {'type': 'panel', 'size': ['100%', 0], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, -86],  # 画面の上の方(人の顔に重ならない)
                                 'bindings': [col(T), vis(has(mark))], 'controls': body}})
 hud['mpl_sub'] = dict(SUB, offset=[0, 0])

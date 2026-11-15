@@ -300,38 +300,6 @@
      ],
      "controls": [
       {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
-      {
        "flash": {
         "type": "image",
         "texture": "textures/ui/mpl/flash",
@@ -397,11 +365,34 @@
        }
       },
       {
-       "sub@hud.mpl_sub": {
+       "tsub": {
+        "type": "label",
+        "text": "#hud_subtitle_text_string",
         "offset": [
          0,
-         120
-        ]
+         150
+        ],
+        "layer": 5,
+        "anchor_from": "top_middle",
+        "anchor_to": "top_middle",
+        "shadow": true,
+        "localize": false,
+        "font_scale_factor": 0.9,
+        "color": [
+         1,
+         1,
+         1
+        ],
+        "anims": [
+         "@hud.mpl_fadein"
+        ],
+        "bindings": [
+         {
+          "binding_name": "#hud_subtitle_text_string",
+          "binding_type": "global"
+         }
+        ],
+        "font_type": "unicode"
        }
       }
      ]
@@ -533,38 +524,6 @@
       }
      ],
      "controls": [
-      {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
       {
        "flash": {
         "type": "image",
@@ -768,38 +727,6 @@
      ],
      "controls": [
       {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
-      {
        "flash": {
         "type": "image",
         "texture": "textures/ui/mpl/flash",
@@ -900,38 +827,6 @@
       }
      ],
      "controls": [
-      {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
       {
        "flash": {
         "type": "image",
@@ -1034,38 +929,6 @@
      ],
      "controls": [
       {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
-      {
        "flash": {
         "type": "image",
         "texture": "textures/ui/mpl/flash",
@@ -1166,38 +1029,6 @@
       }
      ],
      "controls": [
-      {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
       {
        "flash": {
         "type": "image",
@@ -1603,38 +1434,6 @@
      ],
      "controls": [
       {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
-      {
        "flash": {
         "type": "image",
         "texture": "textures/ui/mpl/flash",
@@ -1837,38 +1636,6 @@
      ],
      "controls": [
       {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
-      {
        "flash": {
         "type": "image",
         "texture": "textures/ui/mpl/flash",
@@ -1969,38 +1736,6 @@
       }
      ],
      "controls": [
-      {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
       {
        "flash": {
         "type": "image",
@@ -2204,38 +1939,6 @@
      ],
      "controls": [
       {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
-      {
        "flash": {
         "type": "image",
         "texture": "textures/ui/mpl/flash",
@@ -2438,38 +2141,6 @@
      ],
      "controls": [
       {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
-      {
        "flash": {
         "type": "image",
         "texture": "textures/ui/mpl/flash",
@@ -2570,38 +2241,6 @@
       }
      ],
      "controls": [
-      {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
       {
        "flash": {
         "type": "image",
@@ -2804,38 +2443,6 @@
       }
      ],
      "controls": [
-      {
-       "rays": {
-        "type": "panel",
-        "size": [
-         200,
-         200
-        ],
-        "offset": [
-         0,
-         -60
-        ],
-        "anchor_from": "top_middle",
-        "anchor_to": "top_middle",
-        "controls": [
-         {
-          "img": {
-           "type": "image",
-           "texture": "textures/ui/mpl/rays",
-           "size": [
-            "100%",
-            "100%"
-           ],
-           "layer": 1,
-           "alpha": 0.85,
-           "anims": [
-            "@hud.mpl_rays"
-           ]
-          }
-         }
-        ]
-       }
-      },
       {
        "flash": {
         "type": "image",
