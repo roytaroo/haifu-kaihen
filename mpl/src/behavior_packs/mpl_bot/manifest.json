@@ -2,11 +2,11 @@
   "format_version": 2,
   "header": {
     "name": "MEGAMI PARTY LAND BOT",
-    "description": "BOT と遊べる(Beta APIs が必要)",
+    "description": "BOT \u3068\u904a\u3079\u308b(Beta APIs \u304c\u5fc5\u8981)",
     "uuid": "52129def-72d4-40b0-bee6-9f0e2d82e155",
     "version": [
       1,
-      26,
+      27,
       0
     ],
     "min_engine_version": [
@@ -22,7 +22,7 @@
       "uuid": "d4deaede-c6f5-46a6-905f-5a22a2a43bf7",
       "version": [
         1,
-        26,
+        27,
         0
       ],
       "entry": "scripts/bot.js"

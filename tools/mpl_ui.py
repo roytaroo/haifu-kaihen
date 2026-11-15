@@ -195,7 +195,6 @@ if not os.environ.get('MPL_UI_JSON_ONLY'):
         g = grad(w, h, (30, 34, 58), (12, 14, 28)); mk = Image.new('L', (w, h))
         ImageDraw.Draw(mk).rounded_rectangle((S, S, w - 1 - S, h - 1 - S), 9 * S, fill=228)
         im.paste(g, (0, 0), mk)
-        d.rounded_rectangle((5 * S, 7 * S, 8 * S, h - 7 * S), S * 2, fill=col + (255,))            # 左のしるし
         d.line([(12 * S, 3 * S), (w - 12 * S, 3 * S)], fill=(255, 255, 255, 50), width=S)          # 上のつや
         nine(f'ribbon_{c}', im.resize((w // 2, h // 2), Image.LANCZOS), [8, 5, 8, 5], 4)  # 角の丸み 5、真ん中が残る
     # カード(ミニゲームの説明・フォーム): 暗い半透明 + うすい白のふち(オレンジのふちはやめた)
