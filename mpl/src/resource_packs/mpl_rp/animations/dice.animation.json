@@ -7,14 +7,15 @@
     "root": {
      "rotation": [
       "q.property('mmgplus:rolling') * q.life_time * 720",
-      "q.property('mmgplus:rolling') * q.life_time * 540",
+      "q.property('mmgplus:rolling') * q.life_time * 540 + (1 - q.property('mmgplus:rolling')) * 0",
       0
      ],
      "position": [
       0,
       "math.sin(q.life_time * 300) * 1",
       0
-     ]
+     ],
+     "scale": "1 + (1 - q.property('mmgplus:rolling')) * math.max(0, 0.35 - q.anim_time * 0.0) * 0"
     }
    }
   }

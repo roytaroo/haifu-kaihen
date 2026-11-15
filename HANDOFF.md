@@ -192,3 +192,17 @@
 - 順位表: ★とコインを名前の前に、名前は9文字まで、行の最大幅 220
 - BOT: スキンは変えられない → BOT ごとに色のちがう革の服(dyeable、2秒ごとに着せ直し)
 - 未確認
+
+## MPL v24(名前は VENUS PARTY / BOT 10人 / 第1段階)
+- だいきから: ロゴ(VENUS PARTY)と BOT 10人のスキン・名前・性格。100個の案の選択は アーティファクト https://claude.ai/artifact/GtR8eTF1PMMwrZqsEaBm2A の db(picks)
+- BOT スキン: RP の entity/player.entity.json(公式の写し)に 10人のテクスチャを足し、third_person を「BOT の名前以外」と「controller.render.mpl_bot(名前でスキンと細腕/太腕を選ぶ)」に分けた。Jack だけ太腕
+- bot.js: NAMES = Jack, Humming, Widow, Splash, Oracle, Byte, Shade, Jester, Replica, Comet。性格ごとのせりふ LINES(start/turn/good/bad/star/win/lose/champ)、scriptevent mmgbot:say <名前> <場面>。BOT メニューは出す BOT にチェック + 強さ。前の革の服は脱がせる
+- サイコロ: 1〜10。どの面も同じ数字のテクスチャ10枚(textures/entity/mpl_dice)を render_controllers/mpl_dice で選ぶ。プロパティ mmgplus:num(0 = 回っている間は数字が変わり続ける)
+- 帯の作り直し(暗い半透明のカプセル + 色のふち + 左のしるし)。タイトルのロゴは logo_venus。ロゴ追加 finish / bonusgame / sudden(BKEYS と LOGOS の順番をそろえること)
+- ターン: 「つぎ:」をやめて「★まで あと Nマス」(starDist = 分かれ道もふくめた最短)。マスの移動は walkTo(1tick ずつテレポートで走る、11tick/マス)+ カメラは linear で追う
+- ミニゲーム: RK(score/order/out)で順位 → rankGroups → 同点は breakTies(サイコロの SUDDEN DEATH)→ 10/5/3/1 コイン。4回に1回はボーナス(2倍)。同じパーティで同じミニゲームは出ない(G.played)。終わりに FINISH!
+- マップ: mpl:map(みんなのスロット8に固定)。使うと上空から見る、もう一度で元のカメラ(lastCam)。cam.to は mpl_mapview の人を動かさない
+- 順位表: 右下に固定、持っているアイテムを絵の文字で(font/glyph_E2.png、ICON)
+- ショップ: 買えない商品は灰色 + 「あと N 枚」
+- ワールド名・アイコンを VENUS PARTY に
+- 未確認

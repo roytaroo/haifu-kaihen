@@ -42,5 +42,13 @@
   "texture": "textures/ui/mpl/side",
   "alpha": 1.0,
   "bindings": []
+ },
+ "scoreboard_sidebar": {
+  "anchor_from": "bottom_right",
+  "anchor_to": "bottom_right",
+  "offset": [
+   -3,
+   -3
+  ]
  }
 }

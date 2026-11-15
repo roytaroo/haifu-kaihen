@@ -10,7 +10,29 @@ for (const [proto, names] of [[ModalFormData.prototype, ["title", "slider", "dro
 import { spawnSimulatedPlayer } from "@minecraft/server-gametest";
 
 const TAG = "mmgbot";
-const NAMES = ["Aki", "Ren", "Mio", "Sora", "Yuu", "Haru", "Nagi", "Kai", "Rin", "Tomo", "Sei", "Hina"];
+// BOT は10人。スキンは RP の entity/player.entity.json + render_controllers/mpl_bot(名前で差しかえ)
+const NAMES = ["Jack", "Humming", "Widow", "Splash", "Oracle", "Byte", "Shade", "Jester", "Replica", "Comet"];
+const PROFILE = {
+    Jack: "元気なお調子者", Humming: "がんばり屋", Widow: "無口でけだるい", Splash: "いつも眠いマイペース", Oracle: "ヘラヘラ天才",
+    Byte: "ロボット", Shade: "いたずら好きのうっかり者", Jester: "びっくりさせ屋", Replica: "なぞめいたからかい屋", Comet: "ぶっきらぼうな脳筋",
+};
+// せりふ(場面ごと)。main.js から scriptevent mmgbot:say <名前> <場面>
+const LINES = {
+    Jack: { start: ["主役はオレだ！ みんな見とけよ〜！", "今日もいっちょ目立ってやるぜ！"], turn: ["よっしゃ、オレの番！ 注目〜！", "見てろよ、ド派手にいくぜ！"], good: ["見た！？ 今の見た！？", "さすがオレ！ 天才！"], bad: ["ちょ、今のナシ！ ナシで！", "いや〜、これも演出ってやつ？"], star: ["スターはオレのためにある！", "主役にスター、似合いすぎだろ！"], win: ["当然の1位！ 拍手〜！", "勝っちゃった〜！ ごめんね〜！"], lose: ["次！ 次こそ本気出す！", "今のは手加減したの！ ほんとだって！"], champ: ["優勝〜！ 今日の主役はオレでした〜！", "サインいる？ 今なら無料だぜ！"] },
+    Humming: { start: ["が、がんばります！ 負けないから！", "今日こそ1位、とるんだから！"], turn: ["よし…集中、集中！", "見てて、ちゃんとやるから！"], good: ["ほらね、練習したもん！", "やった…！ 当然だけどね！"], bad: ["う…ま、まだ平気だし！", "今のは、えっと…想定内！"], star: ["スター！ がんばったかいがあった〜！", "ふふん、これくらい余裕よ！"], win: ["1位！ ぜんぶ計算どおり…なんてね！", "やった！ 練習の成果！"], lose: ["くやしい…！ 次は絶対勝つ！", "べ、別に本気じゃなかったし…"], champ: ["優勝…！ 本当に？ やったぁ！", "がんばってよかった…！ ありがと！"] },
+    Widow: { start: ["…眠い。早く終わらせよ", "…起こさないでね"], turn: ["…ん", "…行く"], good: ["…ふーん", "…悪くない"], bad: ["…はぁ", "…まあ、いいけど"], star: ["…もらっとく", "…スター。ふわぁ"], win: ["…簡単", "…終わり。寝ていい？"], lose: ["…寝てたから", "…次は起きてる"], champ: ["…優勝。…じゃ、昼寝する", "…当然。おやすみ"] },
+    Splash: { start: ["ふぁ〜…パーティ？ がんばる〜", "眠いけど…やるときはやるよ〜"], turn: ["ん〜…ぼくの番〜？", "ゆっくり行こ〜"], good: ["わ〜い、ラッキ〜", "ふふ〜、いい感じ〜"], bad: ["あ〜…まいっか〜", "ねむ〜い…"], star: ["スター、もらっちゃった〜", "わ〜、キラキラ〜"], win: ["…本気出しちゃった。てへ", "あれ、勝ってる〜？"], lose: ["ふぁ〜…寝てた〜", "次は本気出す…たぶん〜"], champ: ["優勝〜？ じゃあ、ごほうびに寝る〜", "みんなありがと〜…zzz"] },
+    Oracle: { start: ["は〜い、今日もサクッと勝っちゃお〜", "みんな、手加減しとくね？ あはは"], turn: ["ほいほい、いっくよ〜", "サイコロさん、いい子にしてね〜"], good: ["知ってた〜♪", "ね？ 言ったでしょ〜"], bad: ["あはは、そういうこともあるよね〜", "ま、計算のうちってことで〜"], star: ["スター、いただきま〜す♪", "予想どおりすぎて逆に笑う〜"], win: ["はい1位〜♪ かる〜い", "ごめんね〜、強くて〜"], lose: ["あれ〜？ 今日は調子悪いかも〜", "次は本気、出しちゃおっかな〜"], champ: ["優勝〜♪ ま、当然だよね〜", "みんなおつかれ〜♪ また遊ぼ〜"] },
+    Byte: { start: ["システム起動。勝利プロトコル、開始シマス。", "パーティモード、オン。"], turn: ["ワタシノ番。サイコロ、投下シマス。", "移動ルート、計算中…"], good: ["予定ドオリデス。", "成功。ピピッ。"], bad: ["エラー。想定外ノ事態デス。", "損失ヲ記録シマシタ。"], star: ["スター、取得。満足度、上昇。", "目標ヲ達成シマシタ。"], win: ["勝利。データ通リデス。", "1位ヲ記録。ピピピ。"], lose: ["敗北。学習シマス。", "再計算ガ必要デス。"], champ: ["優勝。…コレガ、ウレシイ、トイウ感情？", "全プログラム、完了。アリガトウ。"] },
+    Shade: { start: ["にしし、今日は何してやろっかな〜", "いたずらの準備はばっちり！ …あれ、どこ置いたっけ"], turn: ["オレの番か！ …サイコロどこ？", "よーし、こっそり行くぞ〜"], good: ["にしし、作戦どおり！", "やった！ …たまたまだけど！"], bad: ["わっ、しまった！", "あちゃ〜、うっかりした〜"], star: ["スター、こっそりいただき！", "にしし、だれにも見られてないよな？"], win: ["いたずら成功〜！ じゃなくて1位！", "にしし、勝っちゃった！"], lose: ["うっかりしてた…", "次は落とし穴しかけとくからな！"], champ: ["優勝！？ うっかり勝っちゃった〜！", "にしし、みんなまんまとだまされたな！"] },
+    Jester: { start: ["ばぁっ！ …びっくりした？ 始めよっか！", "今日はどんなサプライズが起きるかな〜！"], turn: ["さあ、何が起きるかお楽しみ！", "ジャジャーン！ ボクの番だよ！"], good: ["サプライズ大成功！", "ほら、驚いたでしょ！"], bad: ["うわっ、ボクが驚かされた！", "これはこれで、おもしろい！"], star: ["ジャーン！ スターでした〜！", "みんなの顔、最高！"], win: ["ばぁっ！ 1位だよ〜！", "驚いた？ ボクの勝ち！"], lose: ["ちぇっ、次はもっと驚かすからね", "まさかボクが負けるなんて…これもサプライズ！"], champ: ["最後のサプライズ！ ボクの優勝〜！", "みんな、今日いちばん驚いたでしょ？"] },
+    Replica: { start: ["ふふ…わたしはだれでしょう？", "今日は、だれのマネをしようかな"], turn: ["わたしの番。…それとも、あなたの番？", "ふふ、どこへ行くと思う？"], good: ["ほら、言ったとおり", "ふふ…あなたもこうしたかった？"], bad: ["…あら。わざとよ", "ふうん。そう来るのね"], star: ["スター…あなたが欲しかったもの、でしょ？", "ふふ、もらっていくわ"], win: ["勝ったのは、本物のわたし？", "ふふ、つかまえてごらん"], lose: ["負けたのは、わたしのニセモノ", "…今日は、ゆずってあげる"], champ: ["優勝。…さて、本当はだれでしょう？", "ふふ、また会いましょう"] },
+    Comet: { start: ["さっさと始めるぞ。勝つのはオレだ", "考えるのは苦手だ。走って勝つ"], turn: ["オレの番だ。どけ", "……行くぞ"], good: ["ふん、当然だ", "…べ、別にうれしくねーし"], bad: ["チッ…", "なんだよこれ…力でなんとかならねーのか"], star: ["スター？ …まあ、もらってやる", "…ありがとな。言わせんな"], win: ["力こそパワーだ", "ふん。楽勝だ"], lose: ["…くそっ、もう1回だ！", "べ、別にくやしくねーし！"], champ: ["優勝…？ …べ、別にうれしくなんか…ある", "…今日は、楽しかった。…なんでもねー"] },
+};
+function say(name, ev) {
+    const l = LINES[name]?.[ev]; if (!l) return;
+    world.sendMessage(`§e<${name}>§r ${l[Math.floor(Math.random() * l.length)]}`);
+}
 const LOBBY = { x: 0.5, y: 1, z: 65.5 }; // MPL のロビー(港の広場)
 const STRENGTH = ["よわい", "ふつう", "つよい"];
 const dim = () => world.getDimension("overworld");
@@ -35,7 +57,8 @@ function score(objective, name) {
 
 // ===== 出し入れ =====
 function addBot() {
-    const name = NAMES.find((n) => !bots.has(n) && !world.getPlayers({ name: n }).length);
+    const pool = (setting().chosen ?? NAMES).filter((n) => NAMES.includes(n));
+    const name = pool.find((n) => !bots.has(n) && !world.getPlayers({ name: n }).length);
     if (!name) return false;
     const p = spawnSimulatedPlayer({ dimension: dim(), ...LOBBY }, name, GameMode.Adventure ?? GameMode.adventure);
     p.addTag(TAG);
@@ -64,6 +87,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.id === "mmgbot:ui" && ev.sourceEntity?.typeId === "minecraft:player") botUI(ev.sourceEntity);
+    if (ev.id === "mmgbot:add") { const n = Number(ev.message) || 1; for (let k = 0; k < n; k++) addBot(); return; }
     // ミニゲームからの指示: jump <名前> / move <名前> x y z [速さ] / look <名前> x y z / sneak <名前> 0|1 / stop <名前>
     const [who, ...a] = ev.message.trim().split(/\s+/), b = bots.get(who);
     if (!b) return;
@@ -73,35 +97,30 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         if (ev.id === "mmgbot:look") { const [x, y, z] = a.map(Number); b.lookAtLocation({ x, y, z }); held.set(who, system.currentTick + 20); }
         if (ev.id === "mmgbot:sneak") b.isSneaking = a[0] === "1";
         if (ev.id === "mmgbot:stop") { b.stopMoving(); held.set(who, system.currentTick + 20); }
+        if (ev.id === "mmgbot:say") say(who, a[0]);
     } catch {}
 });
 
+// BOT を選ぶ: 出すBOTにチェック(上から順に人数ぶん出る)+ 強さ
 async function botUI(player) {
-    const res = await new ModalFormData().title("BOT")
-        .slider("BOTの人数", 0, NAMES.length, { valueStep: 1, defaultValue: bots.size })
-        .dropdown("BOTの強さ", STRENGTH, { defaultValueIndex: strength() })
-        .show(player);
+    const st = setting(), chosen = new Set(st.chosen ?? NAMES.slice(0, 3));
+    const f = new ModalFormData().title("BOT");
+    NAMES.forEach((n) => f.toggle(`${n}  §7${PROFILE[n]}`, { defaultValue: chosen.has(n) && (bots.has(n) || !bots.size) }));
+    f.dropdown("BOTの強さ", STRENGTH, { defaultValueIndex: strength() });
+    const res = await f.show(player);
     if (res.canceled) return;
-    const [n, st] = res.formValues;
-    const s = setting(); s.strength = st; saveSetting(s);
-    setCount(n);
-    player.sendMessage(`§aBOT ${bots.size}人(${STRENGTH[st]})にしました`);
+    const v = res.formValues, pick = NAMES.filter((_, i) => v[i]);
+    st.strength = v[NAMES.length]; st.chosen = pick; saveSetting(st);
+    for (const n of [...bots.keys()]) if (!pick.includes(n)) { try { bots.get(n).disconnect(); } catch {} bots.delete(n); brain.delete(n); }
+    for (const n of pick) if (!bots.has(n)) addBot();
+    const s2 = setting(); s2.count = bots.size; saveSetting(s2);
+    player.sendMessage(`§aBOT: ${[...bots.keys()].join(", ") || "なし"}(${STRENGTH[st.strength]})`);
+    for (const n of bots.keys()) system.runTimeout(() => say(n, "start"), 20 + Math.floor(Math.random() * 40));
 }
 
 // ===== 見た目 =====
-// BOT のスキンはスクリプトから変えられない(初期スキンのどれかになる)。かわりに、BOT ごとに色のちがう服(染めた革の服・ズボン・くつ)を着せて見分けやすくする
-const BOT_COLORS = [[0.9, 0.2, 0.2], [0.2, 0.45, 0.95], [0.2, 0.75, 0.3], [0.95, 0.8, 0.15], [0.65, 0.3, 0.9], [0.95, 0.5, 0.1], [0.1, 0.75, 0.8], [0.95, 0.45, 0.7], [0.95, 0.95, 0.95], [0.25, 0.25, 0.3], [0.55, 0.35, 0.2], [0.5, 0.9, 0.2]];
-function dress(p, name) {
-    const eq = p.getComponent("minecraft:equippable"); if (!eq) return;
-    if (eq.getEquipment(EquipmentSlot.Chest)?.typeId === "minecraft:leather_chestplate") return;
-    const [r, g, b] = BOT_COLORS[Math.max(0, NAMES.indexOf(name)) % BOT_COLORS.length];
-    for (const [slot, id] of [[EquipmentSlot.Chest, "leather_chestplate"], [EquipmentSlot.Legs, "leather_leggings"], [EquipmentSlot.Feet, "leather_boots"]]) {
-        const it = new ItemStack(`minecraft:${id}`, 1);
-        try { const d = it.getComponent("minecraft:dyeable"); if (d) d.color = { red: r, green: g, blue: b }; } catch {}
-        try { eq.setEquipment(slot, it); } catch {}
-    }
-}
-system.runInterval(() => { for (const [name, p] of bots) { try { if (p.isValid) dress(p, name); } catch {} } }, 40);
+// スキンは RP 側で名前ごとに差しかえる。前の版で着せた革の服は脱がせる
+system.runInterval(() => { for (const [, p] of bots) { try { const eq = p.getComponent("minecraft:equippable"); for (const sl of [EquipmentSlot.Chest, EquipmentSlot.Legs, EquipmentSlot.Feet]) if (eq?.getEquipment(sl)?.typeId?.startsWith("minecraft:leather_")) eq.setEquipment(sl); } catch {} } }, 100);
 
 // ===== 動き =====
 // ゲームの種類ごとにざっくり動かす。細かい判断がいるゲーム(投票・数え・クラフト)は歩き回るだけ

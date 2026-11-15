@@ -19,7 +19,7 @@ def level_dat():
         ver, name, root = nbt.read(p)
         keep_types = {k: v[0] for k, v in root.items()}
         def put(k, v): root[k] = (keep_types.get(k, 8 if isinstance(v, str) else 3), v)
-        put('LevelName', f'MEGAMI PARTY LAND {tag}')
+        put('LevelName', f'VENUS PARTY {tag}')
         put('RandomSeed', random.randint(1, 2**62)); put('LastPlayed', int(time.time())); put('currentTick', 0); put('worldStartCount', 0)
         put('SpawnX', 0); put('SpawnY', 1); put('SpawnZ', 65); put('Time', 6000); put('PlayerHasDied', 0)
         put('GameType', 2); put('Difficulty', 1); put('Generator', 2)
@@ -31,13 +31,13 @@ def level_dat():
         return open(p, 'rb').read()
 
 def icon():
+    # だいきのロゴ(VENUS PARTY)を空色の背景にのせる
     im = Image.new('RGB', (256, 256)); d = ImageDraw.Draw(im)
-    for y in range(256): d.line([(0, y), (256, y)], fill=(255 - y // 3, 120 + y // 4, 200))
-    try: f = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 72); f2 = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 22)
-    except Exception: f = f2 = ImageFont.load_default()
-    d.text((128, 110), 'MPL', font=f, fill=(255, 230, 60), anchor='mm', stroke_width=5, stroke_fill=(90, 30, 120))
-    d.text((128, 180), 'MEGAMI PARTY LAND', font=f2, fill=(255, 255, 255), anchor='mm', stroke_width=3, stroke_fill=(90, 30, 120))
-    p = tempfile.mktemp(suffix='.jpeg'); im.save(p, quality=90); return open(p, 'rb').read()
+    for y in range(256): d.line([(0, y), (256, y)], fill=(90 + y // 4, 170 + y // 6, 255 - y // 5))
+    lg = Image.open(os.path.join(SRC, 'resource_packs', 'mpl_rp', 'textures', 'ui', 'mpl', 'logo_venus.png')).convert('RGBA')
+    w = 240; lg = lg.resize((w, round(lg.height * w / lg.width)), Image.LANCZOS)
+    im.paste(lg, ((256 - w) // 2, (256 - lg.height) // 2), lg)
+    p = tempfile.mktemp(suffix='.jpeg'); im.save(p, quality=92); return open(p, 'rb').read()
 
 def ref(kind, folder):
     h = json.load(open(os.path.join(SRC, kind, folder, 'manifest.json')))['header']
@@ -46,7 +46,7 @@ def ref(kind, folder):
 os.makedirs(os.path.dirname(out), exist_ok=True)
 with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
     z.writestr('level.dat', level_dat())
-    z.writestr('levelname.txt', f'MEGAMI PARTY LAND {tag}')
+    z.writestr('levelname.txt', f'VENUS PARTY {tag}')
     z.writestr('world_icon.jpeg', icon())
     for kind in ('behavior_packs', 'resource_packs'):
         for r, _, fs in os.walk(os.path.join(SRC, kind)):

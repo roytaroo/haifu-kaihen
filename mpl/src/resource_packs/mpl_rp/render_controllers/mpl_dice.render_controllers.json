@@ -1,0 +1,32 @@
+{
+ "format_version": "1.8.0",
+ "render_controllers": {
+  "controller.render.mpl_dice": {
+   "arrays": {
+    "textures": {
+     "Array.d": [
+      "Texture.d1",
+      "Texture.d2",
+      "Texture.d3",
+      "Texture.d4",
+      "Texture.d5",
+      "Texture.d6",
+      "Texture.d7",
+      "Texture.d8",
+      "Texture.d9",
+      "Texture.d10"
+     ]
+    }
+   },
+   "geometry": "Geometry.default",
+   "materials": [
+    {
+     "*": "Material.default"
+    }
+   ],
+   "textures": [
+    "Array.d[q.property('mmgplus:num') > 0 ? q.property('mmgplus:num') - 1 : math.mod(math.floor(q.life_time * 14), 10)]"
+   ]
+  }
+ }
+}

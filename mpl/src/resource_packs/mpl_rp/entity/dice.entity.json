@@ -7,13 +7,22 @@
     "default": "entity_alphatest"
    },
    "textures": {
-    "default": "textures/entity/mmgplus_dice"
+    "d1": "textures/entity/mpl_dice/d1",
+    "d2": "textures/entity/mpl_dice/d2",
+    "d3": "textures/entity/mpl_dice/d3",
+    "d4": "textures/entity/mpl_dice/d4",
+    "d5": "textures/entity/mpl_dice/d5",
+    "d6": "textures/entity/mpl_dice/d6",
+    "d7": "textures/entity/mpl_dice/d7",
+    "d8": "textures/entity/mpl_dice/d8",
+    "d9": "textures/entity/mpl_dice/d9",
+    "d10": "textures/entity/mpl_dice/d10"
    },
    "geometry": {
-    "default": "geometry.mmgplus.dice"
+    "default": "geometry.mpl.dice10"
    },
    "render_controllers": [
-    "controller.render.default"
+    "controller.render.mpl_dice"
    ],
    "animations": {
     "a": "animation.mmgplus.dice"

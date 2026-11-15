@@ -141,6 +141,9 @@ LOGOS = [
     ('lastspurt', 'FINAL STRETCH!', 'red', False, False),
     ('bonus', 'BONUS STARS', 'gold', False, True),
     ('item', 'ITEM!', 'purple', False, False),
+    ('finish', 'FINISH!', 'gold', False, True),
+    ('bonusgame', 'BONUS GAME!', RAINBOW, False, True),
+    ('sudden', 'SUDDEN DEATH', 'red', False, False),
 ]
 NUMS = list(range(0, 31))
 RIBBONS = {'gold': ((255, 214, 70), (220, 120, 0)), 'blue': ((90, 170, 255), (20, 70, 200)), 'red': ((255, 110, 100), (180, 20, 30)),
@@ -181,19 +184,18 @@ if not os.environ.get('MPL_UI_JSON_ONLY'):
     # 光のフラッシュ
     fl = Image.new('L', (256, 128)); ImageDraw.Draw(fl).ellipse((20, 20, 236, 108), fill=255); fl = fl.filter(ImageFilter.GaussianBlur(22))
     Image.merge('RGBA', (Image.new('L', fl.size, 255), Image.new('L', fl.size, 250), Image.new('L', fl.size, 220), fl)).save(os.path.join(TEX, 'flash.png'))
-    # 帯(リボン): はしが切れこんだ形 + 上下に白い線
-    for c, (top, bot) in RIBBONS.items():
-        S = 4; w, h = 96 * S, 32 * S
-        im = Image.new('RGBA', (w, h)); g = grad(w, h, top, bot)
-        mk = Image.new('L', (w, h)); d = ImageDraw.Draw(mk)
-        d.polygon([(0, 0), (w, 0), (w - 10 * S, h // 2), (w, h - 1), (0, h - 1), (10 * S, h // 2)], fill=255)
-        im.paste((20, 14, 40, 255), (0, 0), mk)
-        inner = mk.filter(ImageFilter.MinFilter(2 * S + 1))
-        im.paste(g, (0, 0), inner)
-        d2 = ImageDraw.Draw(im)
-        d2.line([(14 * S, 4 * S), (w - 14 * S, 4 * S)], fill=(255, 255, 255, 200), width=S)
-        d2.line([(14 * S, h - 5 * S), (w - 14 * S, h - 5 * S)], fill=(255, 255, 255, 120), width=S)
-        nine(f'ribbon_{c}', im.resize((w // 2, h // 2), Image.LANCZOS), [14, 8, 14, 8])
+    # 帯: 暗い半透明のカプセル + 色の細いふち + 左に色のしるし(すっきりした見た目)
+    ACC = {'gold': (255, 196, 40), 'blue': (70, 160, 255), 'red': (255, 80, 80), 'purple': (180, 110, 255), 'green': (90, 220, 110), 'gray': (170, 175, 195)}
+    for c in RIBBONS:
+        S = 4; w, h = 96 * S, 28 * S; col = ACC[c]
+        im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
+        d.rounded_rectangle((0, 0, w - 1, h - 1), 10 * S, fill=col + (255,))
+        g = grad(w, h, (34, 38, 70), (12, 14, 30)); mk = Image.new('L', (w, h))
+        ImageDraw.Draw(mk).rounded_rectangle((S + S // 2, S + S // 2, w - 1 - S - S // 2, h - 1 - S - S // 2), 9 * S, fill=238)
+        im.paste(g, (0, 0), mk)
+        d.rounded_rectangle((5 * S, 7 * S, 8 * S, h - 7 * S), S * 2, fill=col + (255,))            # 左のしるし
+        d.line([(12 * S, 3 * S), (w - 12 * S, 3 * S)], fill=(255, 255, 255, 50), width=S)          # 上のつや
+        nine(f'ribbon_{c}', im.resize((w // 2, h // 2), Image.LANCZOS), [16, 7, 16, 7])
     # カード(ミニゲームの説明・フォーム)
     S = 4; w = h = 48 * S
     im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
@@ -275,10 +277,10 @@ for i, key in enumerate(KEYS):
             body.append({'rays': {'type': 'panel', 'size': [200, 200], 'offset': [0, -60], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'controls': [
                 {'img': {'type': 'image', 'texture': 'textures/ui/mpl/rays', 'size': ['100%', '100%'], 'layer': 1, 'alpha': 0.85, 'anims': ['@hud.mpl_rays']}}]}})
         body += [{'flash': {'type': 'image', 'texture': 'textures/ui/mpl/flash', 'size': [300, 110], 'offset': [0, -20], 'layer': 2, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'anims': ['@hud.mpl_flash']}},
-                 {'box': {'type': 'panel', 'size': [280, 70], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'controls': [
-                     {'logo': {'type': 'image', 'texture': f'textures/ui/mpl/logo_{key}', 'size': ['100%', '100%'], 'layer': 3, 'anims': ['@hud.mpl_pop1']}},
+                 {'box': {'type': 'panel', 'size': [230, 118] if key == 'title' else [280, 70], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'controls': [
+                     {'logo': {'type': 'image', 'texture': 'textures/ui/mpl/logo_venus' if key == 'title' else f'textures/ui/mpl/logo_{key}', 'size': ['100%', '100%'], 'layer': 3, 'anims': ['@hud.mpl_pop1']}},
                      {'glint': {'type': 'image', 'texture': 'textures/ui/mpl/glint', 'size': [0, 0], 'offset': [96, -18], 'layer': 4, 'anims': ['@hud.mpl_glint']}}]}},
-                 {'sub@hud.mpl_sub': {'offset': [0, 72]}}]
+                 {'sub@hud.mpl_sub': {'offset': [0, 120 if key == 'title' else 72]}}]
     ctrls.append({f'k_{key}': {'type': 'panel', 'size': ['100%', 0], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, -86],  # 画面の上の方(人の顔に重ならない)
                                 'bindings': [col(T), vis(has(mark))], 'controls': body}})
 hud['mpl_sub'] = dict(SUB, offset=[0, 0])
@@ -299,6 +301,7 @@ json.dump(hud, open(os.path.join(UI, 'hud_screen.json'), 'w', encoding='utf-8'),
 sb = json.load(open(os.path.join(UI, 'scoreboards.json'), encoding='utf-8'))
 sb['scoreboard_sidebar/main'] = {'texture': 'textures/ui/mpl/side', 'alpha': 1.0, 'bindings': []}
 sb.setdefault('scoreboard_sidebar_score', {})['visible'] = False  # 並び順用の数字はかくす
+sb['scoreboard_sidebar'] = dict(sb.get('scoreboard_sidebar', {}), anchor_from='bottom_right', anchor_to='bottom_right', offset=[-3, -3])  # 右下に固定
 sb.setdefault('scoreboard_sidebar_player', {})['max_size'] = [220, 10]  # 長い行が切れないように
 sb.setdefault('scoreboard_sidebar/main/displayed_objective', {})['max_size'] = [220, 10]
 json.dump(sb, open(os.path.join(UI, 'scoreboards.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)

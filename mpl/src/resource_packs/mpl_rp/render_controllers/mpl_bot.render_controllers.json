@@ -1,0 +1,84 @@
+{
+ "format_version": "1.8.0",
+ "render_controllers": {
+  "controller.render.mpl_bot": {
+   "geometry": "Array.mpl_geo[(q.is_name_any('Jack') ? 0 : 0) + (q.is_name_any('Humming') ? 1 : 0) + (q.is_name_any('Widow') ? 2 : 0) + (q.is_name_any('Splash') ? 3 : 0) + (q.is_name_any('Oracle') ? 4 : 0) + (q.is_name_any('Byte') ? 5 : 0) + (q.is_name_any('Shade') ? 6 : 0) + (q.is_name_any('Jester') ? 7 : 0) + (q.is_name_any('Replica') ? 8 : 0) + (q.is_name_any('Comet') ? 9 : 0)]",
+   "materials": [
+    {
+     "*": "Material.default"
+    }
+   ],
+   "textures": [
+    "Array.mpl_skins[(q.is_name_any('Jack') ? 0 : 0) + (q.is_name_any('Humming') ? 1 : 0) + (q.is_name_any('Widow') ? 2 : 0) + (q.is_name_any('Splash') ? 3 : 0) + (q.is_name_any('Oracle') ? 4 : 0) + (q.is_name_any('Byte') ? 5 : 0) + (q.is_name_any('Shade') ? 6 : 0) + (q.is_name_any('Jester') ? 7 : 0) + (q.is_name_any('Replica') ? 8 : 0) + (q.is_name_any('Comet') ? 9 : 0)]"
+   ],
+   "part_visibility": [
+    {
+     "*": true
+    },
+    {
+     "helmet": "variable.helmet_layer_visible"
+    },
+    {
+     "leftLegging": "variable.leg_layer_visible"
+    },
+    {
+     "rightLegging": "variable.leg_layer_visible"
+    },
+    {
+     "leftBoot": "variable.boot_layer_visible"
+    },
+    {
+     "rightBoot": "variable.boot_layer_visible"
+    },
+    {
+     "leftSock": "variable.boot_layer_visible && variable.leg_layer_visible"
+    },
+    {
+     "rightSock": "variable.boot_layer_visible && variable.leg_layer_visible"
+    },
+    {
+     "bodyArmor": "variable.chest_layer_visible"
+    },
+    {
+     "leftArmArmor": "variable.chest_layer_visible"
+    },
+    {
+     "rightArmArmor": "variable.chest_layer_visible"
+    },
+    {
+     "belt": "variable.chest_layer_visible && variable.leg_layer_visible"
+    }
+   ],
+   "arrays": {
+    "textures": {
+     "Array.mpl_skins": [
+      "Texture.mpl_jack",
+      "Texture.mpl_humming",
+      "Texture.mpl_widow",
+      "Texture.mpl_splash",
+      "Texture.mpl_oracle",
+      "Texture.mpl_byte",
+      "Texture.mpl_shade",
+      "Texture.mpl_jester",
+      "Texture.mpl_replica",
+      "Texture.mpl_comet"
+     ]
+    },
+    "geometries": {
+     "Array.mpl_geo": [
+      "Geometry.mpl_wide",
+      "Geometry.mpl_slim",
+      "Geometry.mpl_slim",
+      "Geometry.mpl_slim",
+      "Geometry.mpl_slim",
+      "Geometry.mpl_slim",
+      "Geometry.mpl_slim",
+      "Geometry.mpl_slim",
+      "Geometry.mpl_slim",
+      "Geometry.mpl_slim"
+     ]
+    }
+   }
+  }
+ }
+}

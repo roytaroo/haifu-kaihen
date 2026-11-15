@@ -19,6 +19,9 @@
   },
   "mpl_menu": {
    "textures": "textures/items/mpl_menu"
+  },
+  "mpl_map": {
+   "textures": "textures/items/mpl_map"
   }
  }
 }

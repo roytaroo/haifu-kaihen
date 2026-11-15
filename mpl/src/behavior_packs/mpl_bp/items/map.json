@@ -1,0 +1,21 @@
+{
+ "format_version": "1.20.50",
+ "minecraft:item": {
+  "description": {
+   "identifier": "mpl:map",
+   "menu_category": {
+    "category": "items"
+   }
+  },
+  "components": {
+   "minecraft:max_stack_size": 1,
+   "minecraft:icon": {
+    "texture": "mpl_map"
+   },
+   "minecraft:display_name": {
+    "value": "§bマップ\n§7使うとボード全体を見る(もう一度でもどる)"
+   },
+   "minecraft:hand_equipped": true
+  }
+ }
+}
