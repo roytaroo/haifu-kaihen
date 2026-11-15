@@ -142,6 +142,23 @@
     }
    ]
   },
+  "mplx.bucket.empty_lava": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/bucket/empty_lava1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/bucket/empty_lava2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/bucket/empty_lava3",
+     "is3D": false
+    }
+   ]
+  },
   "mplx.chime.amethyst_block": {
    "category": "ui",
    "sounds": [
@@ -572,6 +589,15 @@
     },
     {
      "name": "sounds/random/explode4",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.fizz": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/fizz",
      "is3D": false
     }
    ]

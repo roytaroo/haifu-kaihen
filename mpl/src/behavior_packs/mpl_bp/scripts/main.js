@@ -2398,10 +2398,67 @@ async function todayRule() {
     await wait(40);
     await djTalk([`決まったぜ！ ${RULES[k][1]}`], 2);
 }
-// 潮: 3ターンごとに満ちて、浜の道(tide の分かれ道)が沈む
+// 潮: 3ターンごとに満ちる。浜が海に近い順に水びたしになり(BD.flood)、浜の近道(tide)が沈む。引くときは逆の順に引いていく
 const tideHigh = () => G.on && G.turn % 3 === 0;
-function setTide(high) {
-    for (const [x, z] of BD.tide ?? []) { if (SPACES.some((s) => Math.abs(s.x - x) <= 1 && Math.abs(s.z - z) <= 1)) continue; cmd(`setblock ${x} 1 ${z} ${high ? "light_blue_stained_glass" : "air"}`); }
+let tideNow = false;
+async function setTide(high, show = true) {
+    if (show && high === tideNow) return;
+    tideNow = high;
+    const F = BD.flood ?? [], steps = F.reduce((m, r) => Math.max(m, r[3]), 0);
+    const t0 = BD.tide?.[0] ?? [0, 70];
+    if (show && G.on) {
+        cam.to("@a[tag=mpl_board]", { x: t0[0] + 6, y: 13, z: t0[1] - 20 }, { x: t0[0] + 2, y: 1, z: t0[1] }, 1.2);
+        await wait(20);
+        ribbon("blue", high ? "HIGH TIDE!" : "LOW TIDE", high ? "潮が満ちて浜が水びたし！ 浜の近道は通れない" : "潮が引いた！ 浜の近道が通れる", 90);
+        soundAllPlayers("random.splash", 0.6);
+    }
+    for (let k = 0; k <= steps; k++) {
+        const st = high ? k : steps - k, rows = F.filter((r) => r[3] === st);
+        for (const [x1, x2, z] of rows) cmd(`fill ${x1} 1 ${z} ${x2} 1 ${z} ${high ? "water" : "air"}`);
+        if (show && G.on) {
+            for (let j = 0; j < 4 && rows.length; j++) { const r = rows[rand(0, rows.length - 1)]; cmd(`particle minecraft:water_splash_particle ${rand(r[0], r[1]) + 0.5} 1.6 ${r[2] + 0.5}`); }
+            if (k % 3 === 0) soundAllPlayers("random.splash", 0.7 + k * 0.04);
+            await wait(3);
+        }
+    }
+    for (const [x, z] of BD.tide ?? []) { if (SPACES.some((s) => Math.abs(s.x - x) <= 1 && Math.abs(s.z - z) <= 1)) continue; cmd(`setblock ${x} 1 ${z} ${high ? "water" : "air"}`); }
+    if (show && G.on) { await wait(25); cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); await wait(20); }
+}
+// 噴火: 火口の溶岩がふちまで上がり、斜面を流れ下る(BD.volc)。しばらくすると冷えて固まり、消える
+let lavaOn = false, lavaGen = 0;
+async function eruptLava() {
+    const v = BD.volc, c = BD.crater; if (!v) return;
+    cmd("effect @a fire_resistance 90 0 true");
+    const [x1, z1, x2, z2] = v.pool;
+    for (let y = v.y0; y <= v.y1; y++) {
+        cmd(`fill ${x1} ${y} ${z1} ${x2} ${y} ${z2} lava replace air`);
+        for (let j = 0; j < 5; j++) cmd(`particle minecraft:lava_particle ${c.x + rand(-5, 5)} ${y + 1} ${c.z + rand(-3, 3)}`);
+        soundAllPlayers("bucket.empty_lava", 0.7 + (y - v.y0) * 0.06); cmd("camerashake add @a 0.3 0.4 positional");
+        await wait(7);
+    }
+    lavaOn = true; const gen = ++lavaGen;
+    const n = v.flows.reduce((m, f) => Math.max(m, f.length), 0), lead = v.flows.reduce((a, f) => (f.length > a.length ? f : a), []);
+    for (let i = 0; i < n; i++) {
+        for (const f of v.flows) if (f[i]) { const [x, y, z] = f[i]; cmd(`setblock ${x} ${y} ${z} lava`); if (i % 2 === 0) cmd(`particle minecraft:lava_particle ${x + 0.5} ${y + 0.8} ${z + 0.5}`); }
+        if (i % 4 === 0) { soundAllPlayers("bucket.empty_lava", 0.6 + Math.random() * 0.3); cmd(`particle minecraft:huge_explosion_emitter ${c.x + rand(-3, 3)} ${c.y + 4} ${c.z + rand(-3, 3)}`); }
+        const q = lead[Math.min(i, lead.length - 1)];
+        if (q && i % 3 === 0) cam.to("@a[tag=mpl_board]", { x: q[0] + 14, y: q[1] + 9, z: q[2] - 16 }, { x: q[0], y: q[1], z: q[2] }, 0.5, "linear");
+        await wait(3);
+    }
+    // 冷えるのは少しあと(ゲームは先へ進む)
+    system.runTimeout(() => { if (gen === lavaGen) coolLava(true); }, 400);
+}
+async function coolLava(show) {
+    const v = BD.volc; if (!v || (!lavaOn && show)) return;
+    lavaOn = false;
+    for (const f of v.flows) for (const [x, y, z] of f) cmd(`setblock ${x} ${y} ${z} ${show ? "magma_block" : "air"}`);
+    const [x1, z1, x2, z2] = v.pool;
+    if (show) {
+        for (let k = 0; k < 6; k++) { for (const f of v.flows) { const q = f[rand(0, f.length - 1)]; if (q) cmd(`particle minecraft:large_smoke_particle ${q[0] + 0.5} ${q[1] + 1} ${q[2] + 0.5}`); } if (k % 2 === 0) soundAllPlayers("random.fizz", 0.8); await wait(5); }
+        await wait(60);
+        for (const f of v.flows) for (const [x, y, z] of f) cmd(`fill ${x} ${y} ${z} ${x} ${y} ${z} air replace magma_block`);
+    }
+    for (let y = v.y1; y >= v.y0; y--) { cmd(`fill ${x1} ${y} ${z1} ${x2} ${y} ${z2} air replace lava`); cmd(`fill ${x1} ${y} ${z1} ${x2} ${y} ${z2} air replace flowing_lava`); if (show) await wait(4); }
 }
 // 幽霊船: 沖からゆっくり港へ(1tick ずつ動かす)。次の5ターンまで止まって、そのあと帰る
 async function ghostArrive() {
@@ -2564,7 +2621,7 @@ async function startParty(turns, players, hc = {}) {
         for (G.turn = 1; G.turn <= G.turns && G.on; G.turn++) {
             const last = G.turn > G.turns - 3;
             hud();
-            cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); setBridge(bridgeDown()); setTide(tideHigh());
+            cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); setBridge(bridgeDown()); await setTide(tideHigh());
             banner(last ? "lastspurt" : "turn", (last ? `TURN ${G.turn} / ${G.turns}  青と赤のマスが2倍` : `${G.turn} / ${G.turns}`) + (bridgeDown() ? "   §aドローブリッジ: 通れる" : "   §cドローブリッジ: 通行止め"), 55);
             soundAllPlayers("random.levelup", last ? 0.7 : 0.9);
             await wait(55);
@@ -2582,7 +2639,7 @@ async function startParty(turns, players, hc = {}) {
         }
         if (G.on) await finale();
     } finally {
-        try { djEntity?.remove(); } catch {} try { G.ghost?.remove(); } catch {} G.ghost = null; setTide(false); cmd("time set 6000");
+        try { djEntity?.remove(); } catch {} try { G.ghost?.remove(); } catch {} G.ghost = null; setTide(false, false); coolLava(false); cmd("time set 6000");
         G.on = false; G.now = null;
         bgm(null); unlockAll(); cam.clear();
         for (const p of world.getPlayers()) { p.removeTag("mpl_board"); }
@@ -2875,21 +2932,18 @@ const inZone = (n, zones) => zones.includes(SPACES[G.pos[n]]?.zone);
 async function zoneEvent(p, ev) {
     const name = p.name, l = p.location;
     if (ev === "volcano") {
-        // 噴火: 火口を映す → 火山の上にいる全員がコインを5枚落として、ふもとへ吹き飛ばされる
+        // 噴火: 地ひびき → 火口の溶岩がふちまで上がる → 斜面を流れ下る → 火山の上にいる全員がコインを5枚落として、ふもとへ吹き飛ばされる
         const c = BD.crater;
         cam.to("@a[tag=mpl_board]", { x: c.x, y: c.y + 16, z: c.z - 30 }, c, 1);
-        ribbon("red", "ERUPTION!", "火山が噴火した！", 90); soundAllPlayers("ambient.weather.thunder", 0.6);
         await wait(20);
-        for (let k = 0; k < 14; k++) {
-            cmd(`particle minecraft:huge_explosion_emitter ${c.x + rand(-3, 3)} ${c.y + 2 + k * 0.6} ${c.z + rand(-3, 3)}`);
-            for (let j = 0; j < 4; j++) cmd(`particle minecraft:lava_particle ${c.x + rand(-6, 6)} ${c.y + 2 + rand(0, 6)} ${c.z + rand(-6, 6)}`);
-            if (k % 3 === 0) { soundAllPlayers("random.explode", 0.6 + k * 0.03); cmd("camerashake add @a 0.5 0.4 positional"); }
-            await wait(4);
-        }
+        for (let k = 0; k < 8; k++) { cmd(`particle minecraft:large_smoke_particle ${c.x + rand(-4, 4)} ${c.y + 3} ${c.z + rand(-3, 3)}`); if (k % 3 === 0) cmd("camerashake add @a 0.2 0.5 positional"); await wait(3); }
+        ribbon("red", "ERUPTION!", "火山が噴火した！ 溶岩が流れ出す！", 120); soundAllPlayers("ambient.weather.thunder", 0.6); cmd("camerashake add @a 0.7 0.8 positional");
+        for (let k = 0; k < 6; k++) { cmd(`particle minecraft:huge_explosion_emitter ${c.x + rand(-3, 3)} ${c.y + 2 + k} ${c.z + rand(-3, 3)}`); if (k % 2 === 0) soundAllPlayers("random.explode", 0.6 + k * 0.03); await wait(4); }
+        await eruptLava();
         const hit = G.players.filter((n) => inZone(n, ["volcano"]));
         cam.fade("@a", 0.25, 0.3, 0.35); await wait(7);
         for (const n of hit) { addCoins(n, -Math.min(5, G.coins[n] ?? 0)); G.pos[n] = BD.volcanoFoot; world.getPlayers({ name: n })[0]?.teleport(spot(G.pos[n], G.players.indexOf(n)), lookCenter); }
-        ribbon("red", `-5${I.coin}`, `${hit.join(", ")} がふもとへ飛ばされた`, 60);
+        ribbon("red", `-5${I.coin}`, hit.length ? `${hit.join(", ")} がふもとへ飛ばされた` : "だれも巻きこまれなかった", 60);
         await react(p, false, 0.5);
     } else if (ev === "cannon") {
         // 大砲: どこかの青マスまで飛ばされる(弧をえがいて飛ぶ)
@@ -3167,6 +3221,7 @@ async function menu(p) {
 function resetAll() {
     G.on = false; run.active = false; setScore("game", "playing", 0); setScore("game", "selectgame", 0);
     cam.clear(); unlockAll(); bgm(null); cmd("time set 6000");
+    setTide(false, false); coolLava(false);
     for (const t of ["mmgplus:dice", "mmgplus:star", "mmgplus:coin", "mmgplus:dj", "mmgplus:ghostship", "mmgplus:steve", "mmgplus:cannonball", "mmgplus:fireball"]) cmd(`kill @e[type=${t}]`);
     for (let i = 0; i < 6; i++) cmd(`kill @e[type=mmgplus:racehorse${i}]`);
     for (const p of world.getPlayers()) { p.removeTag("mpl_board"); p.removeTag("playing"); p.removeTag("mmgplus_out"); try { p.setGameMode(ADVENTURE); } catch {} p.teleport(LOBBY, lookCenter); }
@@ -3244,7 +3299,7 @@ system.runTimeout(() => {
     for (const o of ["game", "setting"]) obj(o);
     for (const c of ["gamerule dodaylightcycle false", "time set 6000", "gamerule doweathercycle false", "weather clear", "gamerule domobspawning false", "gamerule pvp false",
         "gamerule falldamage false", "gamerule dofiretick false", "gamerule keepinventory true", "gamerule doimmediaterespawn true", "gamerule sendcommandfeedback false", "gamerule commandblockoutput false",
-        "gamerule showcoordinates false", `setworldspawn ${LOBBY.x | 0} ${LOBBY.y} ${LOBBY.z | 0}`, "tickingarea add -24 -5 -49 25 40 0 mpl_field1 true", "tickingarea add -24 -5 1 25 40 50 mpl_field2 true"]) cmd(c);
+        "gamerule showcoordinates false", `setworldspawn ${LOBBY.x | 0} ${LOBBY.y} ${LOBBY.z | 0}`, "tickingarea add -24 -5 -49 25 40 0 mpl_field1 true", "tickingarea add -24 -5 1 25 40 50 mpl_field2 true", "tickingarea add -68 -5 56 64 25 120 mpl_beach true", "tickingarea add -48 0 150 48 30 196 mpl_volcano true"]) cmd(c);
     if ((load("board_built", 0)) < BD.version) buildBoard();
 }, 60);
 // タイトル画面: 島の上空をカメラが回り、ロゴ。ジャンプでスタート

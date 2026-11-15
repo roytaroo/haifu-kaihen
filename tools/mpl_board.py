@@ -517,8 +517,52 @@ def merge():
     return [c for _, _, c in sorted(cmds, key=lambda c: (1 if any(k in c[1] for k in late) else 0, c[0]))]
 cmds = merge()
 out_nodes = [{k: v for k, v in nd.items() if k != 'g'} for nd in nodes]
+# ===== 満潮で水びたしになる浜(y=1 に水)。海に近い順に満ちる。広場・DJ ブースのまわり(+8)には入れない =====
+pzz = wz(-9)
+def floodable(x, z):
+    if H.get((x, z)) != 0 or V.get((x, 1, z)) not in (None, 'air'): return False
+    if -22 <= x <= 22 and z <= pzz + 2: return False
+    top = V.get((x, 0, z), '').split(' ')[0]
+    return top == 'sand' or (top == 'smooth_sandstone' and (x, z) in ROAD)
+FL = {c for c in H if floodable(*c)}
+dist, frontier = {}, [c for c in FL if any((c[0] + i, c[1] + j) not in H or H[(c[0] + i, c[1] + j)] < 0 for i, j in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
+for c in frontier: dist[c] = 0
+while frontier:
+    nxt = []
+    for (x, z) in frontier:
+        for i, j in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            n = (x + i, z + j)
+            if n in FL and n not in dist: dist[n] = dist[(x, z)] + 1; nxt.append(n)
+    frontier = nxt
+FLOOD = []   # [x1, x2, z, 段] 同じ z・同じ段で x が続く所は 1 つにまとめる
+for z in sorted({c[1] for c in dist}):
+    xs = sorted(x for (x, zz) in dist if zz == z); run = None
+    for x in xs:
+        st = min(dist[(x, z)] // 2, 12)
+        if run and x == run[1] + 1 and st == run[3]: run[1] = x
+        else:
+            if run: FLOOD.append(run)
+            run = [x, x, z, st]
+    if run: FLOOD.append(run)
+# ===== 噴火の溶岩: 火口がふちまで満ちて、斜面を流れ下る(道から 5 マス・海から 6 マスの手前で止める) =====
+def near_sea(x, z, r): return any((x + i, z + j) not in H or H[(x + i, z + j)] < 0 for i in range(-r, r + 1) for j in range(-r, r + 1))
+POOL = [c for c in H if vol(*c) < 1.0]
+FLOWS = []
+for a in (-1.2, 1.5):   # 北がわ(-2.4・2.6)は海が近いので流さない
+    f, last = [], None
+    for k in range(200):
+        d = 1.0 + k * 0.03
+        x, z = round(math.sin(a) * d * 1.15 * G), round(ZC + (9.8 - math.cos(a) * d * 0.75) * G)
+        if (x, z) == last: continue
+        last = (x, z); h = H.get((x, z))
+        if h is None or near_road(x, z, 5) or near_sea(x, z, 6) or (d > 1.9 and h < 7): break
+        y = 19 if d < 1.9 else h + 1
+        if V.get((x, y, z)) in (None, 'air'): f.append([x, y, z])
+    FLOWS.append(f)
+VOLC = {'pool': [min(c[0] for c in POOL), min(c[1] for c in POOL), max(c[0] for c in POOL), max(c[1] for c in POOL)], 'y0': 14, 'y1': 18, 'flows': FLOWS}
+print('flood runs', len(FLOOD), 'cells', len(dist), 'flows', [len(f) for f in FLOWS])
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 10, 'tide': TIDE, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}}}
+        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 11, 'tide': TIDE, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 
