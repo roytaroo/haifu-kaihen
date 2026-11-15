@@ -285,7 +285,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -323,8 +323,8 @@
        "box": {
         "type": "panel",
         "size": [
-         230,
-         118
+         200,
+         103
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -370,7 +370,7 @@
         "text": "#hud_subtitle_text_string",
         "offset": [
          0,
-         150
+         106
         ],
         "layer": 5,
         "anchor_from": "top_middle",
@@ -409,7 +409,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -447,8 +447,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -492,7 +492,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -510,7 +510,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -548,8 +548,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -593,7 +593,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -611,7 +611,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -649,8 +649,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -694,7 +694,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -712,7 +712,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -750,8 +750,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -795,7 +795,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -813,7 +813,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -851,8 +851,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -896,7 +896,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -914,7 +914,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -952,8 +952,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -997,7 +997,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -1015,7 +1015,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -1053,8 +1053,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -1098,7 +1098,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -1116,7 +1116,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -1154,8 +1154,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -1199,7 +1199,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -1217,7 +1217,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -1255,8 +1255,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -1300,7 +1300,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -1318,7 +1318,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -1356,8 +1356,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -1401,7 +1401,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -1419,7 +1419,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -1457,8 +1457,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -1502,7 +1502,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -1520,7 +1520,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -1558,8 +1558,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -1603,7 +1603,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -1621,7 +1621,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -1659,8 +1659,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -1704,7 +1704,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -1722,7 +1722,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -1760,8 +1760,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -1805,7 +1805,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -1823,7 +1823,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -1861,8 +1861,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -1906,7 +1906,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -1924,7 +1924,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -1962,8 +1962,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -2007,7 +2007,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -2025,7 +2025,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2063,8 +2063,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -2108,7 +2108,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -2126,7 +2126,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2164,8 +2164,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -2209,7 +2209,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -2227,7 +2227,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2265,8 +2265,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -2310,7 +2310,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -2328,7 +2328,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2366,8 +2366,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -2411,7 +2411,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -2429,7 +2429,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2467,8 +2467,8 @@
        "box": {
         "type": "panel",
         "size": [
-         280,
-         70
+         210,
+         52
         ],
         "anchor_from": "top_middle",
         "anchor_to": "top_middle",
@@ -2512,7 +2512,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         72
+         54
         ]
        }
       }
@@ -2530,7 +2530,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2549,8 +2549,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_0",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -2564,7 +2564,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -2582,7 +2582,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2601,8 +2601,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_1",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -2616,7 +2616,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -2634,7 +2634,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2653,8 +2653,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_2",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -2668,7 +2668,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -2686,7 +2686,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2705,8 +2705,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_3",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -2720,7 +2720,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -2738,7 +2738,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2757,8 +2757,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_4",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -2772,7 +2772,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -2790,7 +2790,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2809,8 +2809,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_5",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -2824,7 +2824,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -2842,7 +2842,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2861,8 +2861,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_6",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -2876,7 +2876,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -2894,7 +2894,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2913,8 +2913,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_7",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -2928,7 +2928,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -2946,7 +2946,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -2965,8 +2965,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_8",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -2980,7 +2980,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -2998,7 +2998,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3017,8 +3017,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_9",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3032,7 +3032,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3050,7 +3050,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3069,8 +3069,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_10",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3084,7 +3084,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3102,7 +3102,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3121,8 +3121,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_11",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3136,7 +3136,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3154,7 +3154,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3173,8 +3173,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_12",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3188,7 +3188,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3206,7 +3206,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3225,8 +3225,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_13",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3240,7 +3240,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3258,7 +3258,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3277,8 +3277,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_14",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3292,7 +3292,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3310,7 +3310,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3329,8 +3329,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_15",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3344,7 +3344,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3362,7 +3362,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3381,8 +3381,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_16",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3396,7 +3396,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3414,7 +3414,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3433,8 +3433,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_17",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3448,7 +3448,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3466,7 +3466,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3485,8 +3485,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_18",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3500,7 +3500,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3518,7 +3518,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3537,8 +3537,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_19",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3552,7 +3552,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3570,7 +3570,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3589,8 +3589,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_20",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3604,7 +3604,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3622,7 +3622,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3641,8 +3641,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_21",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3656,7 +3656,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3674,7 +3674,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3693,8 +3693,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_22",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3708,7 +3708,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3726,7 +3726,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3745,8 +3745,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_23",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3760,7 +3760,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3778,7 +3778,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3797,8 +3797,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_24",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3812,7 +3812,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3830,7 +3830,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3849,8 +3849,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_25",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3864,7 +3864,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3882,7 +3882,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3901,8 +3901,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_26",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3916,7 +3916,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3934,7 +3934,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -3953,8 +3953,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_27",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -3968,7 +3968,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -3986,7 +3986,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -4005,8 +4005,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_28",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -4020,7 +4020,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -4038,7 +4038,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -4057,8 +4057,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_29",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -4072,7 +4072,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -4090,7 +4090,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -4109,8 +4109,8 @@
         "type": "image",
         "texture": "textures/ui/mpl/num_30",
         "size": [
-         100,
-         75
+         80,
+         60
         ],
         "layer": 3,
         "anchor_from": "top_middle",
@@ -4124,7 +4124,7 @@
        "sub@hud.mpl_sub": {
         "offset": [
          0,
-         76
+         62
         ]
        }
       }
@@ -4142,7 +4142,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -4256,7 +4256,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -4370,7 +4370,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -4484,7 +4484,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -4598,7 +4598,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -4712,7 +4712,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -4826,7 +4826,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -4955,7 +4955,7 @@
      "anchor_to": "top_middle",
      "offset": [
       0,
-      -86
+      2
      ],
      "bindings": [
       {
@@ -4982,7 +4982,7 @@
         "anchor_to": "top_middle",
         "offset": [
          0,
-         200
+         150
         ],
         "anims": [
          "@hud.mpl_fadein"
@@ -5079,6 +5079,12 @@
   ]
  },
  "hud_title_text": {
+  "anchor_from": "top_middle",
+  "anchor_to": "top_middle",
+  "offset": [
+   0,
+   6
+  ],
   "modifications": [
    {
     "array_name": "controls",

@@ -190,21 +190,21 @@ if not os.environ.get('MPL_UI_JSON_ONLY'):
     for c in RIBBONS:
         S = 4; w, h = 96 * S, 28 * S; col = ACC[c]
         im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
-        d.rounded_rectangle((0, 0, w - 1, h - 1), 10 * S, fill=col + (255,))
-        g = grad(w, h, (34, 38, 70), (12, 14, 30)); mk = Image.new('L', (w, h))
-        ImageDraw.Draw(mk).rounded_rectangle((S + S // 2, S + S // 2, w - 1 - S - S // 2, h - 1 - S - S // 2), 9 * S, fill=238)
+        d.rounded_rectangle((0, 0, w - 1, h - 1), 10 * S, fill=(255, 255, 255, 70))
+        g = grad(w, h, (30, 34, 58), (12, 14, 28)); mk = Image.new('L', (w, h))
+        ImageDraw.Draw(mk).rounded_rectangle((S, S, w - 1 - S, h - 1 - S), 9 * S, fill=228)
         im.paste(g, (0, 0), mk)
         d.rounded_rectangle((5 * S, 7 * S, 8 * S, h - 7 * S), S * 2, fill=col + (255,))            # 左のしるし
         d.line([(12 * S, 3 * S), (w - 12 * S, 3 * S)], fill=(255, 255, 255, 50), width=S)          # 上のつや
         nine(f'ribbon_{c}', im.resize((w // 2, h // 2), Image.LANCZOS), [16, 7, 16, 7])
-    # カード(ミニゲームの説明・フォーム)
+    # カード(ミニゲームの説明・フォーム): 暗い半透明 + うすい白のふち(オレンジのふちはやめた)
     S = 4; w = h = 48 * S
     im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
-    d.rounded_rectangle((0, 0, w - 1, h - 1), 10 * S, fill=(20, 14, 40, 255))
-    d.rounded_rectangle((2 * S, 2 * S, w - 1 - 2 * S, h - 1 - 2 * S), 8 * S, fill=(255, 200, 60, 255))
-    g = grad(w, h, (52, 40, 96), (22, 18, 48)); mk = Image.new('L', (w, h))
-    ImageDraw.Draw(mk).rounded_rectangle((4 * S, 4 * S, w - 1 - 4 * S, h - 1 - 4 * S), 6 * S, fill=245)
+    d.rounded_rectangle((0, 0, w - 1, h - 1), 9 * S, fill=(255, 255, 255, 70))
+    g = grad(w, h, (30, 34, 58), (14, 16, 30)); mk = Image.new('L', (w, h))
+    ImageDraw.Draw(mk).rounded_rectangle((S, S, w - 1 - S, h - 1 - S), 8 * S, fill=225)
     im.paste(g, (0, 0), mk)
+    d.line([(10 * S, 2 * S), (w - 10 * S, 2 * S)], fill=(255, 255, 255, 60), width=S)
     nine('card', im.resize((48, 48), Image.LANCZOS), [12, 12, 12, 12])
     # ボタン(ふつう・選択中・押した)
     for name, top, bot, border in [('btn', (90, 110, 210), (45, 55, 140), (20, 14, 40)), ('btn_hover', (255, 226, 110), (240, 150, 20), (255, 255, 255)), ('btn_press', (220, 140, 20), (170, 90, 0), (255, 255, 255))]:
@@ -216,12 +216,13 @@ if not os.environ.get('MPL_UI_JSON_ONLY'):
         im.paste(grad(w, h, top, bot), (0, 2 * S if 'press' in name else 0), mk)
         ImageDraw.Draw(im).line([(7 * S, 4 * S), (w - 7 * S, 4 * S)], fill=(255, 255, 255, 110), width=S)
         nine(name, im.resize((w // 4, h // 4), Image.LANCZOS), [6, 6, 6, 6])
-    # アクションバー・サイドバーの背景
-    im = Image.new('RGBA', (64, 32)); d = ImageDraw.Draw(im)
-    d.rounded_rectangle((0, 0, 63, 31), 8, fill=(14, 10, 30, 225), outline=(255, 200, 60, 255), width=2)
+    # アクションバー・説明の文字の背景: 暗い半透明の角丸だけ(ふちなし)
+    S = 4; im = Image.new('RGBA', (64 * S, 32 * S)); d = ImageDraw.Draw(im)
+    d.rounded_rectangle((0, 0, 64 * S - 1, 32 * S - 1), 9 * S, fill=(10, 12, 24, 170))
+    im = im.resize((64, 32), Image.LANCZOS)
     nine('toast', im, [9, 9, 9, 9])
     im = Image.new('RGBA', (16, 16)); d = ImageDraw.Draw(im)
-    d.rectangle((0, 0, 15, 15), fill=(14, 10, 30, 215)); d.rectangle((0, 0, 15, 1), fill=(255, 200, 60, 255)); d.rectangle((0, 14, 15, 15), fill=(255, 200, 60, 255))
+    d.rectangle((0, 0, 15, 15), fill=(10, 12, 24, 170)); d.rectangle((0, 0, 15, 0), fill=(255, 255, 255, 70))
     nine('side', im, [3, 3, 3, 3])
     print('textures ok')
 
@@ -254,9 +255,9 @@ ctrls = []
 for i, key in enumerate(KEYS):
     mark = BMARK + code(i)
     if key.startswith('n'):  # 数字(サイコロ)
-        body = [{'num': {'type': 'image', 'texture': f'textures/ui/mpl/num_{key[1:]}', 'size': [100, 75], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
+        body = [{'num': {'type': 'image', 'texture': f'textures/ui/mpl/num_{key[1:]}', 'size': [80, 60], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
                          'anims': ['@hud.mpl_pop1']}},
-                {'sub@hud.mpl_sub': {'offset': [0, 76]}}]
+                {'sub@hud.mpl_sub': {'offset': [0, 62]}}]
     elif key.startswith('r_'):  # 帯
         body = [{'stack': {'type': 'stack_panel', 'orientation': 'vertical', 'size': ['100%', '100%c'], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'anims': ['@hud.mpl_slide'], 'controls': [
             {'rb': {'type': 'panel', 'size': ['100%', '100%c'], 'controls': [{'img': {'type': 'image', 'texture': f'textures/ui/mpl/ribbon_{key[2:]}', 'size': ['100%c + 56px', '100%c + 14px'], 'layer': 3,
@@ -264,7 +265,7 @@ for i, key in enumerate(KEYS):
             {'gap': {'type': 'panel', 'size': ['100%', 4]}},
             {'sb': {'type': 'panel', 'size': ['100%', '100%c'], 'controls': [{'sub@hud.mpl_sub': {}}]}}]}}]
     elif key == 'talk':  # DJ トシオのせりふ(画面の下の方、RPG の文字の箱)
-        body = [{'img': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [320, '100%c + 18px'], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, 200],
+        body = [{'img': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [320, '100%c + 18px'], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, 150],
                          'anims': ['@hud.mpl_fadein'], 'controls': [{'st': {'type': 'stack_panel', 'orientation': 'vertical', 'size': [296, '100%c'], 'controls': [
                              {'name': {'type': 'image', 'texture': 'textures/ui/mpl/ribbon_purple', 'size': [96, 18], 'layer': 4, 'controls': [
                                  {'t': {'type': 'label', 'text': T, 'layer': 5, 'shadow': True, 'localize': False, 'color': [1, 0.9, 0.4], 'bindings': [col(T)]}}]}},
@@ -286,17 +287,17 @@ for i, key in enumerate(KEYS):
             body.append({'rays': {'type': 'panel', 'size': [200, 200], 'offset': [0, -60], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'controls': [
                 {'img': {'type': 'image', 'texture': 'textures/ui/mpl/rays', 'size': ['100%', '100%'], 'layer': 1, 'alpha': 0.85, 'anims': ['@hud.mpl_rays']}}]}})
         body += [{'flash': {'type': 'image', 'texture': 'textures/ui/mpl/flash', 'size': [300, 110], 'offset': [0, -20], 'layer': 2, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'anims': ['@hud.mpl_flash']}},
-                 {'box': {'type': 'panel', 'size': [230, 118] if key == 'title' else [280, 70], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'controls': [
+                 {'box': {'type': 'panel', 'size': [200, 103] if key == 'title' else [210, 52], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'controls': [
                      {'logo': {'type': 'image', 'texture': 'textures/ui/mpl/logo_venus' if key == 'title' else f'textures/ui/mpl/logo_{key}', 'size': ['100%', '100%'], 'layer': 3, 'anims': ['@hud.mpl_pop1']}},
                      {'glint': {'type': 'image', 'texture': 'textures/ui/mpl/glint', 'size': [0, 0], 'offset': [96, -18], 'layer': 4, 'anims': ['@hud.mpl_glint']}}]}},
-                 ({'tsub': {'type': 'label', 'text': '#hud_subtitle_text_string', 'offset': [0, 150], 'layer': 5, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
+                 ({'tsub': {'type': 'label', 'text': '#hud_subtitle_text_string', 'offset': [0, 106], 'layer': 5, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
                             'shadow': True, 'localize': False, 'font_scale_factor': 0.9, 'color': [1, 1, 1], 'anims': ['@hud.mpl_fadein'], 'bindings': [col('#hud_subtitle_text_string')]}}
-                  if key == 'title' else {'sub@hud.mpl_sub': {'offset': [0, 72]}})]  # タイトルの下は背景なし・小さめ
-    ctrls.append({f'k_{key}': {'type': 'panel', 'size': ['100%', 0], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, -86],  # 画面の上の方(人の顔に重ならない)
+                  if key == 'title' else {'sub@hud.mpl_sub': {'offset': [0, 54]}})]  # タイトルの下は背景なし・小さめ
+    ctrls.append({f'k_{key}': {'type': 'panel', 'size': ['100%', 0], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, 2],  # 画面の上の端から(人の顔に重ならない)
                                 'bindings': [col(T), vis(has(mark))], 'controls': body}})
 hud['mpl_sub'] = dict(SUB, offset=[0, 0])
 hud['mpl_banner'] = {'type': 'panel', 'size': ['100%', 0], 'controls': ctrls}
-hud['hud_title_text'] = {'modifications': [{'array_name': 'controls', 'operation': 'insert_front', 'value': [{'mpl_banner@hud.mpl_banner': {}}]}]}
+hud['hud_title_text'] = {'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, 6], 'modifications': [{'array_name': 'controls', 'operation': 'insert_front', 'value': [{'mpl_banner@hud.mpl_banner': {}}]}]}
 # ふつうのタイトル・サブタイトルは印がある時だけかくす
 def hide(path, binds):
     d = hud.setdefault(path, {})

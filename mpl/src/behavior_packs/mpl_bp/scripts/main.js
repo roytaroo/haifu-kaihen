@@ -2078,7 +2078,7 @@ function bgm(kind) {
     if (!kind || load("bgm_off", false)) return;
     const [snd, len] = BGM[kind];
     bgmNow = snd;
-    const play = () => cmd(`execute as @a at @s run playsound ${snd} @s ~ ~ ~ 0.55 1`);
+    const play = () => cmd(`execute as @a at @s run playsound ${snd} @s ~ ~ ~ 0.3 1`);
     play(); bgmTimer = system.runInterval(play, len);
 }
 
@@ -2181,11 +2181,13 @@ async function swapAnim(a, b) {
 }
 
 // マスからマスへ走る(テレポートではなく、1tickずつなめらかに進む。足もとが少し上下)
-async function walkTo(p, to, ticks = 11) {
+async function walkTo(p, to, ticks = 13) {
     const from = p.location, yaw = (Math.atan2(-(to.x - from.x), to.z - from.z) * 180) / Math.PI;
+    pose(p, "run"); // 0.65秒 = 1マスぶんの走るアニメ
     for (let t = 1; t <= ticks && p.isValid; t++) {
         const u = t / ticks;
-        try { p.teleport({ x: from.x + (to.x - from.x) * u, y: from.y + (to.y - from.y) * u + Math.abs(Math.sin(u * Math.PI * 2)) * 0.18, z: from.z + (to.z - from.z) * u }, { rotation: { x: 0, y: yaw } }); } catch {}
+        try { p.teleport({ x: from.x + (to.x - from.x) * u, y: from.y + (to.y - from.y) * u, z: from.z + (to.z - from.z) * u }, { rotation: { x: 0, y: yaw } }); } catch {}
+        if (t % 4 === 0) { const q = p.location; cmd(`particle minecraft:basic_smoke_particle ${q.x} ${q.y + 0.1} ${q.z}`); }
         await wait(1);
     }
 }
@@ -2444,7 +2446,7 @@ async function shuffleSpace(p) {
 }
 // 全体を見るカメラ(南の上空から)と、広場から神殿を見るカメラ
 const [AX0, , AZ0, AX1, , AZ1] = BD.area;
-const VIEW = { pos: { x: 0.5, y: 105, z: AZ0 - 22 }, look: { x: 0.5, y: 0, z: (AZ0 + AZ1) / 2 - 8 } };
+const VIEW = { pos: { x: 0.5, y: 92, z: (AZ0 + AZ1) / 2 - 28 }, look: { x: 0.5, y: 0, z: (AZ0 + AZ1) / 2 + 2 } }; // 前より近く(奥がかすまないように)
 const PLAZA = { pos: { x: 0.5, y: 5, z: BD.finaleZ - 6 }, look: { x: 0.5, y: 16, z: BOARD.z } };
 
 // ===== すごろく =====
@@ -2633,7 +2635,7 @@ async function takeTurn(p, last, nextName) {
         else { const nx = SPACES[G.pos[name]].next; G.pos[name] = nx.length > 1 ? await chooseWay(p, nx) : nx[0]; }
         const s = spot(G.pos[name]);
         follow(p, 0.55, s);
-        await walkTo(p, s, 11);
+        await walkTo(p, s, 13);
         actionbar(`${I.dice} のこり §e§l${k - 1}`, world.getPlayers());
         cmd(`playsound note.pling @a ${s.x} ${s.y} ${s.z} 0.9 ${(0.8 + (total - k) * 0.08).toFixed(2)}`);
         if (G.magnet[name]) addCoins(name, 1);
@@ -3242,7 +3244,7 @@ system.runInterval(() => {
         cmd(`camera "${p.name}" set minecraft:free ease 0.5 linear pos ${(c.x + Math.cos(a) * 85).toFixed(1)} 55 ${(c.z + Math.sin(a) * 85).toFixed(1)} facing ${c.x} 6 ${c.z}`);
         if (system.currentTick % 120 === 0) banner("title", "ジャンプでスタート", 130, [p]);
         // タイトル画面の BGM(ボードの曲)。1曲ぶん(600tick)ごとに鳴らし直す
-        if (!G.on && (titleBgm.get(p.name) ?? -1e9) + 600 <= system.currentTick) { titleBgm.set(p.name, system.currentTick); if (!load("bgm_off", false)) cmd(`execute as "${p.name}" at @s run playsound mpl.bgm_board @s ~ ~ ~ 0.55 1`); }
+        if (!G.on && (titleBgm.get(p.name) ?? -1e9) + 600 <= system.currentTick) { titleBgm.set(p.name, system.currentTick); if (!load("bgm_off", false)) cmd(`execute as "${p.name}" at @s run playsound mpl.bgm_board @s ~ ~ ~ 0.3 1`); }
     }
 }, 10);
 // エリアの環境音: ボードの上で、自分のいるエリアの音が小さく流れる
