@@ -144,11 +144,12 @@ LOGOS = [
     ('finish', 'FINISH!', 'gold', False, True),
     ('bonusgame', 'BONUS GAME!', RAINBOW, False, True),
     ('sudden', 'SUDDEN DEATH', 'red', False, False),
+    ('vs', 'VS', 'red', False, True),
 ]
 NUMS = list(range(0, 31))
 RIBBONS = {'gold': ((255, 214, 70), (220, 120, 0)), 'blue': ((90, 170, 255), (20, 70, 200)), 'red': ((255, 110, 100), (180, 20, 30)),
            'purple': ((200, 130, 255), (110, 40, 200)), 'green': ((120, 230, 110), (20, 140, 50)), 'gray': ((140, 145, 165), (60, 64, 82))}
-KEYS = [k for k, *_ in LOGOS] + [f'n{n}' for n in NUMS] + [f'r_{c}' for c in RIBBONS] + ['card']
+KEYS = [k for k, *_ in LOGOS] + [f'n{n}' for n in NUMS] + [f'r_{c}' for c in RIBBONS] + ['card', 'talk']
 assert len(KEYS) <= 256
 
 def nine(name, img, sl):
@@ -262,6 +263,14 @@ for i, key in enumerate(KEYS):
                     'controls': [{'t': {'type': 'label', 'text': T, 'layer': 4, 'shadow': True, 'localize': False, 'font_scale_factor': 1.6, 'color': [1, 1, 1], 'bindings': [col(T)]}}]}}]}},
             {'gap': {'type': 'panel', 'size': ['100%', 4]}},
             {'sb': {'type': 'panel', 'size': ['100%', '100%c'], 'controls': [{'sub@hud.mpl_sub': {}}]}}]}}]
+    elif key == 'talk':  # DJ トシオのせりふ(画面の下の方、RPG の文字の箱)
+        body = [{'img': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [320, '100%c + 18px'], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, 200],
+                         'anims': ['@hud.mpl_fadein'], 'controls': [{'st': {'type': 'stack_panel', 'orientation': 'vertical', 'size': [296, '100%c'], 'controls': [
+                             {'name': {'type': 'image', 'texture': 'textures/ui/mpl/ribbon_purple', 'size': [96, 18], 'layer': 4, 'controls': [
+                                 {'t': {'type': 'label', 'text': T, 'layer': 5, 'shadow': True, 'localize': False, 'color': [1, 0.9, 0.4], 'bindings': [col(T)]}}]}},
+                             {'gap': {'type': 'panel', 'size': ['100%', 4]}},
+                             {'say': {'type': 'label', 'text': '#hud_subtitle_text_string', 'size': ['100%', 'default'], 'text_alignment': 'left', 'layer': 5, 'shadow': True, 'localize': False,
+                                      'font_scale_factor': 1.15, 'color': [1, 1, 1], 'bindings': [col('#hud_subtitle_text_string')]}}]}}]}}]
     elif key == 'card':  # ミニゲームの説明カード
         body = [{'img': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [280, '100%c + 22px'], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
                          'anims': ['@hud.mpl_drop'], 'controls': [{'st': {'type': 'stack_panel', 'orientation': 'vertical', 'size': [256, '100%c'], 'controls': [

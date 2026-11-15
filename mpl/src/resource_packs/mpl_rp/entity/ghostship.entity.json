@@ -1,0 +1,28 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:ghostship",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/mmgplus_ghostship"
+   },
+   "geometry": {
+    "default": "geometry.mmgplus.ghostship"
+   },
+   "render_controllers": [
+    "controller.render.default"
+   ],
+   "animations": {
+    "a": "animation.mmgplus.ghostship"
+   },
+   "scripts": {
+    "animate": [
+     "a"
+    ]
+   }
+  }
+ }
+}

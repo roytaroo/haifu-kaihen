@@ -1,0 +1,22 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.ghostship": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "rotation": [
+      "math.sin(q.life_time * 60) * 2",
+      0,
+      "math.sin(q.life_time * 45) * 3"
+     ],
+     "position": [
+      0,
+      "math.sin(q.life_time * 80) * 0.6",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

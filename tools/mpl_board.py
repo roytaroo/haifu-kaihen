@@ -63,6 +63,11 @@ for k, lst in KIND.items():
 for e, lst in EV.items():
     for g in lst: N(*g)['kind'] = 'event'; N(*g)['ev'] = e
 nodes[0]['kind'] = 'start'
+# v3: シャッフルマス・銀行マス(1つずつ)、火山のラッキーを増やす、潮で沈む浜の道
+N(0, -6)['kind'] = 'shuffle'; N(0, -6).pop('ev', None)
+N(1, -9)['kind'] = 'bank'
+for g in [(1, 8), (-3, 8)]: N(*g)['kind'] = 'lucky'
+N(-5, -9)['gate'] = 'tide'
 N(7, 2)['n'] = [1, 0]; N(-5, 6)['n'] = [0, 1]; N(-7, -6)['n'] = [-1, 0]
 
 # 道のセル: (x,z) → 高さ。マスは 3x3、マスの間 3セルで高さをつなぐ
@@ -165,7 +170,7 @@ clear(fx - 1, 0, fz - 1, fx + 1, 6, fz - 1)
 # ===== 道をしく =====
 ROADMAT = {'port': 'smooth_sandstone', 'beach': 'smooth_sandstone', 'harbor': 'spruce_planks', 'cliff': 'polished_andesite', 'crystal': 'polished_andesite', 'foot': 'polished_deepslate',
            'forest': 'packed_mud', 'tree': 'spruce_planks', 'ship': 'spruce_planks', 'volcano': 'polished_blackstone_bricks', 'shrine': 'quartz_bricks', 'meadow': 'smooth_sandstone'}
-COL = {'start': 'white_concrete', 'blue': 'light_blue_concrete', 'red': 'red_concrete', 'event': 'lime_concrete', 'lucky': 'yellow_concrete', 'shop': 'purple_concrete', 'skull': 'black_concrete'}
+COL = {'shuffle': 'pink_concrete', 'bank': 'cyan_concrete', 'start': 'white_concrete', 'blue': 'light_blue_concrete', 'red': 'red_concrete', 'event': 'lime_concrete', 'lucky': 'yellow_concrete', 'shop': 'purple_concrete', 'skull': 'black_concrete'}
 BRIDGE_BOX = None
 for (x, z), y in ROAD.items():
     g = H.get((x, z))
@@ -280,6 +285,17 @@ def house(x, z, w, d, flo, door):   # door: 'n' か 's'(道のある方)
 for gx, w in ((-5.0, 7), (-3.5, 7), (-1.5, 7), (1.2, 7), (3.6, 7), (5.4, 7)):
     x = round(gx * G) - w // 2; z = wz(-9) + 4
     if free(x, z, x + w - 1, z + 6, 0): house(x, z, w, 7, random.choice([1, 2, 2]), 's')
+# 潮で沈む道(浜の本線、分かれ道の先 (-5,-9)〜(-3,-9) のあいだ)
+TIDE = sorted({(x, z) for (x, z) in ROAD if wx(-5.5) <= x <= wx(-2.5) and wz(-9) - 1 <= z <= wz(-9) + 1})
+# DJ ブース(広場の東): 台・スピーカー・ターンテーブル・ネオン
+dbx, dbz = 10, wz(-9) - 7
+box(dbx - 3, 0, dbz - 2, dbx + 3, 0, dbz + 2, 'polished_blackstone'); box(dbx - 3, 1, dbz - 2, dbx + 3, 1, dbz - 2, 'black_concrete')
+box(dbx - 2, 2, dbz - 2, dbx + 2, 2, dbz - 2, 'polished_blackstone_slab'); put(dbx - 1, 2, dbz - 2, 'black_concrete'); put(dbx + 1, 2, dbz - 2, 'black_concrete')
+for sx in (dbx - 3, dbx + 3):
+    box(sx, 1, dbz - 1, sx, 3, dbz - 1, 'black_concrete'); put(sx, 2, dbz - 2, 'note_block'); put(sx, 4, dbz - 1, 'magenta_stained_glass')
+for i, c in enumerate(['magenta', 'purple', 'blue', 'light_blue', 'lime', 'yellow', 'orange']): put(dbx - 3 + i, 5, dbz + 2, f'{c}_stained_glass'); put(dbx - 3 + i, 4, dbz + 2, 'sea_lantern' if i % 2 else 'black_concrete')
+box(dbx - 3, 1, dbz + 2, dbx - 3, 3, dbz + 2, 'black_concrete'); box(dbx + 3, 1, dbz + 2, dbx + 3, 3, dbz + 2, 'black_concrete')
+DJ = {'x': dbx + 0.5, 'y': 1, 'z': dbz + 0.5, 'cam': {'x': dbx + 0.5, 'y': 3.4, 'z': dbz - 6}}
 # 広場: スタートの南に石だたみ・アーチ・旗
 pz = wz(-9)
 for x in range(-13, 14):
@@ -494,7 +510,7 @@ def merge():
 cmds = merge()
 out_nodes = [{k: v for k, v in nd.items() if k != 'g'} for nd in nodes]
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 9}
+        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 10, 'tide': TIDE, 'dj': DJ, 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 
@@ -511,7 +527,7 @@ C = {'grass_block': (110, 170, 70), 'moss_block': (90, 140, 50), 'dirt': (130, 9
      'sea_lantern': (200, 230, 230), 'gold_block': (250, 210, 60), 'quartz_pillar': (235, 230, 220), 'chiseled_quartz_block': (230, 225, 215), 'amethyst_block': (150, 100, 200), 'purple_stained_glass': (170, 110, 220),
      'dark_oak_planks': (65, 45, 25), 'white_wool': (245, 245, 245), 'red_wool': (180, 40, 40), 'polished_diorite': (200, 200, 200), 'smooth_stone': (170, 170, 170), 'stone_brick_wall': (120, 120, 120),
      'stripped_spruce_log': (140, 110, 70), 'stripped_birch_wood': (200, 180, 120), 'oak_fence': (150, 120, 70), 'barrel': (120, 85, 50), 'hay_block': (200, 170, 40), 'coal_block': (20, 20, 20),
-     'iron_bars': (150, 150, 150), 'red_terracotta': (145, 60, 45), 'waterlily': (40, 120, 50), 'red_nether_brick_slab': (90, 15, 15)}
+     'iron_bars': (150, 150, 150), 'pink_concrete': (240, 140, 180), 'cyan_concrete': (30, 140, 150), 'polished_blackstone': (50, 45, 55), 'polished_blackstone_slab': (55, 50, 60), 'note_block': (110, 70, 50), 'black_concrete': (20, 20, 25), 'red_terracotta': (145, 60, 45), 'waterlily': (40, 120, 50), 'red_nether_brick_slab': (90, 15, 15)}
 def colr(b):
     if b in C: return C[b]
     if 'leaves' in b: return {'oak': (60, 130, 40), 'bir': (110, 150, 60), 'aza': (90, 140, 70), 'che': (240, 170, 200), 'jun': (50, 140, 40), 'spr': (45, 90, 55)}[b[:3]]

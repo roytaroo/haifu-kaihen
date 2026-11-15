@@ -19,6 +19,7 @@ item
 finish
 bonusgame
 sudden
+vs
 n0
 n1
 n2
@@ -57,3 +58,4 @@ r_purple
 r_green
 r_gray
 card
+talk

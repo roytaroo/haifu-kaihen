@@ -1,0 +1,28 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:dj",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/mmgplus_dj"
+   },
+   "geometry": {
+    "default": "geometry.mmgplus.dj"
+   },
+   "render_controllers": [
+    "controller.render.default"
+   ],
+   "animations": {
+    "a": "animation.mmgplus.dj"
+   },
+   "scripts": {
+    "animate": [
+     "a"
+    ]
+   }
+  }
+ }
+}

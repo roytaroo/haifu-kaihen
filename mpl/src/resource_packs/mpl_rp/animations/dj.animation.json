@@ -1,0 +1,52 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.dj": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "position": [
+      0,
+      "math.abs(math.sin(q.life_time * 240)) * 0.6 * (1 - (q.property('mmgplus:mood') == 2))",
+      0
+     ]
+    },
+    "head": {
+     "rotation": [
+      "(q.property('mmgplus:mood') == 1) * math.sin(q.life_time * 520) * 7 + (1 - (q.property('mmgplus:mood') == 1)) * (1 - (q.property('mmgplus:mood') == 2)) * math.sin(q.life_time * 240) * 5 - (q.property('mmgplus:mood') == 2) * 8",
+      "(q.property('mmgplus:mood') == 1) * math.sin(q.life_time * 170) * 14",
+      0
+     ]
+    },
+    "eyes": {
+     "scale": [
+      1,
+      "1 + (q.property('mmgplus:mood') == 2) * 0.7",
+      1
+     ]
+    },
+    "glasses": {
+     "position": [
+      0,
+      "(q.property('mmgplus:mood') == 2) * (2.6 + math.sin(q.life_time * 900) * 0.4)",
+      "(q.property('mmgplus:mood') == 2) * -0.6"
+     ]
+    },
+    "rightArm": {
+     "rotation": [
+      "(q.property('mmgplus:mood') == 1) * (-80 + math.sin(q.life_time * 430) * 35) + (q.property('mmgplus:mood') == 2) * -150 + (1 - (q.property('mmgplus:mood') == 1)) * (1 - (q.property('mmgplus:mood') == 2)) * (-35 + math.sin(q.life_time * 480) * 12)",
+      0,
+      "(q.property('mmgplus:mood') == 1) * (15 + math.sin(q.life_time * 300) * 20) + (q.property('mmgplus:mood') == 2) * 25"
+     ]
+    },
+    "leftArm": {
+     "rotation": [
+      "(q.property('mmgplus:mood') == 1) * (-60 + math.sin(q.life_time * 380 + 90) * 30) + (q.property('mmgplus:mood') == 2) * -150 + (1 - (q.property('mmgplus:mood') == 1)) * (1 - (q.property('mmgplus:mood') == 2)) * (-45 + math.sin(q.life_time * 480 + 180) * 6)",
+      0,
+      "(q.property('mmgplus:mood') == 1) * (-10 - math.sin(q.life_time * 250) * 20) - (q.property('mmgplus:mood') == 2) * 25"
+     ]
+    }
+   }
+  }
+ }
+}
