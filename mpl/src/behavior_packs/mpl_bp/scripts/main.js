@@ -424,7 +424,7 @@ async function gamePool() {
             if (!puffers.some((f) => Math.hypot(f.location.x - p.location.x, f.location.y - (p.location.y + 0.8), f.location.z - p.location.z) < 1.6)) continue;
             stung.set(p.name, system.currentTick + 40);
             const lost = Math.min(2, got.get(p.name) ?? 0);
-            if (lost) { got.set(p.name, got.get(p.name) - lost); bar(p, `§cフグにさされて ${lost}点 落とした！`); cmd(`playsound mob.pufferfish.sting "${p.name}"`); }
+            if (lost) { got.set(p.name, got.get(p.name) - lost); bar(p, `§cフグにさされて ${lost}点 落とした！`); cmd(`playsound random.hurt "${p.name}"`); }
         }
         const list = TREASURE.flatMap((tr) => dim().getEntities({ type: tr.type }).map((e) => ({ e, tr })));
         for (let n = list.length; n < want(); n++) spawn();
@@ -1100,7 +1100,7 @@ async function gameLaser() {
             const axis = Math.random() < 0.5 ? "x" : "z", dir = Math.random() < 0.5 ? 1 : -1, high = Math.random() < 0.4;
             const e = spawnAt("mmgplus:laser_beam", { x: 0.5, y: high ? 1.9 : 1.2, z: 0.5 });
             if (e) lasers.push({ e, axis, dir, pos: -9 * dir, high, speed: 0.12 + Math.min(0.2, sec / 300) + level() * 0.02 });
-            soundAll("mob.guardian.attack", 1.6);
+            soundAll("mob.guardian.hit", 1.6);
         }
         for (const L of lasers.slice()) {
             const prev = L.pos; L.pos += L.dir * L.speed * 2;
@@ -2135,7 +2135,7 @@ async function vsScreen() {
     cam.fade(); await wait(8);
     ps.forEach((q, i) => q.teleport({ x: 0.5 + (i - (ps.length - 1) / 2) * 2.4, y: 1, z: BD.finaleZ }, { facingLocation: { x: 0.5 + (i - (ps.length - 1) / 2) * 2.4, y: 1.6, z: BD.finaleZ - 10 } }));
     cam.to("@a[tag=mpl_board]", { x: 0.5, y: 2.4, z: BD.finaleZ - 7.5 }, { x: 0.5, y: 2.1, z: BD.finaleZ }, 0.1);
-    banner("vs", ps.map((q) => `${G.color[q.name] ?? "§f"}${q.name}`).join(" §7vs "), 60); soundAllPlayers("mob.enderdragon.growl", 1.6);
+    banner("vs", ps.map((q) => `${G.color[q.name] ?? "§f"}${q.name}`).join(" §7vs "), 60); soundAllPlayers("random.levelup", 1.2);
     ps.forEach((q, i) => system.runTimeout(() => { if (q.isValid) pose(q, "guts"); }, 8 + i * 6));
     await wait(62);
 }
@@ -2145,7 +2145,7 @@ function coinRain(q, n) {
     for (let k = 0; k < Math.min(10, n); k++) system.runTimeout(async () => {
         const c = spawnAt("mmgplus:coin", { x: l.x + (Math.random() - 0.5) * 0.8, y: l.y + 5, z: l.z + (Math.random() - 0.5) * 0.8 }); if (!c) return;
         for (let t = 1; t <= 12; t++) { try { c.teleport({ x: c.location.x, y: l.y + 5 - (3.6 * t) / 12, z: c.location.z }); } catch {} await wait(1); }
-        try { c.remove(); } catch {} cmd(`playsound random.orb @a 0 0 0 0.35 ${(1.3 + k * 0.05).toFixed(2)}`);
+        try { c.remove(); } catch {} if (k === 0) cmd("playsound random.orb @a 0 0 0 0.6 1.4");
     }, k * 4);
 }
 // コインがふえた時は頭の上から落ちてきて吸いこまれる / へった時は足もとに散らばる(ボードの上だけ)
@@ -2181,15 +2181,12 @@ async function swapAnim(a, b) {
 }
 
 // マスからマスへ走る(テレポートではなく、1tickずつなめらかに進む。足もとが少し上下)
-async function walkTo(p, to, ticks = 13) {
-    const from = p.location, yaw = (Math.atan2(-(to.x - from.x), to.z - from.z) * 180) / Math.PI;
-    pose(p, "run"); // 0.65秒 = 1マスぶんの走るアニメ
-    for (let t = 1; t <= ticks && p.isValid; t++) {
-        const u = t / ticks;
-        try { p.teleport({ x: from.x + (to.x - from.x) * u, y: from.y + (to.y - from.y) * u, z: from.z + (to.z - from.z) * u }, { rotation: { x: 0, y: yaw } }); } catch {}
-        if (t % 4 === 0) { const q = p.location; cmd(`particle minecraft:basic_smoke_particle ${q.x} ${q.y + 0.1} ${q.z}`); }
-        await wait(1);
-    }
+async function walkTo(p, to) {
+    // 1マスずつワープ(テレポート)+ 小さな光
+    const yaw = (Math.atan2(-(to.x - p.location.x), to.z - p.location.z) * 180) / Math.PI;
+    try { p.teleport(to, { rotation: { x: 0, y: yaw } }); } catch {}
+    cmd(`particle minecraft:villager_happy ${to.x} ${to.y + 0.2} ${to.z}`);
+    await wait(7);
 }
 // スターまでのマス数(分かれ道もふくめて一番近い道)
 function starDist(from) {
@@ -2552,7 +2549,7 @@ async function startParty(turns, players, hc = {}) {
             hud();
             cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); setBridge(bridgeDown()); setTide(tideHigh());
             banner(last ? "lastspurt" : "turn", (last ? `TURN ${G.turn} / ${G.turns}  青と赤のマスが2倍` : `${G.turn} / ${G.turns}`) + (bridgeDown() ? "   §aドローブリッジ: 通れる" : "   §cドローブリッジ: 通行止め"), 55);
-            soundAllPlayers(last ? "mob.wither.spawn" : "random.levelup", last ? 1.6 : 0.9);
+            soundAllPlayers("random.levelup", last ? 0.7 : 0.9);
             await wait(55);
             await turnNews(last);
             for (let k = 0; k < G.players.length && G.on; k++) {
@@ -2612,7 +2609,7 @@ async function takeTurn(p, last, nextName) {
             if (l.y - base.y > 0.45 && Math.hypot(l.x - base.x, l.z - base.z) < 0.9) hit = true; // ジャンプで頭が届いた
             if (isBot(p) && t === 30) cmd(`scriptevent mmgbot:jump ${name}`);
             if (hit || t >= 239) break;
-            if (t % 3 === 0) cmd(`playsound random.click @a ${base.x} ${base.y} ${base.z} 0.35 ${(1 + Math.random()).toFixed(2)}`);
+            if (t % 8 === 0) cmd(`playsound random.click @a ${base.x} ${base.y} ${base.z} 0.5 ${(1 + Math.random()).toFixed(2)}`);
             await wait(1);
         }
         let roll = rand(1, 10);
@@ -2634,8 +2631,8 @@ async function takeTurn(p, last, nextName) {
         if (back) G.pos[name] = prevOf(G.pos[name]);
         else { const nx = SPACES[G.pos[name]].next; G.pos[name] = nx.length > 1 ? await chooseWay(p, nx) : nx[0]; }
         const s = spot(G.pos[name]);
-        follow(p, 0.55, s);
-        await walkTo(p, s, 13);
+        follow(p, 0.3, s);
+        await walkTo(p, s);
         actionbar(`${I.dice} のこり §e§l${k - 1}`, world.getPlayers());
         cmd(`playsound note.pling @a ${s.x} ${s.y} ${s.z} 0.9 ${(0.8 + (total - k) * 0.08).toFixed(2)}`);
         if (G.magnet[name]) addCoins(name, 1);
@@ -3252,7 +3249,7 @@ const AMBIENT = { beach: ["random.splash", 0.5], port: ["random.splash", 0.6], h
     volcano: ["liquid.lavapop", 0.8], crystal: ["chime.amethyst_block", 1], cliff: ["chime.amethyst_block", 1.2], shrine: ["note.chime", 0.7], meadow: ["note.flute", 1.4], foot: ["liquid.lavapop", 1.1] };
 system.runInterval(() => {
     if (!G.on || run.active) return;
-    for (const n of G.players) { const z = SPACES[G.pos[n]]?.zone, a = AMBIENT[z]; if (a && Math.random() < 0.6) cmd(`execute as "${n}" at @s run playsound ${a[0]} @s ~ ~ ~ 0.25 ${a[1]}`); }
+    return; // 環境音はやめた(音が多すぎて、ほかの音が落ちるため)
 }, 70);
 // 途中で抜けた人: すごろく中なら BOT が引きつぐ(戻ってきたら本人に返す)
 const BOT_NAMES = ["Jack", "Humming", "Widow", "Splash", "Oracle", "Byte", "Shade", "Jester", "Replica", "Comet"];

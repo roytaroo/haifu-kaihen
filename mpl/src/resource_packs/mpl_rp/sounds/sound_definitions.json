@@ -187,31 +187,6 @@
     }
    ]
   },
-  "mplx.mob.enderdragon.growl": {
-   "category": "ui",
-   "sounds": [
-    {
-     "name": "sounds/mob/enderdragon/growl1",
-     "volume": 8,
-     "is3D": false
-    },
-    {
-     "name": "sounds/mob/enderdragon/growl2",
-     "volume": 8,
-     "is3D": false
-    },
-    {
-     "name": "sounds/mob/enderdragon/growl3",
-     "volume": 8,
-     "is3D": false
-    },
-    {
-     "name": "sounds/mob/enderdragon/growl4",
-     "volume": 8,
-     "is3D": false
-    }
-   ]
-  },
   "mplx.mob.endermen.portal": {
    "category": "ui",
    "sounds": [
@@ -246,6 +221,27 @@
     {
      "name": "sounds/mob/fox/screech4",
      "volume": 0.8,
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.guardian.hit": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/guardian/guardian_hit1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/guardian/guardian_hit2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/guardian/guardian_hit3",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/guardian/guardian_hit4",
      "is3D": false
     }
    ]
@@ -458,15 +454,6 @@
     }
    ]
   },
-  "mplx.mob.wither.spawn": {
-   "category": "ui",
-   "sounds": [
-    {
-     "name": "sounds/mob/wither/spawn",
-     "is3D": false
-    }
-   ]
-  },
   "mplx.mob.zombie.unfect": {
    "category": "ui",
    "sounds": [
@@ -602,6 +589,15 @@
     },
     {
      "name": "sounds/random/glass3",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.hurt": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/hurt",
      "is3D": false
     }
    ]

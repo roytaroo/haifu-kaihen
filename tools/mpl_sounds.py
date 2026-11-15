@@ -13,6 +13,8 @@ van = json.loads(t); van = van.get('sound_definitions', van)
 src = open(os.path.join(SC, 'main.js'), encoding='utf-8').read() + open(os.path.join(ROOT, 'mpl', 'src', 'behavior_packs', 'mpl_bot', 'scripts', 'bot.js'), encoding='utf-8').read()
 ids = set(re.findall(r'playsound ([a-z_][\w.]*)', src)) | set(re.findall(r'soundAll(?:Players)?\(\s*(?:[^"\n]*\?\s*)?"([\w.]+)"', src)) | set(re.findall(r'"((?:random|note|mob|block|ambient|firework|item|dig|step|music|portal|beacon|bucket|fire|liquid|game|raid|respawn_anchor|conduit|crossbow|bubble|elytra|horn|smithing_table|ui|camera|armor|sign|use|hit|fall|jump|land|place|break|bloom|cauldron|chime|component|copper|trial_spawner|vault|mace|wind_charge)\.[\w.]+)"', src))
 ids |= {'block.barrel.open', 'block.barrel.close'}; ids.discard('block.barrel.')
+# 名前を組み立てて鳴らす音も拾う: スクリプトの中の文字列のうち、公式の音の名前と同じものは全部
+ids |= {x for x in re.findall(r'["`]([a-z_]+(?:\.[a-z0-9_]+)+)["`]', src) if x in van}
 p = os.path.join(RP, 'sounds', 'sound_definitions.json')
 d = json.load(open(p, encoding='utf-8')); sd = d['sound_definitions']
 for k in [k for k in sd if k.startswith('mplx.')]: del sd[k]
