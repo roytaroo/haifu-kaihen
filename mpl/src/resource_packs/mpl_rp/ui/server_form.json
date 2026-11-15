@@ -1781,7 +1781,7 @@
   "type": "panel",
   "size": [
    "100%",
-   26
+   28
   ],
   "controls": [
    {
@@ -1789,7 +1789,7 @@
      "$pressed_button_name": "button.form_button_click",
      "size": [
       "100% - 8px",
-      23
+      25
      ],
      "anchor_from": "center",
      "anchor_to": "center",
@@ -1964,48 +1964,41 @@
          },
          {
           "head": {
-           "type": "label",
-           "text": "#title_text",
-           "size": [
-            "100%",
-            "default"
-           ],
-           "text_alignment": "center",
-           "layer": 3,
-           "shadow": true,
-           "localize": false,
-           "font_scale_factor": 1.2,
-           "color": [
-            1,
-            0.82,
-            0.3
-           ],
-           "bindings": [
-            {
-             "binding_name": "#title_text"
-            }
-           ],
-           "font_type": "unicode"
-          }
-         },
-         {
-          "g0": {
-           "type": "panel",
-           "size": [
-            "100%",
-            4
-           ]
-          }
-         },
-         {
-          "ln": {
            "type": "image",
-           "texture": "textures/ui/mpl/line",
+           "texture": "textures/ui/mpl/head",
            "size": [
             "100%",
-            1
+            24
            ],
-           "layer": 3
+           "layer": 3,
+           "controls": [
+            {
+             "t": {
+              "type": "label",
+              "text": "#title_text",
+              "size": [
+               "100%",
+               "default"
+              ],
+              "text_alignment": "center",
+              "layer": 4,
+              "shadow": true,
+              "localize": false,
+              "font_scale_factor": 1.2,
+              "color": [
+               1,
+               1,
+               1
+              ],
+              "bindings": [
+               {
+                "binding_name": "#title_text"
+               }
+              ],
+              "font_type": "unicode"
+             }
+            }
+           ]
           }
          },
          {

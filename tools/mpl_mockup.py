@@ -68,13 +68,12 @@ def scene_dj():
 def scene_menu():
     im = bg(); sh = Image.new('RGBA', im.size, (0, 0, 0, 115)); im.alpha_composite(sh); d = ImageDraw.Draw(im)
     btns = ["すごろくを始める", "ミニゲーム勝ち抜き戦(5回)", "ミニゲームを1つ選んで遊ぶ", "ミニゲームを全部順番に遊ぶ", "ミニゲームの ON/OFF", "次のページ ▶"]
-    h = 4 + 8 * 1.2 + 4 + 1 + 6 + 8 + 6 + 26 * len(btns) + 20; y0 = GH / 2 - h / 2
+    h = 4 + 24 + 6 + 8 + 6 + 28 * len(btns) + 20; y0 = GH / 2 - h / 2
     paste(im, nine('card', 250, h, (12, 12, 12, 12)), GW / 2 - 125, y0)
-    y = y0 + 10 + 4; text(d, (GW / 2, y), "VENUS PARTY", 1.2, (255, 210, 77)); y += 8 * 1.2 + 4
-    d.line([((GW / 2 - 113) * K, y * K), ((GW / 2 + 113) * K, y * K)], fill=(255, 255, 255, 90), width=K); y += 7
+    y = y0 + 10 + 4; paste(im, nine('head', 226, 24), GW / 2 - 113, y); text(d, (GW / 2, y + 12), "VENUS PARTY", 1.2, (255, 255, 255)); y += 24 + 6
     text(d, (GW / 2, y), "何をする？  (1/2)", 1, (199, 209, 242)); y += 14
     for i, b in enumerate(btns):
-        paste(im, nine('btn_hover' if i == 0 else 'btn', 218, 23, (6, 6, 6, 6)), GW / 2 - 109, y + 1.5); text(d, (GW / 2, y + 9), b); y += 26
+        paste(im, nine('btn_hover' if i == 0 else 'btn', 218, 25, (6, 6, 6, 6)), GW / 2 - 109, y + 1.5); text(d, (GW / 2, y + 12), b); y += 28
     return im
 os.makedirs(os.path.join(ROOT, 'mpl'), exist_ok=True)
 sc = [scene_turn(), scene_ribbon(), scene_dj(), scene_menu()]

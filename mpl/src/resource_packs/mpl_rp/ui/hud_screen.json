@@ -5147,6 +5147,9 @@
    }
   ]
  },
+ "item_name_text": {
+  "ignored": true
+ },
  "hud_actionbar_text": {
   "texture": "textures/ui/mpl/toast",
   "size": [

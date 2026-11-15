@@ -208,14 +208,27 @@ if not os.environ.get('MPL_UI_JSON_ONLY'):
     nine('card', im.resize((96, 96), Image.LANCZOS), [12, 12, 12, 12], 2)
     # ボタン(ふつう・選択中・押した)
     # ボタン: ふだん = ガラス + うすい白のふち / 選択中 = 少し明るく + 金のふち / 押した = 暗く + 金のふち(少し下へ)
-    for name, top, bot, stroke, dy in [('btn', (44, 50, 84), (26, 30, 54), (255, 255, 255, 60), 0), ('btn_hover', (62, 70, 112), (36, 42, 74), (255, 200, 60, 255), 0), ('btn_press', (24, 28, 50), (18, 20, 38), (255, 200, 60, 255), 1)]:
+    # ボタン: ふだん = あざやかな青 / 選択中 = 金 / 押した = こい金(少し下へ)。パーティらしい色
+    for name, top, bot, border in [('btn', (90, 110, 210), (45, 55, 140), (20, 14, 40)), ('btn_hover', (255, 226, 110), (240, 150, 20), (255, 255, 255)), ('btn_press', (220, 140, 20), (170, 90, 0), (255, 255, 255))]:
         S = 4; w, h = 48 * S, 24 * S
         im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
-        d.rounded_rectangle((0, dy * S, w - 1, h - 1), 6 * S, fill=stroke)
-        mk = Image.new('L', (w, h)); ImageDraw.Draw(mk).rounded_rectangle((S, S + dy * S, w - 1 - S, h - 1 - S), 5 * S, fill=240)
-        im.paste(grad(w, h, top, bot), (0, 0), mk)
-        if not dy: ImageDraw.Draw(im).line([(7 * S, 3 * S), (w - 7 * S, 3 * S)], fill=(255, 255, 255, 45), width=S)
+        d.rounded_rectangle((0, 0, w - 1, h - 1), 7 * S, fill=border + (255,))
+        mk = Image.new('L', (w, h)); ImageDraw.Draw(mk).rounded_rectangle((2 * S, 2 * S, w - 1 - 2 * S, h - 1 - 2 * S - (0 if 'press' in name else 2 * S)), 5 * S, fill=255)
+        im.paste((10, 8, 25, 255), (0, 2 * S), mk)
+        im.paste(grad(w, h, top, bot), (0, 2 * S if 'press' in name else 0), mk)
+        ImageDraw.Draw(im).line([(7 * S, 4 * S), (w - 7 * S, 4 * S)], fill=(255, 255, 255, 110), width=S)
         nine(name, im.resize((w // 2, h // 2), Image.LANCZOS), [6, 6, 6, 6], 2)
+    # メニューの見出しの帯: ピンク→むらさきのあざやかな帯 + 白いふち
+    S = 4; w, h = 96 * S, 28 * S
+    im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
+    d.rounded_rectangle((0, 0, w - 1, h - 1), 10 * S, fill=(255, 255, 255, 255))
+    g = Image.new('RGBA', (w, h))
+    for x in range(w):
+        t = x / (w - 1); ImageDraw.Draw(g).line([(x, 0), (x, h)], fill=(round(255 - 120 * t), round(70 + 10 * t), round(170 + 70 * t), 255))
+    mk = Image.new('L', (w, h)); ImageDraw.Draw(mk).rounded_rectangle((2 * S, 2 * S, w - 1 - 2 * S, h - 1 - 2 * S), 8 * S, fill=255)
+    im.paste(g, (0, 0), mk)
+    d.line([(12 * S, 5 * S), (w - 12 * S, 5 * S)], fill=(255, 255, 255, 90), width=S)
+    nine('head', im.resize((w // 2, h // 2), Image.LANCZOS), [8, 6, 8, 6], 4)
     # 見出しの下の細い線
     ln = Image.new('RGBA', (64, 2)); ImageDraw.Draw(ln).line([(0, 0), (63, 0)], fill=(255, 255, 255, 90), width=1); ln.save(os.path.join(TEX, 'line.png'))
     # アクションバー・説明の文字の背景: 暗い半透明の角丸だけ(ふちなし)
@@ -306,6 +319,7 @@ for path in ('hud_title_text/title_frame/title',):
     hide(path, [vis(hasnt(BMARK, '#text'))])
 for path in ('hud_title_text/title_frame/title_background', 'hud_title_text/subtitle_frame/subtitle', 'hud_title_text/subtitle_frame/subtitle_background'):
     hide(path, [col(T), vis(hasnt(BMARK))])
+hud['item_name_text'] = {'ignored': True}  # アイテムを持ったときの名前・ロックなどの表示を出さない
 hud['hud_actionbar_text'] = {'texture': 'textures/ui/mpl/toast', 'size': ['100%c + 22px', '100%c + 10px']}
 json.dump(hud, open(os.path.join(UI, 'hud_screen.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
@@ -322,8 +336,8 @@ json.dump(sb, open(os.path.join(UI, 'scoreboards.json'), 'w', encoding='utf-8'),
 sf = json.load(open(os.path.join(UI, 'server_form.json'), encoding='utf-8'))
 TT = '#title_text'
 c2 = lambda name, over=None: dict({'binding_name': name, 'binding_type': 'collection', 'binding_collection_name': 'form_buttons'}, **({'binding_name_override': over} if over else {}))
-sf['mpl_btn'] = {'type': 'panel', 'size': ['100%', 26], 'controls': [{'b@common.button': {
-    '$pressed_button_name': 'button.form_button_click', 'size': ['100% - 8px', 23], 'anchor_from': 'center', 'anchor_to': 'center',
+sf['mpl_btn'] = {'type': 'panel', 'size': ['100%', 28], 'controls': [{'b@common.button': {
+    '$pressed_button_name': 'button.form_button_click', 'size': ['100% - 8px', 25], 'anchor_from': 'center', 'anchor_to': 'center',
     'bindings': [{'binding_type': 'collection_details', 'binding_collection_name': 'form_buttons'}],
     'controls': [
         {'default': {'type': 'image', 'texture': 'textures/ui/mpl/btn', 'layer': 1}},
@@ -343,8 +357,8 @@ sf['mpl_form'] = {
         {'card': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [250, '100%c + 20px'], 'layer': 1, 'anims': ['@server_form.mpl_form_in'], 'controls': [{'st': {
             'type': 'stack_panel', 'orientation': 'vertical', 'size': [226, '100%c'], 'controls': [
                 {'pt': {'type': 'panel', 'size': ['100%', 4]}},
-                {'head': {'type': 'label', 'text': TT, 'size': ['100%', 'default'], 'text_alignment': 'center', 'layer': 3, 'shadow': True, 'localize': False, 'font_scale_factor': 1.2, 'color': [1, 0.82, 0.3], 'bindings': [{'binding_name': TT}]}},
-                {'g0': {'type': 'panel', 'size': ['100%', 4]}}, {'ln': {'type': 'image', 'texture': 'textures/ui/mpl/line', 'size': ['100%', 1], 'layer': 3}},
+                {'head': {'type': 'image', 'texture': 'textures/ui/mpl/head', 'size': ['100%', 24], 'layer': 3, 'controls': [
+                    {'t': {'type': 'label', 'text': TT, 'size': ['100%', 'default'], 'text_alignment': 'center', 'layer': 4, 'shadow': True, 'localize': False, 'font_scale_factor': 1.2, 'color': [1, 1, 1], 'bindings': [{'binding_name': TT}]}}]}},
                 {'pad0': {'type': 'panel', 'size': ['100%', 6]}},
                 {'body': {'type': 'label', 'text': '#form_text', 'property_bag': {'#font_type': 'classic'}, 'font_type': '#font_type',  'size': ['100%', 'default'], 'text_alignment': 'center', 'layer': 2, 'shadow': True, 'localize': False, 'color': [0.78, 0.82, 0.95],
                           'bindings': [{'binding_name': '#form_text'}, {'binding_type': 'view', 'source_property_name': '#font_type', 'target_property_name': '#font_type'}]}},
