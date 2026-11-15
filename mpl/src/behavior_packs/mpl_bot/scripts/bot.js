@@ -88,6 +88,9 @@ world.afterEvents.entityDie.subscribe((ev) => {
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.id === "mmgbot:ui" && ev.sourceEntity?.typeId === "minecraft:player") botUI(ev.sourceEntity);
     if (ev.id === "mmgbot:add") { const n = Number(ev.message) || 1; for (let k = 0; k < n; k++) addBot(); return; }
+    // すごろくで抜けた人の代わり: 決まった名前の BOT を出す / 戻ってきたら消す
+    if (ev.id === "mmgbot:spawnas") { const n = ev.message.trim(); if (NAMES.includes(n) && !bots.has(n)) { const p = spawnSimulatedPlayer({ dimension: dim(), ...LOBBY }, n, GameMode.Adventure ?? GameMode.adventure); p.addTag(TAG); bots.set(n, p); } return; }
+    if (ev.id === "mmgbot:remove") { const n = ev.message.trim(), p = bots.get(n); if (p) { try { p.disconnect(); } catch {} bots.delete(n); brain.delete(n); } return; }
     // ミニゲームからの指示: jump <名前> / move <名前> x y z [速さ] / look <名前> x y z / sneak <名前> 0|1 / stop <名前>
     const [who, ...a] = ev.message.trim().split(/\s+/), b = bots.get(who);
     if (!b) return;

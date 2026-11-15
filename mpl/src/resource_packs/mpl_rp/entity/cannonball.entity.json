@@ -1,0 +1,28 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:cannonball",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/mmgplus_cannonball"
+   },
+   "geometry": {
+    "default": "geometry.mmgplus.cannonball"
+   },
+   "render_controllers": [
+    "controller.render.default"
+   ],
+   "animations": {
+    "a": "animation.mmgplus.cannonball"
+   },
+   "scripts": {
+    "animate": [
+     "a"
+    ]
+   }
+  }
+ }
+}

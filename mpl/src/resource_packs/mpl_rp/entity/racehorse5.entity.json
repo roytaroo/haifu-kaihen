@@ -1,0 +1,28 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:racehorse5",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/mmgplus_racehorse5"
+   },
+   "geometry": {
+    "default": "geometry.mmgplus.racehorse5"
+   },
+   "render_controllers": [
+    "controller.render.default"
+   ],
+   "animations": {
+    "a": "animation.mmgplus.racehorse5"
+   },
+   "scripts": {
+    "animate": [
+     "a"
+    ]
+   }
+  }
+ }
+}

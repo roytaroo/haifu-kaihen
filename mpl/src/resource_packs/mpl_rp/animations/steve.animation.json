@@ -1,0 +1,45 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.steve": {
+   "loop": true,
+   "bones": {
+    "rightArm": {
+     "rotation": [
+      "math.sin(q.life_time * 900 + 180) * 45",
+      0,
+      0
+     ]
+    },
+    "leftArm": {
+     "rotation": [
+      "math.sin(q.life_time * 900 + 0) * 45",
+      0,
+      0
+     ]
+    },
+    "rightLeg": {
+     "rotation": [
+      "math.sin(q.life_time * 900 + 0) * 45",
+      0,
+      0
+     ]
+    },
+    "leftLeg": {
+     "rotation": [
+      "math.sin(q.life_time * 900 + 180) * 45",
+      0,
+      0
+     ]
+    },
+    "root": {
+     "position": [
+      0,
+      "math.abs(math.sin(q.life_time * 900)) * 1",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

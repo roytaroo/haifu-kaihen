@@ -13,7 +13,7 @@
     "texture": "mpl_map"
    },
    "minecraft:display_name": {
-    "value": "§bマップ\n§7使うとボード全体を見る(もう一度でもどる)"
+    "value": "§bマップ\n§7使う: ボード全体を見る / しゃがんで使う: マイメニュー"
    },
    "minecraft:hand_equipped": true
   }

@@ -1,0 +1,66 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.racehorse1": {
+   "loop": true,
+   "bones": {
+    "legFR": {
+     "rotation": [
+      "math.sin(q.life_time * 1100 + 0) * 38",
+      0,
+      0
+     ]
+    },
+    "legFL": {
+     "rotation": [
+      "math.sin(q.life_time * 1100 + 60) * 38",
+      0,
+      0
+     ]
+    },
+    "legBR": {
+     "rotation": [
+      "math.sin(q.life_time * 1100 + 180) * 38",
+      0,
+      0
+     ]
+    },
+    "legBL": {
+     "rotation": [
+      "math.sin(q.life_time * 1100 + 240) * 38",
+      0,
+      0
+     ]
+    },
+    "body": {
+     "rotation": [
+      "math.sin(q.life_time * 1100 + 0) * 4",
+      0,
+      0
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "math.sin(q.life_time * 1100 + 90) * 15",
+      0,
+      0
+     ]
+    },
+    "rider": {
+     "position": [
+      0,
+      "math.abs(math.sin(q.life_time * 1100)) * 1.6",
+      0
+     ]
+    },
+    "root": {
+     "position": [
+      0,
+      "math.abs(math.sin(q.life_time * 1100)) * 1.2",
+      0
+     ]
+    }
+   }
+  }
+ }
+}
