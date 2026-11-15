@@ -152,9 +152,10 @@ RIBBONS = {'gold': ((255, 214, 70), (220, 120, 0)), 'blue': ((90, 170, 255), (20
 KEYS = [k for k, *_ in LOGOS] + [f'n{n}' for n in NUMS] + [f'r_{c}' for c in RIBBONS] + ['card', 'talk']
 assert len(KEYS) <= 256
 
-def nine(name, img, sl):
+def nine(name, img, sl, scale=1):
+    # scale: 絵の細かさ(2 = 2倍の細かさで描いた)。base_size と nineslice_size は画面での大きさ(角がゆがまないように)
     img.save(os.path.join(TEX, name + '.png'))
-    json.dump({'nineslice_size': sl, 'base_size': list(img.size)}, open(os.path.join(TEX, name + '.json'), 'w'))
+    json.dump({'nineslice_size': sl, 'base_size': [img.size[0] // scale, img.size[1] // scale]}, open(os.path.join(TEX, name + '.json'), 'w'))
 
 if not os.environ.get('MPL_UI_JSON_ONLY'):
     LW, LH = 1024, 256
@@ -196,7 +197,7 @@ if not os.environ.get('MPL_UI_JSON_ONLY'):
         im.paste(g, (0, 0), mk)
         d.rounded_rectangle((5 * S, 7 * S, 8 * S, h - 7 * S), S * 2, fill=col + (255,))            # 左のしるし
         d.line([(12 * S, 3 * S), (w - 12 * S, 3 * S)], fill=(255, 255, 255, 50), width=S)          # 上のつや
-        nine(f'ribbon_{c}', im.resize((w // 2, h // 2), Image.LANCZOS), [16, 7, 16, 7])
+        nine(f'ribbon_{c}', im.resize((w // 2, h // 2), Image.LANCZOS), [8, 5, 8, 5], 4)  # 角の丸み 5、真ん中が残る
     # カード(ミニゲームの説明・フォーム): 暗い半透明 + うすい白のふち(オレンジのふちはやめた)
     S = 4; w = h = 48 * S
     im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
@@ -205,22 +206,24 @@ if not os.environ.get('MPL_UI_JSON_ONLY'):
     ImageDraw.Draw(mk).rounded_rectangle((S, S, w - 1 - S, h - 1 - S), 8 * S, fill=225)
     im.paste(g, (0, 0), mk)
     d.line([(10 * S, 2 * S), (w - 10 * S, 2 * S)], fill=(255, 255, 255, 60), width=S)
-    nine('card', im.resize((48, 48), Image.LANCZOS), [12, 12, 12, 12])
+    nine('card', im.resize((96, 96), Image.LANCZOS), [12, 12, 12, 12], 2)
     # ボタン(ふつう・選択中・押した)
-    for name, top, bot, border in [('btn', (90, 110, 210), (45, 55, 140), (20, 14, 40)), ('btn_hover', (255, 226, 110), (240, 150, 20), (255, 255, 255)), ('btn_press', (220, 140, 20), (170, 90, 0), (255, 255, 255))]:
+    # ボタン: ふだん = ガラス + うすい白のふち / 選択中 = 少し明るく + 金のふち / 押した = 暗く + 金のふち(少し下へ)
+    for name, top, bot, stroke, dy in [('btn', (44, 50, 84), (26, 30, 54), (255, 255, 255, 60), 0), ('btn_hover', (62, 70, 112), (36, 42, 74), (255, 200, 60, 255), 0), ('btn_press', (24, 28, 50), (18, 20, 38), (255, 200, 60, 255), 1)]:
         S = 4; w, h = 48 * S, 24 * S
         im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
-        d.rounded_rectangle((0, 0, w - 1, h - 1), 7 * S, fill=border + (255,))
-        mk = Image.new('L', (w, h)); ImageDraw.Draw(mk).rounded_rectangle((2 * S, 2 * S, w - 1 - 2 * S, h - 1 - 2 * S - (0 if 'press' in name else 2 * S)), 5 * S, fill=255)
-        im.paste((10, 8, 25, 255), (0, 2 * S), mk)
-        im.paste(grad(w, h, top, bot), (0, 2 * S if 'press' in name else 0), mk)
-        ImageDraw.Draw(im).line([(7 * S, 4 * S), (w - 7 * S, 4 * S)], fill=(255, 255, 255, 110), width=S)
-        nine(name, im.resize((w // 4, h // 4), Image.LANCZOS), [6, 6, 6, 6])
+        d.rounded_rectangle((0, dy * S, w - 1, h - 1), 6 * S, fill=stroke)
+        mk = Image.new('L', (w, h)); ImageDraw.Draw(mk).rounded_rectangle((S, S + dy * S, w - 1 - S, h - 1 - S), 5 * S, fill=240)
+        im.paste(grad(w, h, top, bot), (0, 0), mk)
+        if not dy: ImageDraw.Draw(im).line([(7 * S, 3 * S), (w - 7 * S, 3 * S)], fill=(255, 255, 255, 45), width=S)
+        nine(name, im.resize((w // 2, h // 2), Image.LANCZOS), [6, 6, 6, 6], 2)
+    # 見出しの下の細い線
+    ln = Image.new('RGBA', (64, 2)); ImageDraw.Draw(ln).line([(0, 0), (63, 0)], fill=(255, 255, 255, 90), width=1); ln.save(os.path.join(TEX, 'line.png'))
     # アクションバー・説明の文字の背景: 暗い半透明の角丸だけ(ふちなし)
     S = 4; im = Image.new('RGBA', (64 * S, 32 * S)); d = ImageDraw.Draw(im)
-    d.rounded_rectangle((0, 0, 64 * S - 1, 32 * S - 1), 9 * S, fill=(10, 12, 24, 170))
-    im = im.resize((64, 32), Image.LANCZOS)
-    nine('toast', im, [9, 9, 9, 9])
+    d.rounded_rectangle((0, 0, 64 * S - 1, 32 * S - 1), 6 * S, fill=(10, 12, 24, 170))
+    im = im.resize((128, 64), Image.LANCZOS)
+    nine('toast', im, [6, 6, 6, 6], 2)
     im = Image.new('RGBA', (16, 16)); d = ImageDraw.Draw(im)
     d.rectangle((0, 0, 15, 15), fill=(10, 12, 24, 170)); d.rectangle((0, 0, 15, 0), fill=(255, 255, 255, 70))
     nine('side', im, [3, 3, 3, 3])
@@ -249,7 +252,7 @@ hud.update({
 SUB = {'type': 'image', 'texture': 'textures/ui/mpl/toast', 'size': ['100%c + 16px', '100%c + 8px'], 'layer': 5, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
        'anims': ['@hud.mpl_fadein'],
        'bindings': [col('#hud_subtitle_text_string'), vis("(not (#hud_subtitle_text_string = ''))")],
-       'controls': [{'t': {'type': 'label', 'text': '#hud_subtitle_text_string', 'layer': 6, 'shadow': True, 'localize': False, 'font_scale_factor': 1.25, 'color': [1, 1, 1],
+       'controls': [{'t': {'type': 'label', 'text': '#hud_subtitle_text_string', 'layer': 6, 'shadow': True, 'localize': False, 'font_scale_factor': 1.0, 'color': [1, 1, 1],
                            'bindings': [col('#hud_subtitle_text_string')]}}]}
 ctrls = []
 for i, key in enumerate(KEYS):
@@ -260,26 +263,24 @@ for i, key in enumerate(KEYS):
                 {'sub@hud.mpl_sub': {'offset': [0, 62]}}]
     elif key.startswith('r_'):  # 帯
         body = [{'stack': {'type': 'stack_panel', 'orientation': 'vertical', 'size': ['100%', '100%c'], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'anims': ['@hud.mpl_slide'], 'controls': [
-            {'rb': {'type': 'panel', 'size': ['100%', '100%c'], 'controls': [{'img': {'type': 'image', 'texture': f'textures/ui/mpl/ribbon_{key[2:]}', 'size': ['100%c + 56px', '100%c + 14px'], 'layer': 3,
-                    'controls': [{'t': {'type': 'label', 'text': T, 'layer': 4, 'shadow': True, 'localize': False, 'font_scale_factor': 1.6, 'color': [1, 1, 1], 'bindings': [col(T)]}}]}}]}},
+            {'rb': {'type': 'panel', 'size': ['100%', '100%c'], 'controls': [{'img': {'type': 'image', 'texture': f'textures/ui/mpl/ribbon_{key[2:]}', 'size': ['100%c + 44px', '100%c + 12px'], 'layer': 3,
+                    'controls': [{'t': {'type': 'label', 'text': T, 'layer': 4, 'shadow': True, 'localize': False, 'font_scale_factor': 1.3, 'color': [1, 1, 1], 'bindings': [col(T)]}}]}}]}},
             {'gap': {'type': 'panel', 'size': ['100%', 4]}},
             {'sb': {'type': 'panel', 'size': ['100%', '100%c'], 'controls': [{'sub@hud.mpl_sub': {}}]}}]}}]
     elif key == 'talk':  # DJ トシオのせりふ(画面の下の方、RPG の文字の箱)
-        body = [{'img': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [320, '100%c + 18px'], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, 150],
-                         'anims': ['@hud.mpl_fadein'], 'controls': [{'st': {'type': 'stack_panel', 'orientation': 'vertical', 'size': [296, '100%c'], 'controls': [
-                             {'name': {'type': 'image', 'texture': 'textures/ui/mpl/ribbon_purple', 'size': [96, 18], 'layer': 4, 'controls': [
-                                 {'t': {'type': 'label', 'text': T, 'layer': 5, 'shadow': True, 'localize': False, 'color': [1, 0.9, 0.4], 'bindings': [col(T)]}}]}},
-                             {'gap': {'type': 'panel', 'size': ['100%', 4]}},
+        body = [{'img': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [290, '100%c + 16px'], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [-20, 122],
+                         'anims': ['@hud.mpl_fadein'], 'controls': [{'st': {'type': 'stack_panel', 'orientation': 'vertical', 'size': [268, '100%c'], 'controls': [
+                             {'name': {'type': 'label', 'text': T, 'size': ['100%', 'default'], 'text_alignment': 'left', 'layer': 5, 'shadow': True, 'localize': False, 'color': [1, 0.82, 0.3], 'bindings': [col(T)]}},
+                             {'g0': {'type': 'panel', 'size': ['100%', 3]}}, {'ln': {'type': 'image', 'texture': 'textures/ui/mpl/line', 'size': ['100%', 1], 'layer': 5}}, {'gap': {'type': 'panel', 'size': ['100%', 4]}},
                              {'say': {'type': 'label', 'text': '#hud_subtitle_text_string', 'size': ['100%', 'default'], 'text_alignment': 'left', 'layer': 5, 'shadow': True, 'localize': False,
-                                      'font_scale_factor': 1.15, 'color': [1, 1, 1], 'bindings': [col('#hud_subtitle_text_string')]}}]}}]}}]
+                                      'font_scale_factor': 1.0, 'color': [1, 1, 1], 'bindings': [col('#hud_subtitle_text_string')]}}]}}]}}]
     elif key == 'card':  # ミニゲームの説明カード
         body = [{'img': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [280, '100%c + 22px'], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
                          'anims': ['@hud.mpl_drop'], 'controls': [{'st': {'type': 'stack_panel', 'orientation': 'vertical', 'size': [256, '100%c'], 'controls': [
-                             {'head': {'type': 'image', 'texture': 'textures/ui/mpl/ribbon_purple', 'size': ['100%', 26], 'layer': 4, 'controls': [
-                                 {'t': {'type': 'label', 'text': T, 'layer': 5, 'shadow': True, 'localize': False, 'font_scale_factor': 1.4, 'color': [1, 0.95, 0.55], 'bindings': [col(T)]}}]}},
-                             {'gap': {'type': 'panel', 'size': ['100%', 6]}},
+                             {'head': {'type': 'label', 'text': T, 'size': ['100%', 'default'], 'text_alignment': 'center', 'layer': 5, 'shadow': True, 'localize': False, 'font_scale_factor': 1.25, 'color': [1, 0.82, 0.3], 'bindings': [col(T)]}},
+                             {'g0': {'type': 'panel', 'size': ['100%', 4]}}, {'ln': {'type': 'image', 'texture': 'textures/ui/mpl/line', 'size': ['100%', 1], 'layer': 5}}, {'gap': {'type': 'panel', 'size': ['100%', 5]}},
                              {'how': {'type': 'label', 'text': '#hud_subtitle_text_string', 'size': ['100%', 'default'], 'text_alignment': 'center', 'layer': 5, 'shadow': True, 'localize': False,
-                                      'font_scale_factor': 1.1, 'color': [1, 1, 1], 'bindings': [col('#hud_subtitle_text_string')]}}]}}]}}]
+                                      'font_scale_factor': 1.0, 'color': [0.85, 0.88, 1], 'bindings': [col('#hud_subtitle_text_string')]}}]}}]}}]
     else:  # ロゴ
         rays = [k for k, *_, r in LOGOS if r]
         body = []
@@ -322,8 +323,8 @@ json.dump(sb, open(os.path.join(UI, 'scoreboards.json'), 'w', encoding='utf-8'),
 sf = json.load(open(os.path.join(UI, 'server_form.json'), encoding='utf-8'))
 TT = '#title_text'
 c2 = lambda name, over=None: dict({'binding_name': name, 'binding_type': 'collection', 'binding_collection_name': 'form_buttons'}, **({'binding_name_override': over} if over else {}))
-sf['mpl_btn'] = {'type': 'panel', 'size': ['100%', 31], 'controls': [{'b@common.button': {
-    '$pressed_button_name': 'button.form_button_click', 'size': ['100% - 8px', 28], 'anchor_from': 'center', 'anchor_to': 'center',
+sf['mpl_btn'] = {'type': 'panel', 'size': ['100%', 26], 'controls': [{'b@common.button': {
+    '$pressed_button_name': 'button.form_button_click', 'size': ['100% - 8px', 23], 'anchor_from': 'center', 'anchor_to': 'center',
     'bindings': [{'binding_type': 'collection_details', 'binding_collection_name': 'form_buttons'}],
     'controls': [
         {'default': {'type': 'image', 'texture': 'textures/ui/mpl/btn', 'layer': 1}},
@@ -339,13 +340,14 @@ sf['mpl_form'] = {
     'type': 'panel', 'size': ['100%', '100%'], 'layer': 60,
     'bindings': [{'binding_name': TT}, vis(has(FORM_MARK, TT))],
     'controls': [
-        {'shade': {'type': 'image', 'texture': 'textures/ui/Black', 'alpha': 0.55, 'size': ['100%', '100%'], 'layer': 0}},
+        {'shade': {'type': 'image', 'texture': 'textures/ui/Black', 'alpha': 0.45, 'size': ['100%', '100%'], 'layer': 0}},
         {'card': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [250, '100%c + 20px'], 'layer': 1, 'anims': ['@server_form.mpl_form_in'], 'controls': [{'st': {
             'type': 'stack_panel', 'orientation': 'vertical', 'size': [226, '100%c'], 'controls': [
-                {'head': {'type': 'image', 'texture': 'textures/ui/mpl/ribbon_gold', 'size': ['100% + 30px', 28], 'layer': 2, 'controls': [
-                    {'t': {'type': 'label', 'text': TT, 'property_bag': {'#font_type': 'classic'}, 'font_type': '#font_type', 'layer': 3, 'shadow': True, 'localize': False, 'font_scale_factor': 1.35, 'color': [1, 1, 1], 'bindings': [{'binding_name': TT}, {'binding_type': 'view', 'source_property_name': '#font_type', 'target_property_name': '#font_type'}]}}]}},
+                {'pt': {'type': 'panel', 'size': ['100%', 4]}},
+                {'head': {'type': 'label', 'text': TT, 'size': ['100%', 'default'], 'text_alignment': 'center', 'layer': 3, 'shadow': True, 'localize': False, 'font_scale_factor': 1.2, 'color': [1, 0.82, 0.3], 'bindings': [{'binding_name': TT}]}},
+                {'g0': {'type': 'panel', 'size': ['100%', 4]}}, {'ln': {'type': 'image', 'texture': 'textures/ui/mpl/line', 'size': ['100%', 1], 'layer': 3}},
                 {'pad0': {'type': 'panel', 'size': ['100%', 6]}},
-                {'body': {'type': 'label', 'text': '#form_text', 'property_bag': {'#font_type': 'classic'}, 'font_type': '#font_type',  'size': ['100%', 'default'], 'text_alignment': 'center', 'layer': 2, 'shadow': True, 'localize': False, 'color': [0.92, 0.92, 1],
+                {'body': {'type': 'label', 'text': '#form_text', 'property_bag': {'#font_type': 'classic'}, 'font_type': '#font_type',  'size': ['100%', 'default'], 'text_alignment': 'center', 'layer': 2, 'shadow': True, 'localize': False, 'color': [0.78, 0.82, 0.95],
                           'bindings': [{'binding_name': '#form_text'}, {'binding_type': 'view', 'source_property_name': '#font_type', 'target_property_name': '#font_type'}]}},
                 {'pad1': {'type': 'panel', 'size': ['100%', 6]}},
                 {'buttons': {'type': 'stack_panel', 'orientation': 'vertical', 'size': ['100%', '100%c'], 'layer': 2,

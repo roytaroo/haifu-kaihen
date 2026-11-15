@@ -1781,7 +1781,7 @@
   "type": "panel",
   "size": [
    "100%",
-   31
+   26
   ],
   "controls": [
    {
@@ -1789,7 +1789,7 @@
      "$pressed_button_name": "button.form_button_click",
      "size": [
       "100% - 8px",
-      28
+      23
      ],
      "anchor_from": "center",
      "anchor_to": "center",
@@ -1923,7 +1923,7 @@
     "shade": {
      "type": "image",
      "texture": "textures/ui/Black",
-     "alpha": 0.55,
+     "alpha": 0.45,
      "size": [
       "100%",
       "100%"
@@ -1954,37 +1954,58 @@
         ],
         "controls": [
          {
-          "head": {
-           "type": "image",
-           "texture": "textures/ui/mpl/ribbon_gold",
+          "pt": {
+           "type": "panel",
            "size": [
-            "100% + 30px",
-            28
-           ],
-           "layer": 2,
-           "controls": [
-            {
-             "t": {
-              "type": "label",
-              "text": "#title_text",
-              "font_type": "unicode",
-              "layer": 3,
-              "shadow": true,
-              "localize": false,
-              "font_scale_factor": 1.35,
-              "color": [
-               1,
-               1,
-               1
-              ],
-              "bindings": [
-               {
-                "binding_name": "#title_text"
-               }
-              ]
-             }
-            }
+            "100%",
+            4
            ]
+          }
+         },
+         {
+          "head": {
+           "type": "label",
+           "text": "#title_text",
+           "size": [
+            "100%",
+            "default"
+           ],
+           "text_alignment": "center",
+           "layer": 3,
+           "shadow": true,
+           "localize": false,
+           "font_scale_factor": 1.2,
+           "color": [
+            1,
+            0.82,
+            0.3
+           ],
+           "bindings": [
+            {
+             "binding_name": "#title_text"
+            }
+           ],
+           "font_type": "unicode"
+          }
+         },
+         {
+          "g0": {
+           "type": "panel",
+           "size": [
+            "100%",
+            4
+           ]
+          }
+         },
+         {
+          "ln": {
+           "type": "image",
+           "texture": "textures/ui/mpl/line",
+           "size": [
+            "100%",
+            1
+           ],
+           "layer": 3
           }
          },
          {
@@ -2010,9 +2031,9 @@
            "shadow": true,
            "localize": false,
            "color": [
-            0.92,
-            0.92,
-            1
+            0.78,
+            0.82,
+            0.95
            ],
            "bindings": [
             {
