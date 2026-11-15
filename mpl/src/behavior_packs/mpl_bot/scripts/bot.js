@@ -122,8 +122,19 @@ async function botUI(player) {
 }
 
 // ===== 見た目 =====
-// スキンは RP 側で名前ごとに差しかえる。前の版で着せた革の服は脱がせる
-system.runInterval(() => { for (const [, p] of bots) { try { const eq = p.getComponent("minecraft:equippable"); for (const sl of [EquipmentSlot.Chest, EquipmentSlot.Legs, EquipmentSlot.Feet]) if (eq?.getEquipment(sl)?.typeId?.startsWith("minecraft:leather_")) eq.setEquipment(sl); } catch {} } }, 100);
+// BOT の体は透明にして、その人のスキンの形の「かぶりもの」(mpl:skin_<名前>、RP の attachables)を頭の枠に着せる
+// かぶりものは体の動き(歩く・腕をふる)にそのままついていく。プレイヤーの描画ファイルは変えない(腕ふりが消えたため)
+system.runInterval(() => {
+    for (const [name, p] of bots) {
+        try {
+            if (!p.isValid) continue;
+            if (!p.getEffect("invisibility")) p.addEffect("invisibility", 20000000, { showParticles: false });
+            const eq = p.getComponent("minecraft:equippable"), id = `mpl:skin_${name.toLowerCase()}`;
+            if (eq && eq.getEquipment(EquipmentSlot.Head)?.typeId !== id) eq.setEquipment(EquipmentSlot.Head, new ItemStack(id, 1));
+            for (const sl of [EquipmentSlot.Chest, EquipmentSlot.Legs, EquipmentSlot.Feet]) if (eq?.getEquipment(sl)?.typeId?.startsWith("minecraft:leather_")) eq.setEquipment(sl);
+        } catch {}
+    }
+}, 10);
 
 // ===== 動き =====
 // ゲームの種類ごとにざっくり動かす。細かい判断がいるゲーム(投票・数え・クラフト)は歩き回るだけ

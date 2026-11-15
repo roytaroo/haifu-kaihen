@@ -1368,7 +1368,7 @@ async function gameMelon() {
         if (t % 10 === 0) for (const p of playing()) p.onScreenDisplay.setActionBar(`§2スイカ割り §fあなた: ${melonPts.get(p.name) ?? 0}個  §7残り ${Math.ceil((900 - t) / 20)}秒`);
         await wait(5);
     }
-    cmd("effect @a[tag=playing] clear");
+    cmd("effect @a[tag=playing] clear"); cmd("effect @a[tag=mmgbot] invisibility 99999 0 true");
     return tops(melonPts);
 }
 
@@ -1984,7 +1984,7 @@ const PLAY = {
 // 持ち物を全部消す(左手・よろいも)。BOT も
 function clearItems() {
     cmd("clear @a[tag=playing]");
-    for (const s of ["slot.weapon.offhand 0", "slot.armor.head 0", "slot.armor.chest 0", "slot.armor.legs 0", "slot.armor.feet 0"]) cmd(`replaceitem entity @a[tag=playing] ${s} air`);
+    for (const s of ["slot.weapon.offhand 0", "slot.armor.head 0", "slot.armor.chest 0", "slot.armor.legs 0", "slot.armor.feet 0"]) cmd(`replaceitem entity @a[tag=playing${s.includes("head") ? ",tag=!mmgbot" : ""}] ${s} air`); // BOT の頭はスキン(かぶりもの)
 }
 async function playMinigame(id, players) {
     // 準備: 会場を作り、参加者に playing をつけて会場へ
@@ -1992,7 +1992,7 @@ async function playMinigame(id, players) {
     for (const p of players) { p.addTag("playing"); p.removeTag("mpl_board"); p.setGameMode(ADVENTURE); }
     setScore("game", "selectgame", id); setScore("game", "playing", 1);
     cmd("inputpermission set @a movement enabled"); cmd("inputpermission set @a lateral_movement enabled"); cmd("tag @a remove mpl_lock");
-    clearItems(); cmd("effect @a[tag=playing] clear");
+    clearItems(); cmd("effect @a[tag=playing] clear"); cmd("effect @a[tag=mmgbot] invisibility 99999 0 true");
     clearArena();
     try { (PREP[id] ?? (() => clearArena()))(); } catch (e) { for (const p of world.getPlayers()) if (isAdmin(p)) p.sendMessage(`§7[MPL] ${MINIGAMES[id]} の会場でエラー: ${e}`); }
     cmd(`tp @a[tag=playing] ${START_AT[id] ?? (id === 30 ? `${raceX(RACE_START - 3) + 0.5} 1 ${RACE_START - 3}` : "0 1 0")}`);
@@ -2015,7 +2015,7 @@ async function playMinigame(id, players) {
     // 後片付け
     cmd("ride @a stop_riding"); cmd("inputpermission set @a movement enabled"); cmd("gamerule pvp false");
     for (const p of playing()) { if (p.getGameMode() === SPECTATOR) p.setGameMode(ADVENTURE); }
-    clearItems(); cmd("effect @a[tag=playing] clear"); cmd("tag @a remove mpl_lock");
+    clearItems(); cmd("effect @a[tag=playing] clear"); cmd("effect @a[tag=mmgbot] invisibility 99999 0 true"); cmd("tag @a remove mpl_lock");
     clearArena();
     setScore("game", "playing", 0); setScore("game", "selectgame", 0);
     for (const p of world.getPlayers()) p.removeTag("playing");

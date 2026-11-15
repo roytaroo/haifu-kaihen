@@ -237,3 +237,10 @@
 - タイトルの「ジャンプでスタート」は背景なし・小さめ(0.9)・ロゴの下 150
 - タイトル画面で BGM(ボードの曲を 600tick ごと、その人だけ。ジャンプで止める)
 - 未確認
+
+## MPL v28(プレイヤーが腕をふらない)
+- 原因(たぶん): v24 で入れた RP の entity/player.entity.json(公式 1.26.60.5 の写し)。だいきのマイクラの版と合わず、腕ふりのアニメが動かなかった → 削除。render_controllers/mpl_bot も削除
+- BOT のスキンは別のやり方に: BOT を透明(invisibility)にして、スキンの形のかぶりもの mpl:skin_<名前>(BP items、wearable 頭)を着せる。RP attachables/skin_<名前>.json + models/entity/mpl_skin.geo.json(体の骨の名前がプレイヤーと同じなので、動きについていく)。Jack だけ太腕
+  - bot.js が10tickごとに透明と頭のスキンを確認。ミニゲームの持ち物消しは BOT の頭を消さない、効果を消したあとすぐ透明をかけ直す
+  - 透明なので、BOT の頭の上の名前は出ないかもしれない
+- 未確認
