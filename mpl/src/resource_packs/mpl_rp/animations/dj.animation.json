@@ -25,13 +25,6 @@
       0
      ]
     },
-    "glasses": {
-     "position": [
-      0,
-      "v.sp * 2.5",
-      "v.sp * -0.5"
-     ]
-    },
     "rightArm": {
      "rotation": [
       "(1 - v.tk - v.sp) * (-68 + math.sin(q.life_time * 768) * 4) + v.tk * (-75 + math.sin(q.life_time * 300) * 12) + v.sp * -165",
