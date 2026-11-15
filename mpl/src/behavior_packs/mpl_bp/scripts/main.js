@@ -2332,11 +2332,28 @@ function djSpawn() {
     djEntity = spawnAt("mmgplus:dj", { x: BD.dj.x, y: BD.dj.y, z: BD.dj.z });
     try { djEntity?.setRotation({ x: 0, y: 180 }); } catch {}
 }
+// DJ ブースの後ろの画面: 曲に合わせて 5 本のバーが上下する(DJ がいるときだけ)
+const EQ_COL = ["magenta", "purple", "blue", "light_blue", "cyan"];
+let eqT = 0;
+system.runInterval(() => {
+    const q = BD.dj?.eq; if (!q || !djEntity?.isValid) return;
+    eqT++;
+    try {
+        for (let i = 0; i < q.w; i++) {
+            const lv = 1 + Math.floor((Math.sin(eqT * 0.9 + i * 1.7) * 0.5 + 0.5) * (q.h - 1) + Math.random() * 1.2);
+            for (let j = 0; j < q.h; j++) {
+                const b = dim().getBlock({ x: q.x0 + i, y: q.y0 + j, z: q.z }); if (!b) continue;
+                const want = j < lv ? (j === lv - 1 ? "minecraft:white_concrete" : `minecraft:${EQ_COL[i]}_concrete`) : "minecraft:black_concrete";
+                if (b.typeId !== want) b.setType(want);
+            }
+        }
+    } catch {}
+}, 7);
 // しゃべる: カメラが DJ ブースへ → 文字が少しずつ出る(RPG の文字の箱)
 async function djTalk(lines, mood = 1) {
     if (!djEntity?.isValid) djSpawn();
     const d = BD.dj;
-    cam.to("@a[tag=mpl_board]", d.cam, { x: d.x, y: d.y + 1.9, z: d.z }, 0.9, "in_out_sine");
+    cam.to("@a[tag=mpl_board]", d.cam, { x: d.x, y: d.y + 1.6, z: d.z }, 0.9, "in_out_sine");
     await wait(18);
     for (const line of lines) {
         try { djEntity?.setProperty("mmgplus:mood", mood); } catch {}

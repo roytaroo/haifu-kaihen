@@ -7,43 +7,43 @@
     "root": {
      "position": [
       0,
-      "math.abs(math.sin(q.life_time * 240)) * 0.6 * (1 - (q.property('mmgplus:mood') == 2))",
+      "(1 - v.tk - v.sp) * math.abs(math.sin(q.life_time * 384)) * 0.5 + v.sp * math.abs(math.sin(q.life_time * 500)) * 1.5",
+      0
+     ]
+    },
+    "body": {
+     "rotation": [
+      "(1 - v.tk - v.sp) * 4 + v.tk * math.sin(q.life_time * 200) * 2",
+      "v.tk * math.sin(q.life_time * 150) * 6",
       0
      ]
     },
     "head": {
      "rotation": [
-      "(q.property('mmgplus:mood') == 1) * math.sin(q.life_time * 520) * 7 + (1 - (q.property('mmgplus:mood') == 1)) * (1 - (q.property('mmgplus:mood') == 2)) * math.sin(q.life_time * 240) * 5 - (q.property('mmgplus:mood') == 2) * 8",
-      "(q.property('mmgplus:mood') == 1) * math.sin(q.life_time * 170) * 14",
+      "(1 - v.tk - v.sp) * (math.sin(q.life_time * 768) * 7 + 3) + v.tk * math.sin(q.life_time * 400) * 4 - v.sp * 12",
+      "v.tk * math.sin(q.life_time * 130) * 10 + (1 - v.tk - v.sp) * math.sin(q.life_time * 96) * 8",
       0
-     ]
-    },
-    "eyes": {
-     "scale": [
-      1,
-      "1 + (q.property('mmgplus:mood') == 2) * 0.7",
-      1
      ]
     },
     "glasses": {
      "position": [
       0,
-      "(q.property('mmgplus:mood') == 2) * (2.6 + math.sin(q.life_time * 900) * 0.4)",
-      "(q.property('mmgplus:mood') == 2) * -0.6"
+      "v.sp * 2.5",
+      "v.sp * -0.5"
      ]
     },
     "rightArm": {
      "rotation": [
-      "(q.property('mmgplus:mood') == 1) * (-80 + math.sin(q.life_time * 430) * 35) + (q.property('mmgplus:mood') == 2) * -150 + (1 - (q.property('mmgplus:mood') == 1)) * (1 - (q.property('mmgplus:mood') == 2)) * (-35 + math.sin(q.life_time * 480) * 12)",
-      0,
-      "(q.property('mmgplus:mood') == 1) * (15 + math.sin(q.life_time * 300) * 20) + (q.property('mmgplus:mood') == 2) * 25"
+      "(1 - v.tk - v.sp) * (-68 + math.sin(q.life_time * 768) * 4) + v.tk * (-75 + math.sin(q.life_time * 300) * 12) + v.sp * -165",
+      "(1 - v.tk - v.sp) * math.sin(q.life_time * 768 * 2) * 10",
+      "v.tk * 8 + v.sp * 18"
      ]
     },
     "leftArm": {
      "rotation": [
-      "(q.property('mmgplus:mood') == 1) * (-60 + math.sin(q.life_time * 380 + 90) * 30) + (q.property('mmgplus:mood') == 2) * -150 + (1 - (q.property('mmgplus:mood') == 1)) * (1 - (q.property('mmgplus:mood') == 2)) * (-45 + math.sin(q.life_time * 480 + 180) * 6)",
+      "(1 - v.tk - v.sp) * (-62 + math.sin(q.life_time * 768 + 180) * 3) + v.tk * (-25 + math.sin(q.life_time * 260 + 90) * 10) + v.sp * -165",
       0,
-      "(q.property('mmgplus:mood') == 1) * (-10 - math.sin(q.life_time * 250) * 20) - (q.property('mmgplus:mood') == 2) * 25"
+      "v.tk * -10 - v.sp * 18"
      ]
     }
    }

@@ -21,6 +21,10 @@
    "scripts": {
     "animate": [
      "a"
+    ],
+    "pre_animation": [
+     "v.tk = math.lerp(v.tk ?? 0, q.property('mmgplus:mood') == 1, 0.12);",
+     "v.sp = math.lerp(v.sp ?? 0, q.property('mmgplus:mood') == 2, 0.18);"
     ]
    }
   }

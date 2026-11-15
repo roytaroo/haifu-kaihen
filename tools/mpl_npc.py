@@ -9,47 +9,55 @@ M.BP = os.path.join(ROOT, 'mpl', 'src', 'behavior_packs', 'mpl_bp')
 M.RP = os.path.join(ROOT, 'mpl', 'src', 'resource_packs', 'mpl_rp')
 M.PREVIEW = os.path.join(ROOT, 'mpl', 'npc_preview')
 C = M.C
-SKIN, SKIN2 = (196, 142, 108), (170, 118, 88)
-JACKET, JACKET2, GOLD, BLACK = (92, 46, 150), (66, 30, 112), (250, 200, 60), (24, 22, 30)
-HAIR = (52, 36, 30)
+SKIN, SKIN2 = (198, 140, 104), (176, 120, 88)
+HOOD, HOOD2, TEE, JEANS, GOLD, BLACK = (34, 32, 44), (24, 22, 32), (245, 245, 250), (52, 64, 104), (250, 200, 60), (20, 18, 26)
+CAP, CAP2, NEON, HAIR = (235, 60, 150), (190, 40, 120), (60, 230, 240), (40, 30, 26)
+# プレイヤーと同じ体の形(足 12・体 12・頭 8・うで 4x12)。小物は 0.5 以上の厚みで、体から少しだけ浮かせる(欠けとズレをふせぐ)
 dj = [
-    # すそ長の上着(村人の形)・帯・金のチャック
-    C([-4, 0, -3], [8, 12, 6], JACKET2, bone='body'), C([-4, 12, -3], [8, 12, 6], JACKET, bone='body'),
-    C([-4.2, 11, -3.2], [8.4, 1.4, 6.4], BLACK, bone='body'), C([-0.4, 1, -3.3], [0.8, 22, 0.4], GOLD, flat=True, bone='body'),
-    *[C([-3.6 + i * 1.2, 21.6 - abs(i - 3) * 0.6, -3.4], [1, 0.8, 0.4], GOLD, flat=True, bone='body') for i in range(7)],  # 金のネックレス
-    # ヘッドホン(首にかける)
-    C([-4.6, 22.6, -3.6], [9.2, 1.4, 7.2], BLACK, bone='body'), C([-5.4, 21.2, -1.6], [1.6, 3.4, 3.2], (40, 220, 220), bone='body'), C([3.8, 21.2, -1.6], [1.6, 3.4, 3.2], (40, 220, 220), bone='body'),
-    # 頭(村人の大きな頭)・鼻・髪・耳
-    C([-4, 24, -4], [8, 10, 8], SKIN, bone='head'), C([-1, 25, -6], [2, 4, 2], SKIN2, bone='head'),
-    C([-4.3, 32, -4.3], [8.6, 2.6, 8.6], HAIR, bone='head'), C([-4.3, 27, 1.5], [8.6, 5, 2.8], HAIR, bone='head'),
-    C([-4.8, 28.5, -1], [0.8, 2, 2], SKIN2, bone='head'), C([4, 28.5, -1], [0.8, 2, 2], SKIN2, bone='head'),
-    # まゆ・口ひげ
-    C([-3.4, 30.2, -4.15], [2.6, 0.6, 0.3], HAIR, flat=True, bone='head'), C([0.8, 30.2, -4.15], [2.6, 0.6, 0.3], HAIR, flat=True, bone='head'),
-    C([-2.4, 24.6, -4.15], [4.8, 0.8, 0.3], HAIR, flat=True, bone='head'),
-    # 目(白目 + 緑のひとみ)
-    C([-3.2, 27.6, -4.12], [2.4, 1.8, 0.2], (250, 250, 250), flat=True, bone='eyes'), C([0.8, 27.6, -4.12], [2.4, 1.8, 0.2], (250, 250, 250), flat=True, bone='eyes'),
-    C([-2.2, 27.8, -4.22], [1.2, 1.4, 0.2], (40, 160, 70), flat=True, bone='eyes'), C([1.0, 27.8, -4.22], [1.2, 1.4, 0.2], (40, 160, 70), flat=True, bone='eyes'),
-    # おでこのサングラス(黒いふち + ピンクのレンズ)
-    C([-4.4, 31.2, -4.6], [8.8, 0.8, 0.5], BLACK, flat=True, bone='glasses'),
-    C([-3.8, 31.2, -4.75], [3.4, 2.2, 0.5], BLACK, flat=True, bone='glasses'), C([0.4, 31.2, -4.75], [3.4, 2.2, 0.5], BLACK, flat=True, bone='glasses'),
-    C([-3.4, 31.6, -4.95], [2.6, 1.4, 0.3], (255, 80, 170), flat=True, bone='glasses'), C([0.8, 31.6, -4.95], [2.6, 1.4, 0.3], (255, 80, 170), flat=True, bone='glasses'),
-    C([-2.9, 32.4, -5.05], [0.8, 0.4, 0.2], (255, 220, 240), flat=True, bone='glasses'), C([1.3, 32.4, -5.05], [0.8, 0.4, 0.2], (255, 220, 240), flat=True, bone='glasses'),
-    C([-4.6, 31.4, -4.5], [0.5, 0.6, 5], BLACK, flat=True, bone='glasses'), C([4.1, 31.4, -4.5], [0.5, 0.6, 5], BLACK, flat=True, bone='glasses'),
-    # うで(上着のそで + 手)
-    C([-8, 13, -2], [4, 10, 4], JACKET, bone='rightArm'), C([-8, 10, -2], [4, 3, 4], SKIN, bone='rightArm'), C([-8.1, 20, -2.1], [4.2, 1, 4.2], GOLD, flat=True, bone='rightArm'),
-    C([4, 13, -2], [4, 10, 4], JACKET, bone='leftArm'), C([4, 10, -2], [4, 3, 4], SKIN, bone='leftArm'), C([3.9, 20, -2.1], [4.2, 1, 4.2], GOLD, flat=True, bone='leftArm'),
+    # 足: ジーンズ + 白いスニーカー(ピンクの線)
+    C([-4, 2, -2], [4, 10, 4], JEANS, bone='rightLeg'), C([-4, 0, -2.5], [4, 2, 4.5], TEE, bone='rightLeg'), C([-4.05, 0.6, -2.55], [4.1, 0.6, 4.6], CAP, flat=True, bone='rightLeg'),
+    C([0, 2, -2], [4, 10, 4], JEANS, bone='leftLeg'), C([0, 0, -2.5], [4, 2, 4.5], TEE, bone='leftLeg'), C([-0.05, 0.6, -2.55], [4.1, 0.6, 4.6], CAP, flat=True, bone='leftLeg'),
+    # 体: 黒いパーカー(前が開いて白い T シャツ)・金のくさり・背中のフード
+    C([-4, 12, -2], [8, 12, 4], HOOD, bone='body'),
+    C([-2, 12.5, -2.5], [4, 11, 0.5], TEE, flat=True, bone='body'),
+    C([-1, 17, -2.8], [2, 2, 0.5], CAP, flat=True, bone='body'),                                   # T シャツのマーク
+    *[C([-1.75 + i * 0.5 - 0.25, 21.5 - min(i, 7 - i) * 0.5, -2.9], [0.5, 0.5, 0.5], GOLD, flat=True, bone='body') for i in range(8)],
+    C([-4, 21, 2], [8, 3, 1.5], HOOD2, bone='body'),
+    C([-4, 12, -2.05], [8, 1, 4.1], HOOD2, flat=True, bone='body'),                                # すその帯
+    # 頭: はだ・髪(横は短く)・まゆ・口
+    C([-4, 24, -4], [8, 8, 8], SKIN, bone='head'),
+    C([-4.25, 29, -4.25], [8.5, 2.5, 8.5], HAIR, bone='head'), C([-4.25, 25, 0], [8.5, 4, 4.25], HAIR, bone='head'),
+    C([-3, 25.5, -4.3], [2, 0.5, 0.5], (150, 80, 70), flat=True, bone='head'), C([-1, 25.5, -4.3], [3, 0.5, 0.5], (150, 80, 70), flat=True, bone='head'),  # にやっとした口
+    C([-4.3, 26, -1], [0.5, 1.5, 1.5], SKIN2, flat=True, bone='head'), C([3.8, 26, -1], [0.5, 1.5, 1.5], SKIN2, flat=True, bone='head'),
+    # 後ろ向きのキャップ(つばは後ろ)
+    C([-4.5, 30.5, -4.5], [9, 2.5, 9], CAP, bone='head'), C([-4.5, 30.5, -4.55], [9, 1, 9.1], CAP2, flat=True, bone='head'),
+    C([-3.5, 30.5, 4.5], [7, 0.5, 3.5], CAP2, bone='head'),
+    # ヘッドホン(耳にかけて、上のバンドはキャップの上)
+    C([-5.5, 25.5, -1.5], [1.5, 4, 3], NEON, bone='head'), C([4, 25.5, -1.5], [1.5, 4, 3], NEON, bone='head'),
+    C([-5.5, 29.5, -0.5], [1, 3.5, 1], BLACK, bone='head'), C([4.5, 29.5, -0.5], [1, 3.5, 1], BLACK, bone='head'),
+    C([-5.5, 33, -0.5], [11, 1, 1], BLACK, bone='head'),
+    # サングラス(1 つの骨: おどろくと上へはねる)
+    C([-4.5, 27, -4.6], [9, 0.5, 0.5], BLACK, flat=True, bone='glasses'),
+    C([-3.75, 25.75, -4.75], [3.25, 1.75, 0.5], BLACK, flat=True, bone='glasses'), C([0.5, 25.75, -4.75], [3.25, 1.75, 0.5], BLACK, flat=True, bone='glasses'),
+    C([-3.25, 26.0, -5.0], [2.25, 1.25, 0.5], (255, 70, 170), flat=True, bone='glasses'), C([1.0, 26.0, -5.0], [2.25, 1.25, 0.5], (150, 80, 255), flat=True, bone='glasses'),
+    C([-3.0, 26.75, -5.1], [0.75, 0.5, 0.5], (255, 230, 245), flat=True, bone='glasses'), C([1.25, 26.75, -5.1], [0.75, 0.5, 0.5], (240, 230, 255), flat=True, bone='glasses'),
+    # うで: パーカーのそで・金のそで口・手
+    C([-8, 15, -2], [4, 9, 4], HOOD, bone='rightArm'), C([-8.05, 14.5, -2.05], [4.1, 1, 4.1], GOLD, flat=True, bone='rightArm'), C([-8, 12, -2], [4, 2.5, 4], SKIN, bone='rightArm'),
+    C([4, 15, -2], [4, 9, 4], HOOD, bone='leftArm'), C([3.95, 14.5, -2.05], [4.1, 1, 4.1], GOLD, flat=True, bone='leftArm'), C([4, 12, -2], [4, 2.5, 4], SKIN, bone='leftArm'),
 ]
-mood = "q.property('mmgplus:mood')"
-talk, surp = f"({mood} == 1)", f"({mood} == 2)"
+# 動き(128bpm に合わせる。1拍 = 768度/秒)。気分の切りかえは pre_animation で少しずつ変える(パッと変わらない)
+B = "q.life_time * 768"
+tk, sp, idl = "v.tk", "v.sp", "(1 - v.tk - v.sp)"
 dj_anim = {
-    'root': {'position': [0, f"math.abs(math.sin(q.life_time * 240)) * 0.6 * (1 - {surp})", 0]},
-    'head': {'rotation': [f"{talk} * math.sin(q.life_time * 520) * 7 + (1 - {talk}) * (1 - {surp}) * math.sin(q.life_time * 240) * 5 - {surp} * 8", f"{talk} * math.sin(q.life_time * 170) * 14", 0]},
-    'eyes': {'scale': [1, f"1 + {surp} * 0.7", 1]},
-    'glasses': {'position': [0, f"{surp} * (2.6 + math.sin(q.life_time * 900) * 0.4)", f"{surp} * -0.6"]},
-    'rightArm': {'rotation': [f"{talk} * (-80 + math.sin(q.life_time * 430) * 35) + {surp} * -150 + (1 - {talk}) * (1 - {surp}) * (-35 + math.sin(q.life_time * 480) * 12)", 0, f"{talk} * (15 + math.sin(q.life_time * 300) * 20) + {surp} * 25"]},
-    'leftArm': {'rotation': [f"{talk} * (-60 + math.sin(q.life_time * 380 + 90) * 30) + {surp} * -150 + (1 - {talk}) * (1 - {surp}) * (-45 + math.sin(q.life_time * 480 + 180) * 6)", 0, f"{talk} * (-10 - math.sin(q.life_time * 250) * 20) - {surp} * 25"]},
+    'root': {'position': [0, f"{idl} * math.abs(math.sin(q.life_time * 384)) * 0.5 + {sp} * math.abs(math.sin(q.life_time * 500)) * 1.5", 0]},
+    'body': {'rotation': [f"{idl} * 4 + {tk} * math.sin(q.life_time * 200) * 2", f"{tk} * math.sin(q.life_time * 150) * 6", 0]},
+    'head': {'rotation': [f"{idl} * (math.sin({B}) * 7 + 3) + {tk} * math.sin(q.life_time * 400) * 4 - {sp} * 12", f"{tk} * math.sin(q.life_time * 130) * 10 + {idl} * math.sin(q.life_time * 96) * 8", 0]},
+    'glasses': {'position': [0, f"{sp} * 2.5", f"{sp} * -0.5"]},
+    # まつとき: 両手をデッキに(右はスクラッチ、左はつまみ) / しゃべる: 右手で客をさす・左手は軽く / おどろく: 両手を上へ
+    'rightArm': {'rotation': [f"{idl} * (-68 + math.sin({B}) * 4) + {tk} * (-75 + math.sin(q.life_time * 300) * 12) + {sp} * -165", f"{idl} * math.sin({B} * 2) * 10", f"{tk} * 8 + {sp} * 18"]},
+    'leftArm': {'rotation': [f"{idl} * (-62 + math.sin({B} + 180) * 3) + {tk} * (-25 + math.sin(q.life_time * 260 + 90) * 10) + {sp} * -165", 0, f"{tk} * -10 - {sp} * 18"]},
 }
-M.model('dj', 'DJトシオ(司会の村人)', dj, bones={'root': [0, 0, 0], 'body': [0, 12, 0], 'head': [0, 24, 0], 'eyes': [0, 28.5, -4.2], 'glasses': [0, 32, -4.6], 'rightArm': [-6, 22, 0], 'leftArm': [6, 22, 0]},
+M.model('dj', 'DJトシオ(司会)', dj, bones={'root': [0, 0, 0], 'rightLeg': [-2, 12, 0], 'leftLeg': [2, 12, 0], 'body': [0, 12, 0], 'head': [0, 24, 0], 'glasses': [0, 27, -4.6], 'rightArm': [-6, 22, 0], 'leftArm': [6, 22, 0]},
         anim=dj_anim, box=(0.6, 1.9), props={'mmgplus:mood': {'type': 'int', 'range': [0, 2], 'default': 0, 'client_sync': True}})
 # 幽霊船(大きなモデル。scale 3)
 HULL, HULL2, SAIL, GLOW = (58, 48, 70), (40, 32, 50), (200, 230, 210), (90, 255, 160)
@@ -76,8 +84,14 @@ for n in ('dj', 'ghostship'): M.write(n, M.MODELS[n])
 # DJ: 目とサングラスは頭といっしょに動く(頭の子にする)
 p = os.path.join(M.RP, 'models', 'entity', 'dj.geo.json'); g = json.load(open(p))
 for b in g['minecraft:geometry'][0]['bones']:
-    if b['name'] in ('eyes', 'glasses'): b['parent'] = 'head'
+    if b['name'] == 'glasses': b['parent'] = 'head'
     if b['name'] in ('head', 'rightArm', 'leftArm'): b['parent'] = 'body'
+    if b['name'] in ('body', 'rightLeg', 'leftLeg'): b['parent'] = 'root'
 json.dump(g, open(p, 'w'), indent=1)
+# 気分をなめらかに変える
+p = os.path.join(M.RP, 'entity', 'dj.entity.json'); e = json.load(open(p))
+e['minecraft:client_entity']['description']['scripts']['pre_animation'] = [
+    "v.tk = math.lerp(v.tk ?? 0, q.property('mmgplus:mood') == 1, 0.12);", "v.sp = math.lerp(v.sp ?? 0, q.property('mmgplus:mood') == 2, 0.18);"]
+json.dump(e, open(p, 'w'), indent=1)
 for n in ('dj', 'ghostship'): shutil.copy(os.path.join(M.PREVIEW, f'{n}.png'), os.path.join(ROOT, 'mpl', f'preview_{n}.png'))
 print('ok')
