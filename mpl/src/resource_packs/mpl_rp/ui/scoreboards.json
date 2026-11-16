@@ -20,28 +20,70 @@
    }
   ],
   "max_size": [
-   220,
-   10
+   240,
+   11
+  ],
+  "size": [
+   "default",
+   11
   ],
   "font_type": "unicode"
  },
  "scoreboard_sidebar/main/displayed_objective": {
-  "bindings": [
-   {
-    "binding_name": "#objective_sidebar_name",
-    "binding_type": "global"
-   }
+  "offset": [
+   0,
+   5
   ],
   "max_size": [
    220,
    10
-  ],
-  "font_type": "unicode"
+  ]
  },
  "scoreboard_sidebar/main": {
   "texture": "textures/ui/mpl/side",
   "alpha": 1.0,
-  "bindings": []
+  "bindings": [],
+  "size": [
+   "100%cm + 16px",
+   "100%c + 8px"
+  ],
+  "modifications": [
+   {
+    "array_name": "controls",
+    "operation": "insert_back",
+    "value": [
+     {
+      "mpl_sep": {
+       "type": "image",
+       "texture": "textures/ui/mpl/line",
+       "size": [
+        "100% - 20px",
+        1
+       ],
+       "layer": 2,
+       "anchor_from": "top_middle",
+       "anchor_to": "top_middle",
+       "offset": [
+        0,
+        15
+       ]
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "scoreboard_sidebar/main/lists": {
+  "offset": [
+   0,
+   18
+  ]
+ },
+ "scoreboard_sidebar/main/lists/horizontal_padding": {
+  "size": [
+   0,
+   "100%c"
+  ]
  },
  "scoreboard_sidebar": {
   "anchor_from": "bottom_right",

@@ -186,59 +186,53 @@ if not os.environ.get('MPL_UI_JSON_ONLY'):
     # 光のフラッシュ
     fl = Image.new('L', (256, 128)); ImageDraw.Draw(fl).ellipse((20, 20, 236, 108), fill=255); fl = fl.filter(ImageFilter.GaussianBlur(22))
     Image.merge('RGBA', (Image.new('L', fl.size, 255), Image.new('L', fl.size, 250), Image.new('L', fl.size, 220), fl)).save(os.path.join(TEX, 'flash.png'))
-    # 帯: 暗い半透明のカプセル + 色の細いふち + 左に色のしるし(すっきりした見た目)
-    ACC = {'gold': (255, 196, 40), 'blue': (70, 160, 255), 'red': (255, 80, 80), 'purple': (180, 110, 255), 'green': (90, 220, 110), 'gray': (170, 175, 195)}
+    # ---- 見た目のルール(v38): 暗い紺のガラス + 角丸 + 1本のふち。色は「ふち」と「上のうすい光」だけで分ける ----
+    def glass(w, h, r, edge, fill_top=(34, 38, 66), fill_bot=(16, 18, 34), alpha=232, bw=1, glow=None, S=4):
+        W, Hh = w * S, h * S
+        im = Image.new('RGBA', (W, Hh)); d = ImageDraw.Draw(im)
+        d.rounded_rectangle((0, 0, W - 1, Hh - 1), r * S, fill=edge)
+        mk = Image.new('L', (W, Hh)); ImageDraw.Draw(mk).rounded_rectangle((bw * S, bw * S, W - 1 - bw * S, Hh - 1 - bw * S), (r - bw) * S, fill=alpha)
+        im.paste(grad(W, Hh, fill_top, fill_bot), (0, 0), mk)
+        if glow:   # 上のうすい光(ふちの内がわ、上半分だけ)
+            gl = Image.new('RGBA', (W, Hh)); gd = ImageDraw.Draw(gl)
+            for y in range(Hh // 2):
+                gd.line([(0, bw * S + y), (W, bw * S + y)], fill=glow + (round(70 * (1 - y / (Hh / 2)) ** 2),))
+            m2 = Image.new('L', (W, Hh)); ImageDraw.Draw(m2).rounded_rectangle((bw * S, bw * S, W - 1 - bw * S, Hh - 1 - bw * S), (r - bw) * S, fill=255)
+            im.paste(Image.alpha_composite(im, gl), (0, 0), m2)
+        return im
+    # 帯: 種類の色のふち + 上に同じ色のうすい光(左の縦棒などはなし)
+    ACC = {'gold': (255, 200, 60), 'blue': (90, 170, 255), 'red': (255, 90, 90), 'purple': (190, 120, 255), 'green': (100, 225, 120), 'gray': (175, 180, 200)}
     for c in RIBBONS:
-        S = 4; w, h = 96 * S, 28 * S; col = ACC[c]
+        im = glass(48, 16, 7, ACC[c] + (255,), glow=ACC[c])
+        nine(f'ribbon_{c}', im.resize((96, 32), Image.LANCZOS), [7, 7, 7, 7], 2)
+    # カード(ミニゲームの説明・会話・メニュー): 白いうすいふち
+    nine('card', glass(48, 48, 7, (255, 255, 255, 80)).resize((96, 96), Image.LANCZOS), [9, 9, 9, 9], 2)
+    # ボタン: ふだん = あざやかな青 / 選択中 = 金 / 押した = こい金(少し下へ)。下に1段の影でパーティらしく
+    for name, top, bot, edge in [('btn', (96, 120, 230), (52, 66, 170), (24, 26, 60)), ('btn_hover', (255, 230, 120), (245, 160, 30), (120, 60, 0)), ('btn_press', (230, 150, 30), (190, 110, 10), (120, 60, 0))]:
+        S = 4; w, h = 48 * S, 24 * S; pr = 'press' in name
         im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
-        d.rounded_rectangle((0, 0, w - 1, h - 1), 10 * S, fill=(255, 255, 255, 70))
-        g = grad(w, h, (30, 34, 58), (12, 14, 28)); mk = Image.new('L', (w, h))
-        ImageDraw.Draw(mk).rounded_rectangle((S, S, w - 1 - S, h - 1 - S), 9 * S, fill=228)
-        im.paste(g, (0, 0), mk)
-        d.line([(12 * S, 3 * S), (w - 12 * S, 3 * S)], fill=(255, 255, 255, 50), width=S)          # 上のつや
-        nine(f'ribbon_{c}', im.resize((w // 2, h // 2), Image.LANCZOS), [8, 5, 8, 5], 4)  # 角の丸み 5、真ん中が残る
-    # カード(ミニゲームの説明・フォーム): 暗い半透明 + うすい白のふち(オレンジのふちはやめた)
-    S = 4; w = h = 48 * S
-    im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
-    d.rounded_rectangle((0, 0, w - 1, h - 1), 9 * S, fill=(255, 255, 255, 70))
-    g = grad(w, h, (30, 34, 58), (14, 16, 30)); mk = Image.new('L', (w, h))
-    ImageDraw.Draw(mk).rounded_rectangle((S, S, w - 1 - S, h - 1 - S), 8 * S, fill=225)
-    im.paste(g, (0, 0), mk)
-    d.line([(10 * S, 2 * S), (w - 10 * S, 2 * S)], fill=(255, 255, 255, 60), width=S)
-    nine('card', im.resize((96, 96), Image.LANCZOS), [12, 12, 12, 12], 2)
-    # ボタン(ふつう・選択中・押した)
-    # ボタン: ふだん = ガラス + うすい白のふち / 選択中 = 少し明るく + 金のふち / 押した = 暗く + 金のふち(少し下へ)
-    # ボタン: ふだん = あざやかな青 / 選択中 = 金 / 押した = こい金(少し下へ)。パーティらしい色
-    for name, top, bot, border in [('btn', (90, 110, 210), (45, 55, 140), (20, 14, 40)), ('btn_hover', (255, 226, 110), (240, 150, 20), (255, 255, 255)), ('btn_press', (220, 140, 20), (170, 90, 0), (255, 255, 255))]:
-        S = 4; w, h = 48 * S, 24 * S
-        im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
-        d.rounded_rectangle((0, 0, w - 1, h - 1), 7 * S, fill=border + (255,))
-        mk = Image.new('L', (w, h)); ImageDraw.Draw(mk).rounded_rectangle((2 * S, 2 * S, w - 1 - 2 * S, h - 1 - 2 * S - (0 if 'press' in name else 2 * S)), 5 * S, fill=255)
-        im.paste((10, 8, 25, 255), (0, 2 * S), mk)
-        im.paste(grad(w, h, top, bot), (0, 2 * S if 'press' in name else 0), mk)
-        ImageDraw.Draw(im).line([(7 * S, 4 * S), (w - 7 * S, 4 * S)], fill=(255, 255, 255, 110), width=S)
+        d.rounded_rectangle((0, 1 * S if pr else 0, w - 1, h - 1), 6 * S, fill=edge + (255,))           # ふち + 下の影
+        mk = Image.new('L', (w, h)); ImageDraw.Draw(mk).rounded_rectangle((S, (2 if pr else 1) * S, w - 1 - S, h - 1 - (1 if pr else 3) * S), 5 * S, fill=255)
+        im.paste(grad(w, h, top, bot), (0, 0), mk)
         nine(name, im.resize((w // 2, h // 2), Image.LANCZOS), [6, 6, 6, 6], 2)
-    # メニューの見出しの帯: ピンク→むらさきのあざやかな帯 + 白いふち
-    S = 4; w, h = 96 * S, 28 * S
-    im = Image.new('RGBA', (w, h)); d = ImageDraw.Draw(im)
-    d.rounded_rectangle((0, 0, w - 1, h - 1), 10 * S, fill=(255, 255, 255, 255))
-    g = Image.new('RGBA', (w, h))
+    # メニューの見出しの帯: ピンク→むらさき、ふちなしの角丸
+    S = 4; w, h = 96 * S, 24 * S
+    g = Image.new('RGBA', (w, h)); gd = ImageDraw.Draw(g)
     for x in range(w):
-        t = x / (w - 1); ImageDraw.Draw(g).line([(x, 0), (x, h)], fill=(round(255 - 120 * t), round(70 + 10 * t), round(170 + 70 * t), 255))
-    mk = Image.new('L', (w, h)); ImageDraw.Draw(mk).rounded_rectangle((2 * S, 2 * S, w - 1 - 2 * S, h - 1 - 2 * S), 8 * S, fill=255)
-    im.paste(g, (0, 0), mk)
-    d.line([(12 * S, 5 * S), (w - 12 * S, 5 * S)], fill=(255, 255, 255, 90), width=S)
-    nine('head', im.resize((w // 2, h // 2), Image.LANCZOS), [8, 6, 8, 6], 4)
-    # 見出しの下の細い線
-    ln = Image.new('RGBA', (64, 2)); ImageDraw.Draw(ln).line([(0, 0), (63, 0)], fill=(255, 255, 255, 90), width=1); ln.save(os.path.join(TEX, 'line.png'))
-    # アクションバー・説明の文字の背景: 暗い半透明の角丸だけ(ふちなし)
-    S = 4; im = Image.new('RGBA', (64 * S, 32 * S)); d = ImageDraw.Draw(im)
-    d.rounded_rectangle((0, 0, 64 * S - 1, 32 * S - 1), 6 * S, fill=(10, 12, 24, 170))
-    im = im.resize((128, 64), Image.LANCZOS)
-    nine('toast', im, [6, 6, 6, 6], 2)
-    im = Image.new('RGBA', (16, 16)); d = ImageDraw.Draw(im)
-    d.rectangle((0, 0, 15, 15), fill=(10, 12, 24, 170)); d.rectangle((0, 0, 15, 0), fill=(255, 255, 255, 70))
-    nine('side', im, [3, 3, 3, 3])
+        t = x / (w - 1); gd.line([(x, 0), (x, h)], fill=(round(250 - 110 * t), round(80 + 4 * t), round(175 + 70 * t), 255))
+    mk = Image.new('L', (w, h)); ImageDraw.Draw(mk).rounded_rectangle((0, 0, w - 1, h - 1), 6 * S, fill=255)
+    im = Image.new('RGBA', (w, h)); im.paste(g, (0, 0), mk)
+    nine('head', im.resize((w // 2, h // 2), Image.LANCZOS), [7, 7, 7, 7], 2)
+    # 見出しの下の細い線(まん中ほど明るい)
+    ln = Image.new('RGBA', (64, 2))
+    for x in range(64): ln.putpixel((x, 0), (255, 255, 255, round(110 * math.sin(math.pi * (x + 0.5) / 64))))
+    ln.save(os.path.join(TEX, 'line.png'))
+    # 小さいお知らせ・アクションバー: ふちなしの暗い角丸
+    nine('toast', glass(32, 16, 6, (255, 255, 255, 40), alpha=215).resize((64, 32), Image.LANCZOS), [6, 6, 6, 6], 2)
+    # 右下の順位表
+    nine('side', glass(32, 32, 6, (255, 255, 255, 70), alpha=215).resize((64, 64), Image.LANCZOS), [7, 7, 7, 7], 2)
+    # 会話の名前の札(ピンク→むらさき)
+    nine('plate', im.resize((w // 2, h // 2), Image.LANCZOS), [7, 7, 7, 7], 2)
     print('textures ok')
 
 # ===== HUD(タイトルの代わりにロゴ・帯・カード)=====
@@ -273,19 +267,23 @@ for i, key in enumerate(KEYS):
         body = [{'num': {'type': 'image', 'texture': f'textures/ui/mpl/num_{key[1:]}', 'size': [80, 60], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
                          'anims': ['@hud.mpl_pop1']}},
                 {'sub@hud.mpl_sub': {'offset': [0, 62]}}]
-    elif key.startswith('r_'):  # 帯
-        body = [{'stack': {'type': 'stack_panel', 'orientation': 'vertical', 'size': ['100%', '100%c'], 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'anims': ['@hud.mpl_slide'], 'controls': [
-            {'rb': {'type': 'panel', 'size': ['100%', '100%c'], 'controls': [{'img': {'type': 'image', 'texture': f'textures/ui/mpl/ribbon_{key[2:]}', 'size': ['100%c + 44px', '100%c + 12px'], 'layer': 3,
-                    'controls': [{'t': {'type': 'label', 'text': T, 'layer': 4, 'shadow': True, 'localize': False, 'font_scale_factor': 1.3, 'color': [1, 1, 1], 'bindings': [col(T)]}}]}}]}},
-            {'gap': {'type': 'panel', 'size': ['100%', 4]}},
-            {'sb': {'type': 'panel', 'size': ['100%', '100%c'], 'controls': [{'sub@hud.mpl_sub': {}}]}}]}}]
-    elif key == 'talk':  # DJ トシオのせりふ(画面の下の方、RPG の文字の箱)
-        body = [{'img': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [290, '100%c + 16px'], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [-20, 122],
-                         'anims': ['@hud.mpl_fadein'], 'controls': [{'st': {'type': 'stack_panel', 'orientation': 'vertical', 'size': [268, '100%c'], 'controls': [
-                             {'name': {'type': 'label', 'text': T, 'size': ['100%', 'default'], 'text_alignment': 'left', 'layer': 5, 'shadow': True, 'localize': False, 'color': [1, 0.82, 0.3], 'bindings': [col(T)]}},
-                             {'g0': {'type': 'panel', 'size': ['100%', 3]}}, {'ln': {'type': 'image', 'texture': 'textures/ui/mpl/line', 'size': ['100%', 1], 'layer': 5}}, {'gap': {'type': 'panel', 'size': ['100%', 4]}},
-                             {'say': {'type': 'label', 'text': '#hud_subtitle_text_string', 'size': ['100%', 'default'], 'text_alignment': 'left', 'layer': 5, 'shadow': True, 'localize': False,
-                                      'font_scale_factor': 1.0, 'color': [1, 1, 1], 'bindings': [col('#hud_subtitle_text_string')]}}]}}]}}]
+    elif key.startswith('r_'):  # 帯: 1つのカプセルに 大きい文字(タイトル)と 小さい文字(説明)。説明がないときは低いカプセル
+        SUBS = '#hud_subtitle_text_string'
+        main_t = lambda y: {'t': {'type': 'label', 'text': T, 'layer': 4, 'shadow': True, 'localize': False, 'font_scale_factor': 1.3, 'color': [1, 1, 1],
+                                  'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, y], 'bindings': [col(T)]}}
+        body = [{'one': {'type': 'image', 'texture': f'textures/ui/mpl/ribbon_{key[2:]}', 'size': ['100%cm + 40px', 22], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
+                         'anims': ['@hud.mpl_drop'], 'bindings': [col(SUBS), vis(f"({SUBS} = '')")], 'controls': [main_t(6)]}},
+                {'two': {'type': 'image', 'texture': f'textures/ui/mpl/ribbon_{key[2:]}', 'size': ['100%cm + 40px', 34], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
+                         'anims': ['@hud.mpl_drop'], 'bindings': [col(SUBS), vis(f"(not ({SUBS} = ''))")], 'controls': [main_t(5),
+                    {'s': {'type': 'label', 'text': SUBS, 'layer': 4, 'shadow': True, 'localize': False, 'font_scale_factor': 0.9, 'color': [0.82, 0.86, 0.97],
+                           'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, 20], 'bindings': [col(SUBS)]}}]}}]
+    elif key == 'talk':  # DJ トシオのせりふ: 画面の下の真ん中に箱、左上に名前の札
+        body = [{'img': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [300, '100%c + 20px'], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, 128],
+                         'anims': ['@hud.mpl_fadein'], 'controls': [
+                             {'plate': {'type': 'image', 'texture': 'textures/ui/mpl/plate', 'size': ['100%c + 16px', 13], 'layer': 5, 'anchor_from': 'top_left', 'anchor_to': 'top_left', 'offset': [10, -7],
+                                        'controls': [{'n': {'type': 'label', 'text': T, 'layer': 6, 'shadow': True, 'localize': False, 'color': [1, 1, 1], 'bindings': [col(T)]}}]}},
+                             {'say': {'type': 'label', 'text': '#hud_subtitle_text_string', 'size': [276, 'default'], 'text_alignment': 'left', 'layer': 5, 'shadow': True, 'localize': False,
+                                      'anchor_from': 'top_left', 'anchor_to': 'top_left', 'offset': [12, 12], 'font_scale_factor': 1.0, 'color': [1, 1, 1], 'bindings': [col('#hud_subtitle_text_string')]}}]}}]
     elif key == 'card':  # ミニゲームの説明カード
         body = [{'img': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [280, '100%c + 22px'], 'layer': 3, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle',
                          'anims': ['@hud.mpl_drop'], 'controls': [{'st': {'type': 'stack_panel', 'orientation': 'vertical', 'size': [256, '100%c'], 'controls': [
@@ -325,10 +323,14 @@ json.dump(hud, open(os.path.join(UI, 'hud_screen.json'), 'w', encoding='utf-8'),
 
 # サイドバーの背景
 sb = json.load(open(os.path.join(UI, 'scoreboards.json'), encoding='utf-8'))
-sb['scoreboard_sidebar/main'] = {'texture': 'textures/ui/mpl/side', 'alpha': 1.0, 'bindings': []}
+sb['scoreboard_sidebar/main'] = {'texture': 'textures/ui/mpl/side', 'alpha': 1.0, 'bindings': [], 'size': ['100%cm + 16px', '100%c + 8px']}
+sb['scoreboard_sidebar/main/displayed_objective'] = {'offset': [0, 5]}
+sb['scoreboard_sidebar/main']['modifications'] = [{'array_name': 'controls', 'operation': 'insert_back', 'value': [{'mpl_sep': {'type': 'image', 'texture': 'textures/ui/mpl/line', 'size': ['100% - 20px', 1], 'layer': 2, 'anchor_from': 'top_middle', 'anchor_to': 'top_middle', 'offset': [0, 15]}}]}]
+sb['scoreboard_sidebar/main/lists'] = {'offset': [0, 18]}
+sb['scoreboard_sidebar/main/lists/horizontal_padding'] = {'size': [0, '100%c']}
 sb.setdefault('scoreboard_sidebar_score', {})['visible'] = False  # 並び順用の数字はかくす
 sb['scoreboard_sidebar'] = dict(sb.get('scoreboard_sidebar', {}), anchor_from='bottom_right', anchor_to='bottom_right', offset=[-3, -3])  # 右下に固定
-sb.setdefault('scoreboard_sidebar_player', {})['max_size'] = [220, 10]  # 長い行が切れないように
+sb.setdefault('scoreboard_sidebar_player', {}).update({'max_size': [240, 11], 'size': ['default', 11]})  # 長い行が切れないように
 sb.setdefault('scoreboard_sidebar/main/displayed_objective', {})['max_size'] = [220, 10]
 json.dump(sb, open(os.path.join(UI, 'scoreboards.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 

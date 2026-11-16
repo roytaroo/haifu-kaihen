@@ -130,7 +130,7 @@ const soundAll = (s, pitch = 1) => cmd(`execute as @a[tag=playing] at @s run pla
 const records = load("records", {});
 function record(id, name, v, kind) {
     const r = records[id];
-    if (!r || (kind === "min" ? v < r.v : v > r.v)) { records[id] = { name, v, kind }; save("records", records); toast(`§6★ ${MINIGAMES[id]} の新記録！ §f${name} ${Number.isInteger(v) ? v : v.toFixed(2)}`); }
+    if (!r || (kind === "min" ? v < r.v : v > r.v)) { records[id] = { name, v, kind }; save("records", records); toast(`§6${I.crown} ${MINIGAMES[id]} の新記録！ §f${name} ${Number.isInteger(v) ? v : v.toFixed(2)}`); }
 }
 
 // ===== 25. 計算早押し =====
@@ -2063,10 +2063,11 @@ const MG_HOWTO = {
 const mgOn = () => MG_IDS.filter((id) => !load("mg_off", []).includes(id));
 
 // ===== アイコン(ふつうの文字。自作の絵文字は大きく出たのでやめた)=====
-const I = { star: "★", coin: "●", dice: "⚄", crown: "♛", up: "▲", down: "▼", heart: "♥", bolt: "⚡", bag: "◆", clock: "⌚" };
+// 文字の中のアイコン(RP の font/glyph_E3.png、tools/mpl_icons.py で作る)
+const I = { star: "\ue300", coin: "\ue301", crown: "\ue302", arrow: "\ue30b", crystal: "\ue30c", dice: "\ue30d", clock: "\ue30e", up: "\ue30f", down: "\ue310", heart: "\ue311", bolt: "\ue312", bag: "\ue313" };
 // アイテムの小さな絵(RP の font/glyph_E2.png、U+E200〜)
 const ICON = { double: "\ue200", triple: "\ue201", pipe: "\ue202", gold: "\ue203", glove: "\ue204", fix: "\ue205", slow: "\ue206", magnet: "\ue207", ticket: "\ue208", bag: "\ue209", reverse: "\ue20a" };
-const BADGE = (n) => String.fromCharCode(0x2460 + Math.min(7, Math.max(0, n - 1))); // ①〜⑧
+const BADGE = (n) => String.fromCharCode(0xe303 + Math.min(7, Math.max(0, n - 1))); // 順位のバッジ 1〜8(金・銀・銅・青)
 
 // ===== 音楽(RP の sounds/mpl/*.ogg、tools/mpl_music.py で作ったオリジナル曲)=====
 const BGM = { board: ["mpl.bgm_board", 600], minigame: ["mpl.bgm_minigame", 512], finale: ["mpl.bgm_finale", 300] };
@@ -2530,11 +2531,13 @@ function addCoins(name, d, quiet = false) { const before = G.coins[name] ?? 0; G
 const rankRows = () => G.players.map((n) => [n, G.stars[n] ?? 0, G.coins[n] ?? 0]).sort((a, b) => b[1] - a[1] || b[2] - a[2]);
 function rankOfName(n) { const rows = rankRows(), i = rows.findIndex((r) => r[0] === n); return rows.findIndex((r) => r[1] === rows[i][1] && r[2] === rows[i][2]) + 1; }
 function hud() {
-    // 右の表: 順位のバッジ・名前・★・コイン。今の番の人は ▶。見出しはターン
+    // 右の表(右下)。見出しはターン
     try { world.scoreboard.removeObjective("mpl_hud"); } catch {}
-    const o = world.scoreboard.addObjective("mpl_hud", `§e§l${I.crown} TURN ${Math.max(1, G.turn)}/${G.turns}`);
+    const o = world.scoreboard.addObjective("mpl_hud", `§l§fTURN §e${Math.max(1, G.turn)}§7 / §f${G.turns}`);
     const rows = rankRows();
-    rows.forEach(([n, st, co], i) => o.setScore(boldText(`${G.now === n ? "§e▶" : " "}${BADGE(rankOfName(n))} §e${I.star}${st} §6${I.coin}${String(co).padStart(2, " ")} ${G.color?.[n] ?? "§f"}${n.length > 9 ? n.slice(0, 8) + "…" : n} §r${(G.items[n] ?? []).map((k) => ICON[k] ?? "").join("")}${G.crystal?.[n] ? ` §d◆${G.crystal[n]}` : ""}`), rows.length - i));
+    // 1行: 順位バッジ・★・コイン(数字が縦にそろうよう先に)・名前(今の番は金色 + 矢印)・アイテム・クリスタル
+    const nm = (n) => (n.length > 9 ? n.slice(0, 8) + "…" : n);
+    rows.forEach(([n, st, co], i) => o.setScore(boldText(`§f${BADGE(rankOfName(n))} ${I.star}${st} ${I.coin}${String(co).padStart(2, "0")}  ${G.now === n ? `§e${nm(n)}§f${I.arrow}` : `${G.color?.[n] ?? "§f"}${nm(n)}`}§f${(G.items[n] ?? []).length ? " " + G.items[n].map((k) => ICON[k] ?? "").join("") : ""}${G.crystal?.[n] ? ` ${I.crystal}${G.crystal[n]}` : ""}`), rows.length - i));
     cmd("scoreboard objectives setdisplay sidebar mpl_hud descending");
     // 順位が上がった人には明るい音、下がった人には低い音(本人だけ)
     if (G.on && !run.active) for (const [n] of rows) { const r = rankOfName(n), b = G.prevRank?.[n]; if (b && r !== b) cmd(`execute as "${n}" at @s run playsound ${r < b ? "random.levelup" : "note.bass"} @s ~ ~ ~ 0.8 ${r < b ? 1.7 : 0.6}`); }
@@ -2989,7 +2992,7 @@ async function zoneEvent(p, ev) {
         // クリスタル集め: 1つもらう(+3コイン)。3つ集めると、次のスターが半額
         G.crystal[name] = Math.min(3, (G.crystal[name] ?? 0) + 1); addCoins(name, 3); hud();
         for (let k = 0; k < 8; k++) { cmd(`particle minecraft:end_chest ${l.x} ${l.y + 1 + k * 0.2} ${l.z}`); await wait(2); }
-        ribbon("purple", `CRYSTAL ${"◆".repeat(G.crystal[name])}${"◇".repeat(3 - G.crystal[name])}`, G.crystal[name] >= 3 ? `${name}: 次のスターが半額！` : `${name}: あと${3 - G.crystal[name]}つでスター半額`, 60);
+        ribbon("purple", `CRYSTAL ${I.crystal.repeat(G.crystal[name])}§8${I.crystal.repeat(3 - G.crystal[name])}`, G.crystal[name] >= 3 ? `${name}: 次のスターが半額！` : `${name}: あと${3 - G.crystal[name]}つでスター半額`, 60);
         soundAllPlayers("random.orb", 1.6); await react(p, true);
     } else if (ev === "bless") {
         // 女神の祝福: 止まった人 +10、今いちばん下の人にも +5
