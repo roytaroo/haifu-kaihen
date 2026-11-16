@@ -328,6 +328,44 @@
     }
    ]
   },
+  "mplx.mob.skeleton.say": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/skeleton/say1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/skeleton/say2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/skeleton/say3",
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.mob.skeleton.step": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/mob/skeleton/step1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/skeleton/step2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/skeleton/step3",
+     "is3D": false
+    },
+    {
+     "name": "sounds/mob/skeleton/step4",
+     "is3D": false
+    }
+   ]
+  },
   "mplx.mob.slime.big": {
    "category": "ui",
    "sounds": [

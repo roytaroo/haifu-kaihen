@@ -92,6 +92,21 @@ for nd in nodes:
         n = nd['n']; t = [-n[1], n[0]]
         for a in range(2, 9):
             for b in range(-4, 5): RESERVED.add((nd['x'] + n[0] * a + t[0] * b, nd['z'] + n[1] * a + t[1] * b))
+RES_Y = {c: next(nd['y'] for nd in nodes if nd['kind'] == 'shop' and abs(nd['x'] - c[0]) < 10 and abs(nd['z'] - c[1]) < 10) for c in RESERVED}
+# 鏡のマス(2つ): 道の横の空いた側に大きな鏡。中からガイコツが出てくる
+MIRRORS = []
+for gg in [(-7, -2), (0, -4), (7, 3), (-4, 6), (-7, 4)]:
+    if len(MIRRORS) >= 2 or gg not in at: continue
+    nd = N(*gg)
+    if nd['kind'] != 'blue' or 'gate' in nd: continue
+    for n in ([1, 0], [-1, 0], [0, 1], [0, -1]):
+        t = [-n[1], n[0]]
+        cells = [(nd['x'] + n[0] * a + t[0] * b, nd['z'] + n[1] * a + t[1] * b) for a in range(2, 7) for b in range(-3, 4)]
+        if any(c in ROAD or c in RESERVED or not (X0 + 3 <= c[0] <= X1 - 3 and Z0 + 3 <= c[1] <= Z1 - 3) for c in cells): continue
+        if any(c in ROAD for a in range(2, 7) for b in range(-3, 4) for c in [(nd['x'] + n[0] * a + t[0] * b + 0, nd['z'] + n[1] * a + t[1] * b)]): continue
+        nd['kind'] = 'mirror'; nd['n'] = n; MIRRORS.append(nd)
+        for c in cells: RESERVED.add(c); RES_Y[c] = nd['y']
+        break
 
 # ===== 地形 =====
 def noise(x, z): return math.sin(x * 0.21 + z * 0.13) * 0.6 + math.sin(x * 0.07 - z * 0.19) * 0.9 + math.cos(z * 0.31) * 0.4
@@ -129,7 +144,7 @@ for x in range(X0, X1 + 1):
         if river_d(x, z) <= 2.6 and h <= 0: h = -3
         H[(x, z)] = h
 for p in RESERVED:  # 屋台の場所は平らに
-    if p in H: H[p] = next(nd['y'] for nd in nodes if nd['kind'] == 'shop' and abs(nd['x'] - p[0]) < 10 and abs(nd['z'] - p[1]) < 10)
+    if p in H: H[p] = RES_Y[p]
 ZONE_TOP = lambda x, z, h: ('sand' if h <= 0 and (not all(inside(x + i, z + j) for i, j in ((5, 0), (-5, 0), (0, 5), (0, -5))) or (z - ZC) / G < -7.6) else
                             'blackstone' if vol(x, z) < 5.0 else 'moss_block' if h == 3 and x < -30 and noise(x * 2.3, z * 1.9) > 0.7 else 'grass_block')
 def cliff_block(x, z, y):
@@ -147,6 +162,23 @@ for (x, z), h in H.items():
     if top in ('grass_block', 'moss_block') and h > 0: put(x, h - 1, z, 'dirt')
     put(x, h, z, top)
     if h == 12 and vol(x, z) < 1.0: put(x, 13, z, 'lava'); put(x, 12, z, 'magma_block')   # 火口の溶岩(ふちに囲まれている)
+# 鏡: 金のわく(5x5)・中は黒いガラス + 奥に泣く黒曜石(紫に光る)・上にソウルランタン・前に黒い石の床
+for nd in MIRRORS:
+    n = nd['n']; t = [-n[1], n[0]]; y = nd['y']
+    P = lambda a, b: (nd['x'] + n[0] * a + t[0] * b, nd['z'] + n[1] * a + t[1] * b)
+    for a in range(2, 7):
+        for b in range(-3, 4):
+            x, z = P(a, b); clear(x, y + 1, z, x, y + 8, z)
+    for a in (2, 3):
+        for b in range(-2, 3): x, z = P(a, b); put(x, y, z, 'polished_blackstone_bricks' if (a + b) % 2 else 'deepslate_tiles')
+    for b in range(-2, 3):
+        for k in range(1, 6):
+            x, z = P(4, b); edge = abs(b) == 2 or k in (1, 5)
+            put(x, y + k, z, 'gold_block' if edge else 'black_stained_glass')
+            x2, z2 = P(5, b); put(x2, y + k, z2, 'polished_blackstone' if edge else 'crying_obsidian')
+    x, z = P(4, 0); put(x, y + 6, z, 'chiseled_polished_blackstone'); put(x, y + 7, z, 'soul_lantern')
+    for b in (-3, 3): x, z = P(4, b); put(x, y + 1, z, 'polished_blackstone_wall'); put(x, y + 2, z, 'soul_lantern')
+    nd['mirror'] = {'x': nd['x'] + n[0] * 4 + 0.5, 'y': y + 1, 'z': nd['z'] + n[1] * 4 + 0.5, 'nx': n[0], 'nz': n[1]}
 # 海とふち
 for x in range(X0, X1 + 1):
     for z in range(Z0, Z1 + 1):
@@ -170,7 +202,7 @@ clear(fx - 1, 0, fz - 1, fx + 1, 6, fz - 1)
 # ===== 道をしく =====
 ROADMAT = {'port': 'smooth_sandstone', 'beach': 'smooth_sandstone', 'harbor': 'spruce_planks', 'cliff': 'polished_andesite', 'crystal': 'polished_andesite', 'foot': 'polished_deepslate',
            'forest': 'packed_mud', 'tree': 'spruce_planks', 'ship': 'spruce_planks', 'volcano': 'polished_blackstone_bricks', 'shrine': 'quartz_bricks', 'meadow': 'smooth_sandstone'}
-COL = {'shuffle': 'pink_concrete', 'bank': 'cyan_concrete', 'start': 'white_concrete', 'blue': 'light_blue_concrete', 'red': 'red_concrete', 'event': 'lime_concrete', 'lucky': 'yellow_concrete', 'shop': 'purple_concrete', 'skull': 'black_concrete'}
+COL = {'shuffle': 'pink_concrete', 'bank': 'cyan_concrete', 'start': 'white_concrete', 'blue': 'light_blue_concrete', 'red': 'red_concrete', 'event': 'lime_concrete', 'lucky': 'yellow_concrete', 'shop': 'purple_concrete', 'skull': 'black_concrete', 'mirror': 'amethyst_block'}
 BRIDGE_BOX = None
 for (x, z), y in ROAD.items():
     g = H.get((x, z))
@@ -560,9 +592,9 @@ for a in (-1.2, 1.5):   # 北がわ(-2.4・2.6)は海が近いので流さない
         if V.get((x, y, z)) in (None, 'air'): f.append([x, y, z])
     FLOWS.append(f)
 VOLC = {'pool': [min(c[0] for c in POOL), min(c[1] for c in POOL), max(c[0] for c in POOL), max(c[1] for c in POOL)], 'y0': 14, 'y1': 18, 'flows': FLOWS}
-print('flood runs', len(FLOOD), 'cells', len(dist), 'flows', [len(f) for f in FLOWS])
+print('mirrors', [m['g'] for m in MIRRORS]); print('flood runs', len(FLOOD), 'cells', len(dist), 'flows', [len(f) for f in FLOWS])
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 11, 'tide': TIDE, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}}}
+        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 12, 'tide': TIDE, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 

@@ -2542,7 +2542,7 @@ function hud() {
 }
 let starEntity;
 function placeStar(exclude = -1) {
-    let i; do { i = rand(4, SPACES.length - 1); } while (i === exclude || ["start", "shop", "skull"].includes(SPACES[i].kind));
+    let i; do { i = rand(4, SPACES.length - 1); } while (i === exclude || ["start", "shop", "skull", "mirror"].includes(SPACES[i].kind));
     G.star = i;
     try { starEntity?.remove(); } catch {}
     const s = spaceAt(i);
@@ -2722,7 +2722,7 @@ async function takeTurn(p, last, nextName) {
     const sp = spaceAt(G.pos[name]), mul = last ? 2 : 1;
     const LAND = { blue: ["random.orb", 1.6], red: ["note.bass", 0.6], event: ["note.chime", 1.2], lucky: ["random.levelup", 1.8], shop: ["note.bell", 1.4], skull: ["mob.wither.hurt", 1.6], bank: ["note.bell", 0.9], shuffle: ["note.chime", 0.8] };
     if (LAND[sp.kind]) cmd(`execute as @a at @s run playsound ${LAND[sp.kind][0]} @s ~ ~ ~ 1 ${LAND[sp.kind][1]}`);
-    const KN = { event: "ハプニングマス", lucky: "ラッキーマス", shop: "ショップ", skull: "ドクロマス", bank: "銀行マス", shuffle: "シャッフルマス" };
+    const KN = { event: "ハプニングマス", lucky: "ラッキーマス", shop: "ショップ", skull: "ドクロマス", bank: "銀行マス", shuffle: "シャッフルマス", mirror: "鏡のマス" };
     if (KN[sp.kind]) { ribbon("purple", KN[sp.kind], name, 22); await wait(18); }
     cnt(name, sp.kind);
     if (sp.kind === "bank") { const g = G.bank ?? 0; G.bank = 0; if (g > 0) cnt(name, "bank"); addCoins(name, g); banner("lucky", `BANK ${g}${I.coin} ぜんぶもらった！  ${name}`, 60); soundAllPlayers("random.totem", 1.2); await react(p, g > 0); }
@@ -2735,6 +2735,7 @@ async function takeTurn(p, last, nextName) {
     else if (sp.kind === "event") await (sp.ev ? zoneEvent(p, sp.ev) : happening(p));
     else if (sp.kind === "shop") await shop(p);
     else if (sp.kind === "skull") await skull(p);
+    else if (sp.kind === "mirror") await mirror(p);
     await wait(15);
 }
 // アイテムを使う(サイコロの前)。持っていなければ何もしない
@@ -3027,6 +3028,82 @@ async function skull(p) {
     await react(p, false, 0.8); pose(p, "fall");
     await wait(40);
 }
+// 鏡のマス: 鏡の中からガイコツがガクガク出てくる。タダで 10〜15 コインを奪う / 50 コインでスターを奪う / なにもしない
+const MIRROR_STAR = 50;
+async function mirror(p) {
+    const name = p.name, m = SPACES[G.pos[name]].mirror; if (!m) return;
+    const yaw = Math.atan2(m.nx, -m.nz) * 180 / Math.PI;
+    const front = (a) => ({ x: m.x - m.nx * a, y: m.y, z: m.z - m.nz * a });
+    // カメラ: 鏡とプレイヤーを横から
+    const side = { x: -m.nz, z: m.nx }, mid = front(2);
+    cam.to("@a[tag=mpl_board]", { x: mid.x + side.x * 7 - m.nx * 2, y: m.y + 3.2, z: mid.z + side.z * 7 - m.nz * 2 }, { x: mid.x, y: m.y + 1.2, z: mid.z }, 0.9);
+    await wait(16);
+    ribbon("purple", "MIRROR!", "鏡の中から なにかが出てくる…", 70);
+    for (let k = 0; k < 10; k++) { cmd(`particle minecraft:soul_particle ${m.x + side.x * rand(-1, 1)} ${m.y + 1 + Math.random() * 2.5} ${m.z + side.z * rand(-1, 1)}`); if (k % 3 === 0) soundAllPlayers("mob.zombie.unfect", 1.6); await wait(2); }
+    const sk = spawnAt("mmgplus:mirrorskel", front(0)); if (!sk) return;
+    try { sk.setRotation({ x: 0, y: yaw }); } catch {}
+    // ガクガク出てくる(3tick ごとに止まっては進む)
+    soundAllPlayers("mob.skeleton.say", 0.8);
+    for (let t = 1; t <= 8; t++) { try { sk.teleport(front(t * 0.3), { rotation: { x: 0, y: yaw } }); } catch {} cmd(`particle minecraft:soul_particle ${front(t * 0.3).x} ${m.y + 1.5} ${front(t * 0.3).z}`); if (t % 2) soundAllPlayers("mob.skeleton.step", 0.7 + t * 0.05); await wait(3); }
+    pose(p, "surprise");
+    await wait(10);
+    const others = G.players.filter((n) => n !== name);
+    const starOk = (G.coins[name] ?? 0) >= MIRROR_STAR && others.some((n) => (G.stars[n] ?? 0) > 0);
+    let choice = 0; // 0 コイン / 1 スター / 2 なにもしない
+    if (!others.length) choice = 2;
+    else if (isBot(p)) { await wait(25); choice = starOk ? 1 : 0; }
+    else {
+        const f = new ActionFormData().title(`${FORM_MARK}§lMIRROR`).body(`§lケケケ…！ なにを奪ってほしい？\n§7(コイン ${G.coins[name] ?? 0}${I.coin})`);
+        f.button(`§lコインを奪う  §a(タダ)`); f.button(starOk ? `§lスターを奪う  §6(${MIRROR_STAR}${I.coin})` : `§8§lスターを奪う  (${MIRROR_STAR}${I.coin} / むり)`); f.button("§lなにもしない");
+        const r = await Promise.race([f.show(p).catch(() => ({ canceled: true })), wait(400).then(() => ({ canceled: true }))]);
+        try { uiManager.closeAllForms(p); } catch {}
+        choice = r.canceled ? 0 : r.selection ?? 0;
+        if (choice === 1 && !starOk) choice = 0;
+    }
+    if (choice !== 2) {
+        // 相手を選ぶ(スターのときはスターを持っている人だけ)
+        const list = others.filter((n) => choice === 0 || (G.stars[n] ?? 0) > 0);
+        let t = list[0];
+        if (isBot(p)) { await wait(15); t = list.sort((a, b) => (G.stars[b] - G.stars[a]) || (G.coins[b] - G.coins[a]))[0]; }
+        else if (list.length > 1) {
+            const f = new ActionFormData().title(`${FORM_MARK}§l${choice ? "スターを奪う" : "コインを奪う"}`).body("§lだれから奪う？");
+            list.forEach((n) => f.button(`§l${n}  §e${I.star}${G.stars[n] ?? 0} §6${I.coin}${G.coins[n] ?? 0}`));
+            const r = await Promise.race([f.show(p).catch(() => ({ canceled: true })), wait(300).then(() => ({ canceled: true }))]);
+            try { uiManager.closeAllForms(p); } catch {}
+            t = r.canceled ? list[0] : list[r.selection] ?? list[0];
+        }
+        if (choice === 1) addCoins(name, -MIRROR_STAR);
+        // ガイコツが相手のところへ消えて現れ、手をのばして奪う
+        const tp = world.getPlayers({ name: t })[0];
+        try { sk.setProperty("mmgplus:act", 1); } catch {}
+        soundAllPlayers("mob.skeleton.say", 0.6); cmd(`particle minecraft:soul_particle ${sk.location.x} ${sk.location.y + 1} ${sk.location.z}`);
+        if (tp) {
+            const l = tp.location, d = tp.getViewDirection();
+            cam.to("@a[tag=mpl_board]", { x: l.x + 5, y: l.y + 3, z: l.z - 5 }, { x: l.x, y: l.y + 1, z: l.z }, 0.6);
+            await wait(12);
+            try { sk.teleport({ x: l.x - d.x * 1.3, y: l.y, z: l.z - d.z * 1.3 }, { facingLocation: l }); } catch {}
+            cmd(`particle minecraft:soul_particle ${l.x} ${l.y + 1} ${l.z}`); soundAllPlayers("mob.endermen.portal", 0.7);
+            await wait(15); pose(tp, "surprise");
+        }
+        if (choice === 0) {
+            const n = Math.min(rand(10, 15), G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n);
+            ribbon("purple", `COIN THIEF! ${n}${I.coin}`, `${name} が ${t} から ${n}${I.coin} 奪った`, 70); soundAllPlayers("random.orb", 0.7);
+        } else {
+            G.stars[t] = Math.max(0, (G.stars[t] ?? 0) - 1); G.stars[name] = (G.stars[name] ?? 0) + 1; hud();
+            ribbon("purple", `STAR THIEF! ${I.star}`, `${name} が ${t} からスターを奪った！`, 80); soundAllPlayers("random.totem", 0.7);
+        }
+        try { sk.setProperty("mmgplus:act", 2); } catch {}
+        soundAllPlayers("mob.skeleton.say", 1.3);
+        if (tp) await react(tp, false, 0.6);
+        await wait(10); await react(p, true, 0.6);
+    } else {
+        try { sk.setProperty("mmgplus:act", 2); } catch {}
+        ribbon("gray", "BYE...", "ガイコツは鏡に帰っていった", 50); soundAllPlayers("mob.skeleton.say", 1.3); await wait(30);
+    }
+    cmd(`particle minecraft:soul_particle ${sk.location.x} ${sk.location.y + 1} ${sk.location.z}`); soundAllPlayers("mob.endermen.portal", 1.2);
+    try { sk.remove(); } catch {}
+    await wait(15);
+}
 // ターンの最後のミニゲーム(ルーレットで決める)
 async function minigameRound() {
     let list = mgOn().filter((x) => !G.played.includes(x)); if (!list.length) { G.played = []; list = mgOn(); } if (!list.length) return;
@@ -3222,7 +3299,7 @@ function resetAll() {
     G.on = false; run.active = false; setScore("game", "playing", 0); setScore("game", "selectgame", 0);
     cam.clear(); unlockAll(); bgm(null); cmd("time set 6000");
     setTide(false, false); coolLava(false);
-    for (const t of ["mmgplus:dice", "mmgplus:star", "mmgplus:coin", "mmgplus:dj", "mmgplus:ghostship", "mmgplus:steve", "mmgplus:cannonball", "mmgplus:fireball"]) cmd(`kill @e[type=${t}]`);
+    for (const t of ["mmgplus:dice", "mmgplus:star", "mmgplus:coin", "mmgplus:dj", "mmgplus:ghostship", "mmgplus:mirrorskel", "mmgplus:steve", "mmgplus:cannonball", "mmgplus:fireball"]) cmd(`kill @e[type=${t}]`);
     for (let i = 0; i < 6; i++) cmd(`kill @e[type=mmgplus:racehorse${i}]`);
     for (const p of world.getPlayers()) { p.removeTag("mpl_board"); p.removeTag("playing"); p.removeTag("mmgplus_out"); try { p.setGameMode(ADVENTURE); } catch {} p.teleport(LOBBY, lookCenter); }
     toast("§eリセットしました");

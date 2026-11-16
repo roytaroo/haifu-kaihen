@@ -24,6 +24,42 @@ dj_anim = {
 }
 M.model('dj', 'DJトシオ(司会)', dj, bones={'root': [0, 0, 0], 'rightLeg': [-2, 12, 0], 'leftLeg': [2, 12, 0], 'body': [0, 12, 0], 'head': [0, 24, 0], 'rightArm': [-6, 22, 0], 'leftArm': [6, 22, 0]},
         anim=dj_anim, box=(0.6, 1.9), props={'mmgplus:mood': {'type': 'int', 'range': [0, 2], 'default': 0, 'client_sync': True}})
+# 鏡のガイコツ(鏡のマス): 骨・ろっ骨・あご・紫に光る目・ぼろぼろのスカーフ。動きはガクガク(1秒に7回、急に向きが変わる)
+#   mmgplus:act 0 = ガクガク待つ / 1 = 手をのばして奪う / 2 = 笑う(あごをカタカタ、頭をそらす)
+BONE, BONE2, DARK, EYE, CLOTH = (234, 230, 214), (204, 198, 180), (28, 20, 38), (200, 100, 255), (92, 40, 132)
+skel = [
+    C([-3, 1, -1], [2, 11, 2], BONE, bone='rightLeg'), C([-3.5, 0, -2.5], [3, 1, 4], BONE2, bone='rightLeg'), C([-3.5, 6, -1.5], [3, 1.5, 3], BONE2, bone='rightLeg'),
+    C([1, 1, -1], [2, 11, 2], BONE, bone='leftLeg'), C([0.5, 0, -2.5], [3, 1, 4], BONE2, bone='leftLeg'), C([0.5, 6, -1.5], [3, 1.5, 3], BONE2, bone='leftLeg'),
+    C([-4, 11, -1.5], [8, 2, 3], BONE, bone='body'), C([-1, 13, 0], [2, 11, 2], BONE2, bone='body'),
+    *[C([-4, 15 + i * 2, -2], [8, 1, 4], BONE, bone='body') for i in range(4)],
+    C([-5, 23, -1], [10, 1, 2], BONE, bone='body'),
+    C([-4.5, 21, -2.5], [9, 2, 5], CLOTH, bone='body'), C([-3.5, 14, 2.5], [2, 7, 0.5], CLOTH, flat=True, bone='body'), C([1, 16, 2.5], [2, 5, 0.5], CLOTH, flat=True, bone='body'),
+    C([-7, 11, -1], [2, 12, 2], BONE, bone='rightArm'), C([-7.5, 8, -1.5], [3, 3, 3], BONE2, bone='rightArm'), C([-7.5, 7, -1.5], [0.5, 1, 0.5], DARK, flat=True, bone='rightArm'), C([-5, 7, -1.5], [0.5, 1, 0.5], DARK, flat=True, bone='rightArm'),
+    C([5, 11, -1], [2, 12, 2], BONE, bone='leftArm'), C([4.5, 8, -1.5], [3, 3, 3], BONE2, bone='leftArm'), C([4.5, 7, -1.5], [0.5, 1, 0.5], DARK, flat=True, bone='leftArm'), C([7, 7, -1.5], [0.5, 1, 0.5], DARK, flat=True, bone='leftArm'),
+    C([-4, 25, -4], [8, 7, 8], BONE, bone='head'),
+    C([-3.25, 27.5, -4.5], [2.5, 2.5, 0.5], DARK, flat=True, bone='head'), C([0.75, 27.5, -4.5], [2.5, 2.5, 0.5], DARK, flat=True, bone='head'),
+    C([-2.5, 28.25, -4.8], [1, 1, 0.5], EYE, flat=True, bone='head'), C([1.5, 28.25, -4.8], [1, 1, 0.5], EYE, flat=True, bone='head'),
+    C([-0.5, 26, -4.5], [1, 1.25, 0.5], DARK, flat=True, bone='head'),
+    *[C([-3 + i * 1.25, 25, -4.5], [1, 0.75, 0.5], (250, 248, 238), flat=True, bone='head') for i in range(5)],
+    C([-3.5, 22.5, -4], [7, 2.5, 6], BONE2, bone='jaw'),
+    *[C([-3 + i * 1.25, 24.5, -4.3], [1, 0.75, 0.5], (250, 248, 238), flat=True, bone='jaw') for i in range(5)],
+]
+st = "math.floor(q.life_time * 7)"
+tw = lambda k, amp: f"math.sin({st} * {k}) * {amp}"
+act = "q.property('mmgplus:act')"
+I0, I1, I2 = f"({act} == 0)", f"({act} == 1)", f"({act} == 2)"
+skel_anim = {
+    'root': {'position': [0, f"math.abs(math.sin({st} * 53)) * 0.8 + {I2} * math.abs(math.sin(q.life_time * 900)) * 0.6", 0]},
+    'body': {'rotation': [f"{tw(37, 8)} + {I1} * 15", tw(71, 14), tw(13, 9)]},
+    'head': {'rotation': [f"{tw(19, 18)} - {I2} * 28", tw(83, 32), tw(47, 24)]},
+    'jaw': {'rotation': [f"math.mod(math.floor(q.life_time * (10 + {I2} * 8)), 2) * (10 + {I2} * 22)", 0, 0]},
+    'rightArm': {'rotation': [f"{I0} * (-25 + {tw(29, 40)}) + {I1} * (-95 + {tw(31, 8)}) + {I2} * (-35 + {tw(17, 10)})", tw(59, 15), f"{I0} * (12 + {tw(61, 18)}) + {I2} * 30"]},
+    'leftArm': {'rotation': [f"{I0} * (-25 + {tw(43, 40)}) + {I1} * (-95 + {tw(23, 8)}) + {I2} * (-35 + {tw(41, 10)})", tw(67, 15), f"{I0} * (-12 - {tw(7, 18)}) - {I2} * 30"]},
+    'rightLeg': {'rotation': [tw(11, 14), 0, tw(89, 6)]},
+    'leftLeg': {'rotation': [tw(97, 14), 0, tw(3, 6)]},
+}
+M.model('mirrorskel', '鏡のガイコツ(鏡のマス)', skel, bones={'root': [0, 0, 0], 'rightLeg': [-2, 12, 0], 'leftLeg': [2, 12, 0], 'body': [0, 12, 0], 'head': [0, 24, 0], 'jaw': [0, 24, 2], 'rightArm': [-6, 23, 0], 'leftArm': [6, 23, 0]},
+        anim=skel_anim, box=(0.6, 1.9), props={'mmgplus:act': {'type': 'int', 'range': [0, 2], 'default': 0, 'client_sync': True}})
 # 幽霊船(大きなモデル。scale 3)
 HULL, HULL2, SAIL, GLOW = (58, 48, 70), (40, 32, 50), (200, 230, 210), (90, 255, 160)
 ship = []
@@ -45,7 +81,7 @@ M.model('ghostship', '幽霊船(港に来る)', ship, anim={'root': {'rotation':
         box=(1.0, 1.0), scale=3.0)
 os.makedirs(M.PREVIEW, exist_ok=True)
 for d in [os.path.join(M.RP, 'models', 'entity'), os.path.join(M.RP, 'animations'), os.path.join(M.RP, 'entity'), os.path.join(M.BP, 'entities')]: os.makedirs(d, exist_ok=True)
-for n in ('dj', 'ghostship'): M.write(n, M.MODELS[n])
+for n in ('dj', 'ghostship', 'mirrorskel'): M.write(n, M.MODELS[n])
 # DJ: プレイヤーと同じ体(2層め: 帽子・上着・そで・ズボンつき)にスキンをはる
 def bone(name, parent, pivot, cubes):
     d = {'name': name, 'pivot': pivot, 'cubes': [{'origin': o, 'size': sz, 'uv': uv, **({'inflate': inf} if inf else {})} for o, sz, uv, inf in cubes]}
@@ -70,4 +106,11 @@ e['minecraft:client_entity']['description']['scripts']['pre_animation'] = [
     "v.tk = math.lerp(v.tk ?? 0, q.property('mmgplus:mood') == 1, 0.12);", "v.sp = math.lerp(v.sp ?? 0, q.property('mmgplus:mood') == 2, 0.18);"]
 json.dump(e, open(p, 'w'), indent=1)
 shutil.copy(os.path.join(M.PREVIEW, 'ghostship.png'), os.path.join(ROOT, 'mpl', 'preview_ghostship.png'))
+# ガイコツの骨の親子
+p = os.path.join(M.RP, 'models', 'entity', 'mirrorskel.geo.json'); g = json.load(open(p))
+for b in g['minecraft:geometry'][0]['bones']:
+    b['parent'] = {'head': 'body', 'jaw': 'head', 'rightArm': 'body', 'leftArm': 'body', 'body': 'root', 'rightLeg': 'root', 'leftLeg': 'root'}.get(b['name'], b.get('parent'))
+    if b['parent'] is None: b.pop('parent')
+json.dump(g, open(p, 'w'), indent=1)
+shutil.copy(os.path.join(M.PREVIEW, 'mirrorskel.png'), os.path.join(ROOT, 'mpl', 'preview_mirrorskel.png'))
 print('ok')

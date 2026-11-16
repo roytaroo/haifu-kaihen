@@ -1,0 +1,66 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mmgplus.mirrorskel": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "position": [
+      0,
+      "math.abs(math.sin(math.floor(q.life_time * 7) * 53)) * 0.8 + (q.property('mmgplus:act') == 2) * math.abs(math.sin(q.life_time * 900)) * 0.6",
+      0
+     ]
+    },
+    "body": {
+     "rotation": [
+      "math.sin(math.floor(q.life_time * 7) * 37) * 8 + (q.property('mmgplus:act') == 1) * 15",
+      "math.sin(math.floor(q.life_time * 7) * 71) * 14",
+      "math.sin(math.floor(q.life_time * 7) * 13) * 9"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "math.sin(math.floor(q.life_time * 7) * 19) * 18 - (q.property('mmgplus:act') == 2) * 28",
+      "math.sin(math.floor(q.life_time * 7) * 83) * 32",
+      "math.sin(math.floor(q.life_time * 7) * 47) * 24"
+     ]
+    },
+    "jaw": {
+     "rotation": [
+      "math.mod(math.floor(q.life_time * (10 + (q.property('mmgplus:act') == 2) * 8)), 2) * (10 + (q.property('mmgplus:act') == 2) * 22)",
+      0,
+      0
+     ]
+    },
+    "rightArm": {
+     "rotation": [
+      "(q.property('mmgplus:act') == 0) * (-25 + math.sin(math.floor(q.life_time * 7) * 29) * 40) + (q.property('mmgplus:act') == 1) * (-95 + math.sin(math.floor(q.life_time * 7) * 31) * 8) + (q.property('mmgplus:act') == 2) * (-35 + math.sin(math.floor(q.life_time * 7) * 17) * 10)",
+      "math.sin(math.floor(q.life_time * 7) * 59) * 15",
+      "(q.property('mmgplus:act') == 0) * (12 + math.sin(math.floor(q.life_time * 7) * 61) * 18) + (q.property('mmgplus:act') == 2) * 30"
+     ]
+    },
+    "leftArm": {
+     "rotation": [
+      "(q.property('mmgplus:act') == 0) * (-25 + math.sin(math.floor(q.life_time * 7) * 43) * 40) + (q.property('mmgplus:act') == 1) * (-95 + math.sin(math.floor(q.life_time * 7) * 23) * 8) + (q.property('mmgplus:act') == 2) * (-35 + math.sin(math.floor(q.life_time * 7) * 41) * 10)",
+      "math.sin(math.floor(q.life_time * 7) * 67) * 15",
+      "(q.property('mmgplus:act') == 0) * (-12 - math.sin(math.floor(q.life_time * 7) * 7) * 18) - (q.property('mmgplus:act') == 2) * 30"
+     ]
+    },
+    "rightLeg": {
+     "rotation": [
+      "math.sin(math.floor(q.life_time * 7) * 11) * 14",
+      0,
+      "math.sin(math.floor(q.life_time * 7) * 89) * 6"
+     ]
+    },
+    "leftLeg": {
+     "rotation": [
+      "math.sin(math.floor(q.life_time * 7) * 97) * 14",
+      0,
+      "math.sin(math.floor(q.life_time * 7) * 3) * 6"
+     ]
+    }
+   }
+  }
+ }
+}
