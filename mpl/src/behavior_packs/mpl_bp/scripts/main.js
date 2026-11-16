@@ -12,6 +12,7 @@ import { SOUND_IDS } from "./sound_ids.js";
 // 頭の見えない印(§のつづき)はそのまま残して、そのあとを太字にする。色を変えても太字が切れないように §x のあとにも §l
 const boldText = (t) => {
     if (typeof t !== "string") return t;
+    if (!t.replace(/§./g, "").trim()) return "";   // 中身がない文字(色の記号だけ・空白だけ)は空にする → 空の黒い箱が出ない
     const m = t.match(/^(?:§.)*/)[0];
     return m + "§l" + t.slice(m.length).replace(/§([0-9a-fr])/g, "§$1§l");
 };
@@ -2043,12 +2044,47 @@ async function breakTies(groups) {
     const list = [];
     for (const g of groups) {
         if (g.length < 2) { list.push(...g); continue; }
-        banner("sudden", g.join(" / "), 50); soundAllPlayers("note.bass", 0.8); await wait(30);
-        let rolls; do { rolls = g.map((n) => [n, rand(1, 10)]); } while (new Set(rolls.map((r) => r[1])).size < rolls.length);
-        for (const [n, r] of rolls) { ribbon("purple", `${n}  ${I.dice}${r}`, "", 22); soundAllPlayers("random.click", 1.2); await wait(14); }
-        list.push(...rolls.sort((a, b) => b[1] - a[1]).map((r) => r[0]));
+        banner("sudden", g.join(" / "), 50); soundAllPlayers("note.bass", 0.8); await wait(40);
+        list.push(...(await tieRoll(g)));
+        if (!(G.on && world.getPlayers({ name: g[0] })[0]?.hasTag("mpl_board"))) cam.clear();   // 勝ち抜き戦などはカメラを戻す
     }
     return list;
+}
+// 同率の人をステージに横に並べ、カウントダウンで全員いっしょに自動ジャンプ → 頭の上のサイコロが止まる。同じ目の人はもう一度
+async function tieRoll(g, round = 1) {
+    const board = G.on && world.getPlayers({ name: g[0] })[0]?.hasTag("mpl_board");
+    const st = board ? { x: 0.5, y: 1, z: BD.finaleZ } : { x: LOBBY.x, y: LOBBY.y, z: LOBBY.z };
+    const xs = g.map((_, i) => st.x + (i - (g.length - 1) / 2) * 2.4);
+    g.forEach((n, i) => world.getPlayers({ name: n })[0]?.teleport({ x: xs[i], y: st.y, z: st.z }, { facingLocation: { x: xs[i], y: st.y + 1.6, z: st.z - 10 } }));
+    cam.to("@a", { x: st.x, y: st.y + 2.4, z: st.z - 4 - g.length * 1.3 }, { x: st.x, y: st.y + 2.2, z: st.z }, 0.6);
+    await wait(14);
+    const dice = g.map((n, i) => { const d = spawnAt("mmgplus:dice", { x: xs[i], y: st.y + 2.75, z: st.z }); try { d?.setProperty("mmgplus:rolling", 1); d?.setProperty("mmgplus:num", 0); } catch {} return d; });
+    ribbon("purple", round > 1 ? "ONE MORE!" : "DICE BATTLE!", round > 1 ? "同じ目… もう一度！" : "大きい目を出した人が上の順位", 40);
+    await wait(30);
+    for (const c of ["3", "2", "1"]) { subAll(`§e${c}`); soundAllPlayers("note.hat", 1.4); await wait(10); }
+    subAll("§aJUMP!"); soundAllPlayers("note.pling", 1.6);
+    // 全員いっしょにジャンプ(自動)
+    for (const n of g) { const q = world.getPlayers({ name: n })[0]; if (!q) continue; try { q.applyKnockback({ x: 0, z: 0 }, 0.62); } catch { try { q.applyKnockback(0, 0, 0, 0.62); } catch {} } }
+    await wait(5);
+    const rolls = g.map(() => rand(1, 10));
+    g.forEach((n, i) => {
+        const d = dice[i]; try { d?.setProperty("mmgplus:rolling", 0); d?.setProperty("mmgplus:num", rolls[i]); d?.teleport({ x: xs[i], y: st.y + 3.05, z: st.z }); } catch {}
+        cmd(`particle minecraft:totem_particle ${xs[i]} ${st.y + 2.9} ${st.z}`);
+    });
+    soundAllPlayers("random.anvil_land", 2); soundAllPlayers("random.levelup", 1.6);
+    await wait(4); dice.forEach((d, i) => { try { d?.teleport({ x: xs[i], y: st.y + 2.75, z: st.z }); } catch {} });
+    await wait(30);
+    // 目の大きい順。同じ目どうしはもう一度
+    const by = new Map(); g.forEach((n, i) => by.set(rolls[i], [...(by.get(rolls[i]) ?? []), n]));
+    const keys = [...by.keys()].sort((a, b) => b - a), order = [];
+    for (const k of keys) { const sub = by.get(k); order.push(sub.length > 1 ? sub : sub[0]); }
+    ribbon("gold", order.map((o, r) => `${r + 1}位 ${Array.isArray(o) ? o.join("・") : o}`).join("   "), "", 40);
+    g.forEach((n, i) => { const q = world.getPlayers({ name: n })[0]; if (q) pose(q, rolls[i] === keys[0] ? "cheer" : rolls[i] === keys[keys.length - 1] ? "sad" : "clap"); });
+    await wait(45);
+    dice.forEach((d) => { try { d?.remove(); } catch {} });
+    const out = [];
+    for (const o of order) out.push(...(Array.isArray(o) ? await tieRoll(o, round + 1) : [o]));
+    return out;
 }
 // ミニゲームの最初に出す一言の遊び方
 const MG_HOWTO = {
