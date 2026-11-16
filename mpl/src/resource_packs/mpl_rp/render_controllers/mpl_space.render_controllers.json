@@ -1,0 +1,33 @@
+{
+ "format_version": "1.8.0",
+ "render_controllers": {
+  "controller.render.mpl_space": {
+   "arrays": {
+    "textures": {
+     "Array.k": [
+      "Texture.blue",
+      "Texture.red",
+      "Texture.happen",
+      "Texture.event",
+      "Texture.lucky",
+      "Texture.shop",
+      "Texture.skull",
+      "Texture.bank",
+      "Texture.shuffle",
+      "Texture.mirror",
+      "Texture.start"
+     ]
+    }
+   },
+   "geometry": "Geometry.default",
+   "materials": [
+    {
+     "*": "Material.default"
+    }
+   ],
+   "textures": [
+    "Array.k[q.property('mmgplus:kind')]"
+   ]
+  }
+ }
+}

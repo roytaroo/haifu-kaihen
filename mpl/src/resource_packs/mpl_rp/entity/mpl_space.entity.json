@@ -1,0 +1,30 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:space",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "blue": "textures/entity/mpl_space/blue",
+    "red": "textures/entity/mpl_space/red",
+    "happen": "textures/entity/mpl_space/happen",
+    "event": "textures/entity/mpl_space/event",
+    "lucky": "textures/entity/mpl_space/lucky",
+    "shop": "textures/entity/mpl_space/shop",
+    "skull": "textures/entity/mpl_space/skull",
+    "bank": "textures/entity/mpl_space/bank",
+    "shuffle": "textures/entity/mpl_space/shuffle",
+    "mirror": "textures/entity/mpl_space/mirror",
+    "start": "textures/entity/mpl_space/start"
+   },
+   "geometry": {
+    "default": "geometry.mpl.space"
+   },
+   "render_controllers": [
+    "controller.render.mpl_space"
+   ]
+  }
+ }
+}

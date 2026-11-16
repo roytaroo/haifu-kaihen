@@ -2231,6 +2231,7 @@ async function doBuildBoard() {
         if (i % 160 === 159) { await wait(1); if (i % 1600 === 1599) toast(`§eボードを作っています… ${Math.round((i / BD.cmds.length) * 100)}%`); }
     }
     for (let i = 0; i < SPACES.length; i++) if (SPACES[i].kind === "shop") buildStall(i);
+    placeSpaces();
     save("board_built", BD.version);
     for (const p of hold) if (p.isValid) p.teleport(LOBBY, lookCenter);
     await wait(2);
@@ -2524,7 +2525,17 @@ const PLAZA = { pos: { x: 0.5, y: 5, z: BD.finaleZ - 6 }, look: { x: 0.5, y: 16,
 // ===== すごろく =====
 const G = { on: false, turn: 0, turns: 10, cnt: {}, prevRank: {}, subst: {}, played: [], mgCount: 0, fixRoll: {}, slow: {}, magnet: {}, reverse: {}, crystal: {}, color: {}, bank: 0, ghost: null, ghostUsed: [], ticket: null, sale: 0, rule: null, players: [], star: 0, stars: {}, coins: {}, pos: {}, items: {}, mgWins: {}, coinsGot: {}, now: null };
 const spaceAt = (i) => SPACES[((i % SPACES.length) + SPACES.length) % SPACES.length];
-const spot = (i, k = 0) => { const s = spaceAt(i); return { x: s.x + 0.5 + [0, 0.8, -0.8, 0.8, -0.8, 0][k % 6], y: s.y + 1.05, z: s.z + 0.5 + [0, 0.8, 0.8, -0.8, -0.8, 0][k % 6] }; };
+// マスの丸い台(tools/mpl_spaces.py の KINDS と同じ順番)。台の上の面は 2/16 ブロックの高さ
+const SPACE_KIND = ["blue", "red", "happen", "event", "lucky", "shop", "skull", "bank", "shuffle", "mirror", "start"];
+function placeSpaces() {
+    cmd("kill @e[type=mmgplus:space]");
+    SPACES.forEach((sp, i) => {
+        const k = SPACE_KIND.indexOf(sp.kind === "event" && !sp.ev ? "happen" : sp.kind);
+        const e = spawnAt("mmgplus:space", { x: sp.x + 0.5, y: sp.y + 1, z: sp.z + 0.5 }); if (!e) return;
+        try { e.setProperty("mmgplus:kind", Math.max(0, k)); } catch {}
+    });
+}
+const spot = (i, k = 0) => { const s = spaceAt(i); return { x: s.x + 0.5 + [0, 0.8, -0.8, 0.8, -0.8, 0][k % 6], y: s.y + 1.13, z: s.z + 0.5 + [0, 0.8, 0.8, -0.8, -0.8, 0][k % 6] }; };
 const gp = () => G.players.map((n) => world.getPlayers({ name: n })[0]).filter(Boolean);
 const lookCenter = { facingLocation: { x: BOARD.x, y: 1, z: BOARD.z } };
 function addCoins(name, d, quiet = false) { const before = G.coins[name] ?? 0; G.coins[name] = Math.max(0, before + d); if (d > 0) G.coinsGot[name] = (G.coinsGot[name] ?? 0) + d; hud(); if (!quiet) coinFx(name, G.coins[name] - before); }
@@ -2601,6 +2612,7 @@ async function startParty(turns, players, hc = {}) {
     G.color = Object.fromEntries(G.players.map((n, i) => [n, ["§c", "§9", "§a", "§e", "§d", "§b", "§6", "§5"][i % 8]]));
     for (const n of G.players) { if (hc[n] === 1) G.coins[n] += 20; if (hc[n] === 2) G.stars[n] += 1; }
     if ((load("board_built", 0)) < BD.version) await buildBoard();
+    placeSpaces();
     for (const p of gp()) { p.addTag("mpl_board"); p.teleport(spot(0, G.players.indexOf(p.name)), lookCenter); p.setGameMode(ADVENTURE); }
     lockBoard(); hud();
     try {
