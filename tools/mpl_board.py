@@ -50,8 +50,10 @@ volc = route([(4, 7, 9, 'volcano'), (4, 8, 12, 'volcano')] + [(x, 8, 12, 'volcan
 center = route([(0, 5, 6, 'shrine'), (0, 4, 8, 'shrine'), (0, 3, 8, 'shrine'), (0, 2, 8, 'shrine'), (0, 1, 8, 'shrine'), (0, 0, 8, 'shrine'), (0, -1, 6, 'shrine'), (0, -2, 4, 'shrine'), (0, -3, 2, 'meadow'),
                 (0, -4, 0, 'meadow'), (0, -5, 0, 'meadow'), (0, -6, 0, 'meadow'), (0, -7, 0, 'port'), (0, -8, 0, 'port')], at[(0, 6)], at[(0, -9)])
 tree = route([(-8, 1, 5, 'tree'), (-9, 1, 7, 'tree'), (-9, 0, 7, 'tree'), (-9, -1, 7, 'tree'), (-9, -2, 7, 'tree'), (-9, -3, 7, 'tree'), (-8, -3, 5, 'tree')], at[(-7, 1)], at[(-7, -3)])
+# 潮の道(満潮のときだけ開く。浜の外がわ、水びたしの中を進む。宝のマスがある)
+tideway = route([(x, -10, 0, 'beach') for x in range(3, 8)], at[(3, -9)], at[(7, -9)])
 def N(gx, gz): return nodes[at[(gx, gz)]]
-for g, w in {(-5, -9): '浜辺を進む', (-6, -10): '船に乗る', (6, -9): '浜辺を進む', (5, -8): 'ドローブリッジをわたる', (3, 6): 'ふもとの道', (4, 7): '火山にのぼる',
+for g, w in {(-5, -9): '浜辺を進む', (-6, -10): '船に乗る', (4, -9): '浜辺を進む', (3, -10): '潮の道(満潮だけ)', (6, -9): '浜辺を進む', (5, -8): 'ドローブリッジをわたる', (3, 6): 'ふもとの道', (4, 7): '火山にのぼる',
              (-1, 6): 'ふもとの道', (0, 5): '神殿の近道', (-7, 0): '森の道', (-8, 1): '木の上の道'}.items(): N(*g)['way'] = w
 N(5, -8)['gate'] = 'bridge'; N(0, 5)['gate'] = 'toll'
 KIND = {'shop': [(7, 2), (-5, 6), (-7, -6)], 'skull': [(0, 8), (-7, -1), (0, -3)], 'lucky': [(-9, -1), (-4, -11), (5, -6), (2, 8), (0, 0), (7, -7)],
@@ -68,6 +70,8 @@ N(0, -6)['kind'] = 'shuffle'; N(0, -6).pop('ev', None)
 N(1, -9)['kind'] = 'bank'
 for g in [(1, 8), (-3, 8)]: N(*g)['kind'] = 'lucky'
 N(-5, -9)['gate'] = 'tide'
+N(3, -10)['gate'] = 'tidehigh'
+for g in [(4, -10), (6, -10)]: N(*g)['kind'] = 'lucky'
 N(7, 2)['n'] = [1, 0]; N(-5, 6)['n'] = [0, 1]; N(-7, -6)['n'] = [-1, 0]
 
 # 道のセル: (x,z) → 高さ。マスは 3x3、マスの間 3セルで高さをつなぐ
@@ -594,7 +598,7 @@ for a in (-1.2, 1.5):   # 北がわ(-2.4・2.6)は海が近いので流さない
 VOLC = {'pool': [min(c[0] for c in POOL), min(c[1] for c in POOL), max(c[0] for c in POOL), max(c[1] for c in POOL)], 'y0': 14, 'y1': 18, 'flows': FLOWS}
 print('mirrors', [m['g'] for m in MIRRORS]); print('flood runs', len(FLOOD), 'cells', len(dist), 'flows', [len(f) for f in FLOWS])
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 14, 'tide': TIDE, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
+        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 15, 'tide': TIDE, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 

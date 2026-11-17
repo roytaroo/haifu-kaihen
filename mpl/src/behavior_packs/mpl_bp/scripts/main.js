@@ -2282,7 +2282,7 @@ function setBridge(down) { const b = BD.bridge; if (b) cmd(`fill ${b[0]} ${b[1]}
 async function chooseWay(p, all) {
     const name = p.name, s = SPACES[G.pos[name]];
     cam.to("@a[tag=mpl_board]", { x: s.x + 0.5, y: s.y + 15, z: s.z - 9 }, { x: s.x + 0.5, y: s.y, z: s.z + 0.5 }, 0.8);
-    const why = (j) => SPACES[j].gate === "tide" && tideHigh() ? "潮が満ちて道が沈んでいる" : SPACES[j].gate === "bridge" && !bridgeDown() ? "ドローブリッジが上がっている" : SPACES[j].gate === "toll" && (G.coins[name] ?? 0) < BD.toll ? `関所はコイン${BD.toll}枚` : null;
+    const why = (j) => SPACES[j].gate === "tide" && tideHigh() ? "潮が満ちて道が沈んでいる" : SPACES[j].gate === "tidehigh" && !tideHigh() ? "潮が引いていて、潮の道は閉じている(満潮のときだけ開く)" : SPACES[j].gate === "bridge" && !bridgeDown() ? "ドローブリッジが上がっている" : SPACES[j].gate === "toll" && (G.coins[name] ?? 0) < BD.toll ? `関所はコイン${BD.toll}枚` : null;
     const opts = all.filter((j) => !why(j));
     const closed = all.find((j) => why(j));
     if (opts.length < 2) {
@@ -2413,7 +2413,8 @@ async function turnNews(last) {
     if (G.turn === G.sale - 1) news.push(["お知らせだYO！ 次のターンは…ショップがタイムセール！ 全品半額だぜ！", 1]);
     if (G.turn === G.sale) news.push(["タイムセール開始！ 今のターンはショップ全品半額！ 急げ急げ〜！", 1]);
     if (G.turn % 5 === 0 && !G.ghost) news.push(["な、なんだあれは…！？ 幽霊船が港に来たぞ！ 帆船の上のマスを通ると、幽霊船の店に寄れるらしい…", 2]);
-    if (G.turn % 3 === 0) news.push(["潮が満ちてきた！ 港の浜の道は今のターン通れないぜ！", 1]);
+    if (G.turn % 3 === 0) news.push(["潮が満ちてきた！ 港の浜の近道は沈んで通れない！ そのかわり東の浜に『潮の道』が開くぜ！ 宝のマスがあるYO！", 1]);
+    else if ((G.turn + 1) % 3 === 0) news.push(["潮の予報だYO！ 次のターンは満潮！ 東の浜の『潮の道』が開くぜ！", 1]);
     const ruleTurn = G.turns - Math.floor(G.turns / 3) + 1;
     if (G.turn === ruleTurn && !G.rule) news.push(["RULE", 2]);
     if (!news.length) return;
@@ -2440,7 +2441,7 @@ async function todayRule() {
 const tideHigh = () => G.on && G.turn % 3 === 0;
 let tideNow = false;
 async function setTide(high, show = true) {
-    if (show && high === tideNow) return;
+    if (show && high === tideNow) { if (!tideSigns.length) tideSignsUpdate(); return; }
     tideNow = high;
     const F = BD.flood ?? [], steps = F.reduce((m, r) => Math.max(m, r[3]), 0);
     const t0 = BD.tide?.[0] ?? [0, 70];
@@ -2460,7 +2461,22 @@ async function setTide(high, show = true) {
         }
     }
     for (const [x, z] of BD.tide ?? []) { if (SPACES.some((s) => Math.abs(s.x - x) <= 1 && Math.abs(s.z - z) <= 1)) continue; cmd(`setblock ${x} 1 ${z} ${high ? "water" : "air"}`); }
+    tideSignsUpdate(!show);
     if (show && G.on) { await wait(25); cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); await wait(20); }
+}
+// 潮の分かれ道の看板: 浜の近道(tide)と潮の道(tidehigh)の手前に、今の状態を出す
+let tideSigns = [];
+function tideSignsUpdate(off = false) {
+    tideSigns.forEach((e) => { try { e.remove(); } catch {} }); tideSigns = []; cmd("kill @e[type=mmgplus:board,tag=mpl_tidesign]");
+    if (!G.on || off) return;
+    const hi = tideHigh();
+    SPACES.forEach((sp, i) => {
+        if (sp.gate !== "tide" && sp.gate !== "tidehigh") return;
+        const open = sp.gate === "tide" ? !hi : hi;
+        const e = spawnAt("mmgplus:board", { x: sp.x + 0.5, y: sp.y + 3.2, z: sp.z + 0.5 }); if (!e) return;
+        e.addTag("mpl_tidesign"); e.nameTag = `${hi ? "§b§l満潮" : "§e§l干潮"}§r\n${sp.gate === "tide" ? "浜の近道" : "潮の道"}: ${open ? "§a通れる" : "§c通れない"}`;
+        tideSigns.push(e);
+    });
 }
 // 噴火: 火口の溶岩がふちまで上がり、斜面を流れ下る(BD.volc)。しばらくすると冷えて固まり、消える
 let lavaOn = false, lavaGen = 0;
@@ -2641,7 +2657,7 @@ function rankOfName(n) { const rows = rankRows(), i = rows.findIndex((r) => r[0]
 function hud() {
     // 右の表(右下)。見出しはターン
     try { world.scoreboard.removeObjective("mpl_hud"); } catch {}
-    const o = world.scoreboard.addObjective("mpl_hud", `§l§fTURN §e${Math.max(1, G.turn)}§7 / §f${G.turns}`);
+    const o = world.scoreboard.addObjective("mpl_hud", `§l§fTURN §e${Math.max(1, G.turn)}§7 / §f${G.turns}  ${tideHigh() ? "§b満潮" : "§e干潮"}`);
     const rows = rankRows();
     // 1行: 順位バッジ・★・コイン(数字が縦にそろうよう先に)・名前(今の番は金色 + 矢印)・アイテム・クリスタル
     const nm = (n) => (n.length > 9 ? n.slice(0, 8) + "…" : n);
@@ -2734,7 +2750,7 @@ async function startParty(turns, players, hc = {}) {
             const last = G.turn > G.turns - 3;
             hud();
             cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); setBridge(bridgeDown()); await setTide(tideHigh()); if (G.ghost && G.turn - (G.ghostTurn ?? G.turn) >= 3) await ghostLeave();
-            banner(last ? "lastspurt" : "turn", (last ? `TURN ${G.turn} / ${G.turns}  青と赤のマスが2倍` : `${G.turn} / ${G.turns}`) + (bridgeDown() ? "   §aドローブリッジ: 通れる" : "   §cドローブリッジ: 通行止め"), 55);
+            banner(last ? "lastspurt" : "turn", (last ? `TURN ${G.turn} / ${G.turns}  青と赤のマスが2倍` : `${G.turn} / ${G.turns}`) + (bridgeDown() ? "   §aドローブリッジ: 通れる" : "   §cドローブリッジ: 通行止め") + (tideHigh() ? "   §b満潮: 潮の道が開く" : "   §e干潮: 浜の近道が通れる"), 55);
             soundAllPlayers("random.levelup", last ? 0.7 : 0.9);
             await wait(55);
             await turnNews(last);
