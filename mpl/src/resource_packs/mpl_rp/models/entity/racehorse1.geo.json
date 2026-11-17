@@ -5,7 +5,14 @@
    "description": {
     "identifier": "geometry.mmgplus.racehorse1",
     "texture_width": 256,
-    "texture_height": 64
+    "texture_height": 64,
+    "visible_bounds_width": 4.8,
+    "visible_bounds_height": 3.8,
+    "visible_bounds_offset": [
+     0,
+     1.1,
+     0
+    ]
    },
    "bones": [
     {

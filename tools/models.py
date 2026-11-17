@@ -275,7 +275,12 @@ def write(name, m):
         bone = {'name': b, 'pivot': piv, 'cubes': cubes}
         if b != 'root': bone['parent'] = 'root'
         bones.append(bone)
-    geo = {'format_version': '1.12.0', 'minecraft:geometry': [{'description': {'identifier': f'geometry.mmgplus.{name}', 'texture_width': tex.width, 'texture_height': tex.height}, 'bones': bones}]}
+    # 表示の範囲: 形の大きさから(せまいと、中心が画面の外に出たとき全体が消える)
+    sc = m.get('scale', 1.0) or 1.0
+    rx = max([max(abs(cb['origin'][0]), abs(cb['origin'][0] + cb['size'][0]), abs(cb['origin'][2]), abs(cb['origin'][2] + cb['size'][2])) for cb in m['cubes']] + [8])
+    ty = max([cb['origin'][1] + cb['size'][1] for cb in m['cubes']] + [8])
+    vb = {'visible_bounds_width': round(rx * 2 / 16 * sc + 1.5, 1), 'visible_bounds_height': round(ty / 16 * sc + 1.5, 1), 'visible_bounds_offset': [0, round(ty / 32 * sc, 1), 0]}
+    geo = {'format_version': '1.12.0', 'minecraft:geometry': [{'description': {'identifier': f'geometry.mmgplus.{name}', 'texture_width': tex.width, 'texture_height': tex.height, **vb}, 'bones': bones}]}
     json.dump(geo, open(os.path.join(RP, 'models', 'entity', f'{name}.geo.json'), 'w'), indent=1)
     desc = {'identifier': f'mmgplus:{name}', 'materials': {'default': 'entity_alphatest'}, 'textures': {'default': f'textures/entity/mmgplus_{name}'},
             'geometry': {'default': f'geometry.mmgplus.{name}'}, 'render_controllers': ['controller.render.default']}

@@ -60,27 +60,58 @@ skel_anim = {
 }
 M.model('mirrorskel', '鏡のガイコツ(鏡のマス)', skel, bones={'root': [0, 0, 0], 'rightLeg': [-2, 12, 0], 'leftLeg': [2, 12, 0], 'body': [0, 12, 0], 'head': [0, 24, 0], 'jaw': [0, 24, 2], 'rightArm': [-6, 23, 0], 'leftArm': [6, 23, 0]},
         anim=skel_anim, box=(0.6, 1.9), props={'mmgplus:act': {'type': 'int', 'range': [0, 2], 'default': 0, 'client_sync': True}})
-# 幽霊船(大きなモデル。scale 3)
-HULL, HULL2, SAIL, GLOW = (58, 48, 70), (40, 32, 50), (200, 230, 210), (90, 255, 160)
+# 幽霊船(大きなモデル。scale 4。船首は -z)
+#   船体: 船首がとがり船尾が広い・下ほど細い・板の段と苔の筋 / 船尾の高い船室(光る窓)/ 船首の甲板・骨の船首像・斜めの帆柱
+#   マスト3本(前・中・後ろ)に横木と破れた帆、中マストに見張り台とドクロの旗、ロープ、光る丸窓とランタン
+HULL, HULL2, TRIM, DECK, WOOD, SAIL, SAIL2, GLOW, MOSS, BONE = (60, 50, 74), (46, 38, 58), (96, 84, 70), (88, 72, 62), (66, 50, 40), (196, 214, 200), (170, 190, 176), (100, 255, 170), (70, 110, 70), (232, 228, 212)
 ship = []
-for i in range(14):
-    z = -26 + i * 4; t = abs(i - 6.5) / 7; hw = max(2, round(9 * (1 - t ** 3)))
-    ship += [C([-hw, 0, z], [hw * 2, 8 - (2 if t > 0.75 else 0), 4], HULL if i % 2 else HULL2, flat=True)]
-    ship += [C([-hw - 0.5, 8, z], [1, 2, 4], HULL2, flat=True), C([hw - 0.5, 8, z], [1, 2, 4], HULL2, flat=True)]
-ship += [C([-8, 7.5, -22], [16, 0.6, 46], (80, 64, 60), flat=True)]
-for mz, mh in ((-10, 40), (10, 32)):
-    ship += [C([-1, 8, mz - 1], [2, mh, 2], (60, 44, 34))]
-    for k in range(6):
-        w = 14 - abs(k - 2.5) * 2
-        if (k + mz) % 3 == 0: continue
-        ship += [C([-w / 2, 14 + k * 4, mz + 1], [w, 3.6, 0.5], SAIL, flat=True)]
-    ship += [C([-0.2, 8 + mh, mz + 1], [0.4, 5, 7], (20, 20, 20), flat=True), C([-0.3, 9.6 + mh, mz + 3], [0.5, 2.2, 2.2], (240, 240, 230), flat=True)]
-ship += [C([x, 10, z], [1.2, 1.6, 1.2], GLOW, flat=True) for x in (-9, 8) for z in (-18, -2, 14)]
-ship += [C([-0.5, 6, -32], [1, 1, 8], (60, 44, 34))]
-# v41: 遠くからでも幽霊船とわかるように、ふちに緑の光の線・マストの上にランタン・船首に骨の飾り
-ship += [C([-9.6, 9.8, -22], [0.6, 0.6, 44], GLOW, flat=True), C([9.0, 9.8, -22], [0.6, 0.6, 44], GLOW, flat=True)]
-ship += [C([-1.5, 8 + mh + 5.5, mz - 0.5], [3, 3, 3], GLOW, flat=True) for mz, mh in ((-10, 40), (10, 32))]
-ship += [C([-2, 6, -34], [4, 4, 3], (230, 226, 210)), C([-1.4, 7.4, -34.3], [1, 1, 0.3], (20, 20, 20), flat=True), C([0.4, 7.4, -34.3], [1, 1, 0.3], (20, 20, 20), flat=True)]
+def hw_at(z):   # z(-30 船首 〜 +28 船尾)での船のはば(半分)
+    if z < -14: return max(1.0, 9.5 * math.sqrt(max(0.0, (z + 31) / 17)))
+    return 9.5 - max(0, z - 18) * 0.12
+for z in range(-30, 28, 2):
+    w = hw_at(z + 1)
+    for k, y in enumerate(range(0, 10, 2)):   # 下ほど細い(底は丸く)
+        f = 0.55 + 0.45 * min(1, (y + 2) / 8)
+        ship.append(C([-w * f, y, z], [w * f * 2, 2, 2], HULL if (y // 2 + z // 2) % 2 else HULL2, flat=True))
+    ship.append(C([-w - 0.3, 6.5, z], [w * 2 + 0.6, 0.8, 2], MOSS if z % 6 == 0 else TRIM, flat=True))      # 板の段(ところどころ苔)
+    ship.append(C([-w - 0.4, 10, z], [0.8, 2, 2], TRIM, flat=True)); ship.append(C([w - 0.4, 10, z], [0.8, 2, 2], TRIM, flat=True))   # ふちの手すり
+    if z % 6 == 0 and -24 <= z <= 14:   # 光る丸窓
+        for sx in (-1, 1): ship.append(C([sx * (w * 0.97) - 0.6, 4, z + 0.5], [1.2, 1.2, 1], GLOW, flat=True))
+ship.append(C([-9, 9.5, -22], [18, 0.6, 46], DECK, flat=True))                      # 甲板
+ship.append(C([-0.5, -1.5, -28], [1, 2, 54], HULL2))                                 # 竜骨
+# 船尾の船室(高い)・窓・ランタン
+ship += [C([-9, 10, 16], [18, 9, 12], HULL), C([-9.5, 19, 15.5], [19, 1, 13], TRIM, flat=True), C([-9.5, 20, 15.5], [1, 2, 13], TRIM, flat=True), C([8.5, 20, 15.5], [1, 2, 13], TRIM, flat=True)]
+ship += [C([x, 13, 28.05], [2.4, 3, 0.4], GLOW, flat=True) for x in (-7, -3.2, 0.8, 4.6)]
+ship += [C([sx, 12.5, z], [0.4, 2.6, 2], GLOW, flat=True) for sx in (-9.3, 8.9) for z in (18, 23)]
+ship += [C([sx - 1, 20, 27], [2, 3, 2], GLOW, flat=True) for sx in (-8, 8)]
+ship.append(C([-2, 10, 14.6], [4, 6, 1.4], WOOD, flat=True))                      # 船室の戸
+# 船首の甲板と船首像(ドクロ)・斜めの帆柱
+ship += [C([-6, 10, -26], [12, 2, 8], HULL), C([-2.5, 7, -34], [5, 5, 4], BONE), C([-1.7, 8.6, -34.3], [1.2, 1.4, 0.4], (20, 16, 24), flat=True), C([0.5, 8.6, -34.3], [1.2, 1.4, 0.4], (20, 16, 24), flat=True)]
+ship.append(C([-0.6, 11, -46], [1.2, 1.2, 18], WOOD, rot=[16, 0, 0], pivot=[0, 11, -28]))
+# マスト(前・中・後ろ): 柱・横木・破れた帆(穴あき・少しふくらむ)
+for mz, mh, ys in ((-16, 40, (16, 28)), (-1, 50, (16, 30, 42)), (19, 30, (24,))):
+    base = 20 if mz > 14 else 10
+    ship.append(C([-1, base, mz - 1], [2, mh - (base - 10), 2], WOOD))
+    for yy in ys:
+        top = yy + 9 if yy + 9 < 10 + mh else 10 + mh - 2
+        ship.append(C([-12, top, mz - 0.5], [24, 1, 1], WOOD))   # 横木
+        rows = int((top - yy) // 3)
+        for r in range(rows):
+            y0 = top - 3 - r * 3; bulge = math.sin((r + 0.5) / rows * math.pi) * 1.4
+            for c in range(6):
+                if (c * 7 + r * 3 + mz) % 9 == 0: continue        # 破れた穴
+                x0 = -11 + c * 3.7
+                ship.append(C([x0, y0, mz - 1.4 - bulge], [3.7, 3, 0.4], SAIL if (c + r) % 2 else SAIL2, flat=True))
+    ship.append(C([-1.5, 10 + mh - 1, mz - 1.5], [3, 2, 3], GLOW, flat=True))        # マストの上のランタン
+# 中マストの見張り台・ドクロの旗
+ship += [C([-3, 46, -4], [6, 0.8, 6], WOOD), C([-3, 46.8, -4], [6, 2, 0.5], WOOD, flat=True), C([-3, 46.8, 1.5], [6, 2, 0.5], WOOD, flat=True), C([-3, 46.8, -4], [0.5, 2, 6], WOOD, flat=True), C([2.5, 46.8, -4], [0.5, 2, 6], WOOD, flat=True)]
+ship += [C([-0.2, 54, -1], [0.4, 6, 9], (24, 20, 30), flat=True), C([-0.35, 55.6, 2], [0.5, 2.6, 2.6], BONE, flat=True), C([-0.4, 56.4, 2.4], [0.6, 0.8, 0.6], (24, 20, 30), flat=True), C([-0.4, 56.4, 3.4], [0.6, 0.8, 0.6], (24, 20, 30), flat=True)]
+# ロープ(マストの上からふちへ、ななめの細い線)
+for mz, mh in ((-16, 40), (-1, 50)):
+    for sx in (-1, 1):
+        L = math.hypot(9, mh - 2); ang = math.degrees(math.atan2(9, mh - 2))
+        ship.append(C([-0.2, 10, mz - 0.2], [0.4, L, 0.4], (40, 34, 30), flat=True, rot=[0, 0, -sx * ang], pivot=[0, 10 + mh - 2, mz]) if False else
+                    C([sx * 9 - 0.2, 10, mz - 0.2], [0.4, L, 0.4], (40, 34, 30), flat=True, rot=[0, 0, sx * ang], pivot=[sx * 9, 10, mz]))
 M.model('ghostship', '幽霊船(港に来る)', ship, anim={'root': {'rotation': ["math.sin(q.life_time * 60) * 2", 0, "math.sin(q.life_time * 45) * 3"], 'position': [0, "math.sin(q.life_time * 80) * 0.6", 0]}},
         box=(1.0, 1.0), scale=4.0)
 os.makedirs(M.PREVIEW, exist_ok=True)
@@ -110,6 +141,10 @@ e['minecraft:client_entity']['description']['scripts']['pre_animation'] = [
     "v.tk = math.lerp(v.tk ?? 0, q.property('mmgplus:mood') == 1, 0.12);", "v.sp = math.lerp(v.sp ?? 0, q.property('mmgplus:mood') == 2, 0.18);"]
 json.dump(e, open(p, 'w'), indent=1)
 shutil.copy(os.path.join(M.PREVIEW, 'ghostship.png'), os.path.join(ROOT, 'mpl', 'preview_ghostship.png'))
+# 幽霊船は大きいので、表示の範囲を広く(せまいと中心が画面の外に出たとき船ごと消える)
+p = os.path.join(M.RP, 'models', 'entity', 'ghostship.geo.json'); g = json.load(open(p))
+g['minecraft:geometry'][0]['description'].update({'visible_bounds_width': 24, 'visible_bounds_height': 24, 'visible_bounds_offset': [0, 8, 0]})
+json.dump(g, open(p, 'w'), indent=1)
 # ガイコツの骨の親子
 p = os.path.join(M.RP, 'models', 'entity', 'mirrorskel.geo.json'); g = json.load(open(p))
 for b in g['minecraft:geometry'][0]['bones']:
