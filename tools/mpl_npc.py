@@ -88,26 +88,42 @@ ship.append(C([-2, 10, 14.6], [4, 6, 1.4], WOOD, flat=True))                    
 # 船首の甲板と船首像(ドクロ)・斜めの帆柱
 ship += [C([-6, 10, -26], [12, 2, 8], HULL), C([-2.5, 7, -34], [5, 5, 4], BONE), C([-1.7, 8.6, -34.3], [1.2, 1.4, 0.4], (20, 16, 24), flat=True), C([0.5, 8.6, -34.3], [1.2, 1.4, 0.4], (20, 16, 24), flat=True)]
 ship.append(C([-0.6, 11, -46], [1.2, 1.2, 18], WOOD, rot=[16, 0, 0], pivot=[0, 11, -28]))
-# マスト(前・中・後ろ): 柱・横木・破れた帆(穴あき・少しふくらむ)
-for mz, mh, ys in ((-16, 40, (16, 28)), (-1, 50, (16, 30, 42)), (19, 30, (24,))):
-    base = 20 if mz > 14 else 10
-    ship.append(C([-1, base, mz - 1], [2, mh - (base - 10), 2], WOOD))
-    for yy in ys:
-        top = yy + 9 if yy + 9 < 10 + mh else 10 + mh - 2
-        ship.append(C([-12, top, mz - 0.5], [24, 1, 1], WOOD))   # 横木
-        rows = int((top - yy) // 3)
-        for r in range(rows):
-            y0 = top - 3 - r * 3; bulge = math.sin((r + 0.5) / rows * math.pi) * 1.4
-            for c in range(6):
-                if (c * 7 + r * 3 + mz) % 9 == 0: continue        # 破れた穴
-                x0 = -11 + c * 3.7
-                ship.append(C([x0, y0, mz - 1.4 - bulge], [3.7, 3, 0.4], SAIL if (c + r) % 2 else SAIL2, flat=True))
-    ship.append(C([-1.5, 10 + mh - 1, mz - 1.5], [3, 2, 3], GLOW, flat=True))        # マストの上のランタン
-# 中マストの見張り台・ドクロの旗
-ship += [C([-3, 46, -4], [6, 0.8, 6], WOOD), C([-3, 46.8, -4], [6, 2, 0.5], WOOD, flat=True), C([-3, 46.8, 1.5], [6, 2, 0.5], WOOD, flat=True), C([-3, 46.8, -4], [0.5, 2, 6], WOOD, flat=True), C([2.5, 46.8, -4], [0.5, 2, 6], WOOD, flat=True)]
-ship += [C([-0.2, 54, -1], [0.4, 6, 9], (24, 20, 30), flat=True), C([-0.35, 55.6, 2], [0.5, 2.6, 2.6], BONE, flat=True), C([-0.4, 56.4, 2.4], [0.6, 0.8, 0.6], (24, 20, 30), flat=True), C([-0.4, 56.4, 3.4], [0.6, 0.8, 0.6], (24, 20, 30), flat=True)]
+# マスト(前・中・後ろ)と帆: 帆は上下の横木のあいだにぴんと張った1枚(横に細い帯を重ねる)。風で前(船首がわ)へふくらむ。上の段ほど小さい
+#   帆の段: (下の高さ, 上の高さ, 下のはば半分, 上のはば半分)。破れは下のはしのギザギザと小さい穴1つだけ
+MASTS = [(-16, 50, 10, [(14, 26, 12, 10.5), (28, 38, 9.5, 8), (40, 47, 7, 5.5)]),
+         (-1, 60, 10, [(14, 28, 13, 11.5), (30, 41, 10.5, 9), (47, 56, 7.5, 6)]),
+         (19, 42, 20, [(24, 33, 9.5, 8), (35, 40, 6.5, 5)])]
+for mz, top, base, tiers in MASTS:
+    ship.append(C([-1, base, mz - 1], [2, top - base, 2], WOOD))
+    for ti, (y0, y1, wb, wt) in enumerate(tiers):
+        ship.append(C([-wt - 1.2, y1, mz - 0.6], [2 * (wt + 1.2), 1, 1.2], WOOD))          # 上の横木
+        ship.append(C([-wb - 0.8, y0 - 0.8, mz - 0.5], [2 * (wb + 0.8), 0.8, 1], WOOD))   # 下の横木(帆のすそを止める)
+        n = int(y1 - y0)
+        for r in range(n):
+            t = (r + 0.5) / n                       # 0 = 上 → 1 = 下
+            y = y1 - 1 - r; w = wt + (wb - wt) * t
+            bulge = math.sin(t * math.pi) * (2.2 if ti == 0 else 1.6)
+            col = SAIL2 if r % 3 == 2 else SAIL
+            zz = mz - 1.6 - bulge
+            if ti == 0 and r >= n - 2:              # いちばん下の帆のすそ: 少しギザギザ
+                cut = [1.5, 3.0][r - (n - 2)]
+                ship.append(C([-w + (cut if (mz // 3) % 2 else 0), y, zz], [2 * w - cut, 1, 0.4], col, flat=True)); continue
+            if ti == 0 and r in (n // 2, n // 2 + 1):   # 小さい穴(右寄り)
+                hx = w * 0.35
+                ship.append(C([-w, y, zz], [w + hx - 1, 1, 0.4], col, flat=True)); ship.append(C([hx + 1, y, zz], [w - hx - 1, 1, 0.4], col, flat=True)); continue
+            ship.append(C([-w, y, zz], [2 * w, 1, 0.4], col, flat=True))
+    ship.append(C([-1.5, top - 1, mz - 1.5], [3, 2, 3], GLOW, flat=True))                 # マストの上のランタン
+# 船首の三角の帆(帆柱から前のマストへ、2枚)
+for (yb, yt, zf, zb) in ((13, 36, -40, -18), (15, 28, -45, -31)):
+    n = yt - yb
+    for r in range(n):
+        y = yb + r; zfront = zf + (zb - zf) * (r / n)
+        ship.append(C([-0.2, y, zfront], [0.4, 1, zb - zfront], SAIL if r % 3 else SAIL2, flat=True))
+# 中マストの見張り台(帆のあいだ)・てっぺんのドクロの旗
+ship += [C([-3, 42.4, -4], [6, 0.8, 6], WOOD), C([-3, 43.2, -4], [6, 2, 0.5], WOOD, flat=True), C([-3, 43.2, 1.5], [6, 2, 0.5], WOOD, flat=True), C([-3, 43.2, -4], [0.5, 2, 6], WOOD, flat=True), C([2.5, 43.2, -4], [0.5, 2, 6], WOOD, flat=True)]
+ship += [C([-0.4, 60, -0.4], [0.8, 6, 0.8], WOOD), C([-0.2, 61, 0.4], [0.4, 5, 9], (24, 20, 30), flat=True), C([-0.35, 62.2, 3.4], [0.5, 2.6, 2.6], BONE, flat=True), C([-0.4, 63, 3.8], [0.6, 0.8, 0.6], (24, 20, 30), flat=True), C([-0.4, 63, 4.8], [0.6, 0.8, 0.6], (24, 20, 30), flat=True)]
 # ロープ(マストの上からふちへ、ななめの細い線)
-for mz, mh in ((-16, 40), (-1, 50)):
+for mz, mh in ((-16, 38), (-1, 48)):
     for sx in (-1, 1):
         L = math.hypot(9, mh - 2); ang = math.degrees(math.atan2(9, mh - 2))
         ship.append(C([-0.2, 10, mz - 0.2], [0.4, L, 0.4], (40, 34, 30), flat=True, rot=[0, 0, -sx * ang], pivot=[0, 10 + mh - 2, mz]) if False else
