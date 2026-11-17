@@ -158,7 +158,7 @@ def cliff_block(x, z, y):
     return random.choice(['stone', 'cobblestone', 'mossy_cobblestone', 'stone', 'andesite'])
 for (x, z), h in H.items():
     if h == -3:
-        box(x, YB, z, x, -4, z, 'stone'); put(x, -3, z, 'sand'); put(x, -2, z, 'water'); put(x, -1, z, 'water'); continue
+        box(x, YB, z, x, -4, z, 'stone'); put(x, -3, z, 'sand'); put(x, -2, z, 'water'); put(x, -1, z, 'water'); put(x, 0, z, 'water'); continue   # 川の水面は浜と同じ高さ
     box(x, YB, z, x, -1, z, 'stone')
     low = min([H.get((x + i, z + j), -3) for i, j in ((1, 0), (-1, 0), (0, 1), (0, -1))])
     for y in range(0, h): put(x, y, z, cliff_block(x, z, y) if y >= low else ('blackstone' if vol(x, z) < 5.3 else 'stone'))
@@ -183,14 +183,30 @@ for nd in MIRRORS:
     x, z = P(4, 0); put(x, y + 6, z, 'chiseled_polished_blackstone'); put(x, y + 7, z, 'soul_lantern')
     for b in (-3, 3): x, z = P(4, b); put(x, y + 1, z, 'polished_blackstone_wall'); put(x, y + 2, z, 'soul_lantern')
     nd['mirror'] = {'x': nd['x'] + n[0] * 4 + 0.5, 'y': y + 1, 'z': nd['z'] + n[1] * 4 + 0.5, 'nx': n[0], 'nz': n[1]}
-# 海とふち
+# 海とふち: 水面は y=0(浜の砂と同じ高さ。段差なし)。岸の近くは浅く(底が上がる)、沖ほど深い → 水の色が自然に変わる
+from collections import deque
+SEA_D = {}; dq = deque()
+for x in range(X0, X1 + 1):
+    for z in range(Z0, Z1 + 1):
+        if (x, z) in H: continue
+        if any((x + i, z + j) in H and H[(x + i, z + j)] >= 0 for i, j in ((1, 0), (-1, 0), (0, 1), (0, -1))): SEA_D[(x, z)] = 1; dq.append((x, z))
+while dq:
+    x, z = dq.popleft()
+    for i, j in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        c = (x + i, z + j)
+        if X0 <= c[0] <= X1 and Z0 <= c[1] <= Z1 and c not in H and c not in SEA_D: SEA_D[c] = SEA_D[(x, z)] + 1; dq.append(c)
 for x in range(X0, X1 + 1):
     for z in range(Z0, Z1 + 1):
         if (x, z) in H: continue
         edge = x in (X0, X1) or z in (Z0, Z1)
-        put(x, -4, z, 'prismarine_bricks' if edge else 'sand')
-        for y in (-3, -2, -1): put(x, y, z, 'prismarine_bricks' if edge else 'water')
-        if edge: put(x, 0, z, 'prismarine_bricks')
+        d = SEA_D.get((x, z), 99)
+        floor = -1 if d <= 2 else -2 if d <= 5 else -4
+        if edge:
+            for y in range(-4, 1): put(x, y, z, 'prismarine_bricks')
+            continue
+        for y in range(-4, floor + 1): put(x, y, z, 'sand')
+        for y in range(floor + 1, 1): put(x, y, z, 'water')
+        if d <= 2 and random.random() < 0.06: put(x, floor, z, 'gravel')
 # 火山の溶岩の筋(光るブロック。流れない)
 for a in (-2.4, -1.2, 0.3, 1.5, 2.6):
     for k in range(80):
@@ -597,8 +613,22 @@ for a in (-1.2, 1.5):   # 北がわ(-2.4・2.6)は海が近いので流さない
     FLOWS.append(f)
 VOLC = {'pool': [min(c[0] for c in POOL), min(c[1] for c in POOL), max(c[0] for c in POOL), max(c[1] for c in POOL)], 'y0': 14, 'y1': 18, 'flows': FLOWS}
 print('mirrors', [m['g'] for m in MIRRORS]); print('flood runs', len(FLOOD), 'cells', len(dist), 'flows', [len(f) for f in FLOWS])
+# ===== 岸の波(mmgplus:wave を置く場所): 岸どなりの海のマスを 7 ブロックおきに。向きは陸の方。船・桟橋・道のそばはさける =====
+WAVES = []
+coast = sorted(c for c, d in SEA_D.items() if d == 1 and X0 + 2 < c[0] < X1 - 2 and Z0 + 2 < c[1] < Z1 - 2)
+for (x, z) in coast:
+    if any(abs(x - w[0]) + abs(z - w[1]) < 7 for w in WAVES): continue
+    if any((x + i, z + j) in ROAD for i in range(-3, 4) for j in range(-3, 4)): continue
+    if any(V.get((x + i, y, z + j), 'water').split(' ')[0] not in ('water', 'sand', 'gravel') for i in range(-2, 3) for j in range(-2, 3) for y in (0, 1, 2)
+           if (x + i, z + j) not in H): continue
+    vx = sum(i for i in range(-2, 3) for j in range(-2, 3) if (x + i, z + j) in H and H[(x + i, z + j)] >= 0)
+    vz = sum(j for i in range(-2, 3) for j in range(-2, 3) if (x + i, z + j) in H and H[(x + i, z + j)] >= 0)
+    if vx == 0 and vz == 0: continue
+    yaw = round(math.degrees(math.atan2(-vx, vz)))   # 陸の方を向く(Bedrock の向き)
+    WAVES.append([x, z, yaw])
+print('waves', len(WAVES))
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 15, 'tide': TIDE, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
+        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 16, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 

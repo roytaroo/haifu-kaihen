@@ -1,0 +1,22 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mpl.wave": {
+   "loop": true,
+   "bones": {
+    "w": {
+     "position": [
+      0,
+      "14.2 + v.p * 2.4",
+      "10 - v.p * 22"
+     ],
+     "scale": [
+      "1 + v.p * 0.06",
+      1,
+      "v.t < 0.45 ? 1 : 0.55 + v.p * 0.45"
+     ]
+    }
+   }
+  }
+ }
+}

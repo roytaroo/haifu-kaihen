@@ -2521,10 +2521,10 @@ let ghostKeeper = null, ghostSign = null;
 function ghostPlank(on) {
     const k = BD.ghost?.plank; if (!k) return;
     const { x, edge } = k;
-    cmd(`fill ${x} 1 ${edge - 3} ${x} 1 ${edge - 2} ${on ? "warped_planks" : "air"}`);
-    cmd(`setblock ${x} 2 ${edge - 1} ${on ? "warped_planks" : "air"}`);
+    // 板の橋は甲板と同じ高さ(y=2、上の面 3)。海面を上げたので幽霊船の甲板もほぼ同じ高さ
+    cmd(`fill ${x} 2 ${edge - 3} ${x} 2 ${edge - 1} ${on ? "warped_planks" : "air"}`);
     cmd(`setblock ${x} 3 ${edge} ${on ? "air" : "dark_oak_fence"}`);
-    for (const dx of [-1, 1]) { cmd(`setblock ${x + dx} 2 ${edge - 2} ${on ? "warped_fence" : "air"}`); cmd(`setblock ${x + dx} 3 ${edge - 2} ${on ? "soul_lantern" : "air"}`); }
+    for (const dx of [-1, 1]) { cmd(`setblock ${x + dx} 3 ${edge - 2} ${on ? "warped_fence" : "air"}`); cmd(`setblock ${x + dx} 4 ${edge - 2} ${on ? "soul_lantern" : "air"}`); }
 }
 function ghostCleanup() {
     try { G.ghost?.remove(); } catch {} G.ghost = null;
@@ -2534,7 +2534,7 @@ function ghostCleanup() {
 }
 async function ghostArrive() {
     const g = BD.ghost; ghostCleanup();
-    G.ghost = spawnAt("mmgplus:ghostship", { x: g.from.x, y: -0.8, z: g.from.z }); G.ghostUsed = []; G.ghostTurn = G.turn;
+    G.ghost = spawnAt("mmgplus:ghostship", { x: g.from.x, y: 0.2, z: g.from.z }); G.ghostUsed = []; G.ghostTurn = G.turn;
     if (!G.ghost) return;
     try { G.ghost.setRotation({ x: 0, y: -90 }); } catch {}
     cmd("time set 14200");   // 夕暮れの暗さ
@@ -2543,7 +2543,7 @@ async function ghostArrive() {
     const T = 170;
     for (let t = 1; t <= T; t++) {
         const u = 1 - (1 - t / T) ** 3, gx = g.from.x + (g.to.x - g.from.x) * u;
-        try { G.ghost.teleport({ x: gx, y: -0.8, z: g.from.z }, { rotation: { x: 0, y: -90 } }); } catch {}
+        try { G.ghost.teleport({ x: gx, y: 0.2, z: g.from.z }, { rotation: { x: 0, y: -90 } }); } catch {}
         if (t % 20 === 1) cam.to("@a[tag=mpl_board]", { x: gx + 11, y: 5.5, z: g.to.z - 15 }, { x: gx, y: 3.5, z: g.to.z }, 1, "linear");
         if (t % 3 === 0) cmd(`particle minecraft:campfire_tall_smoke_particle ${gx + rand(-9, 9)} 0.5 ${g.from.z + rand(-5, 5)}`);
         if (t % 5 === 0) cmd(`particle minecraft:soul_particle ${gx + rand(-6, 6)} ${2 + Math.random() * 6} ${g.from.z + rand(-2, 2)}`);
@@ -2579,7 +2579,7 @@ async function ghostLeave() {
     ghostPlank(false); soundAllPlayers("mob.zombie.unfect", 0.5);
     for (let t = 1; t <= 120 && G.ghost?.isValid; t++) {
         const u = (t / 120) ** 2, gx = g.to.x - (g.to.x - g.from.x) * u;
-        try { G.ghost.teleport({ x: gx, y: -0.8 - u * 2, z: g.to.z }, { rotation: { x: 0, y: -90 } }); } catch {}
+        try { G.ghost.teleport({ x: gx, y: 0.2 - u * 2, z: g.to.z }, { rotation: { x: 0, y: -90 } }); } catch {}
         if (t % 3 === 0) cmd(`particle minecraft:campfire_tall_smoke_particle ${gx + rand(-8, 8)} 0.5 ${g.to.z + rand(-4, 4)}`);
         await wait(1);
     }
@@ -2640,7 +2640,13 @@ const G = { on: false, turn: 0, turns: 10, cnt: {}, prevRank: {}, subst: {}, pla
 const spaceAt = (i) => SPACES[((i % SPACES.length) + SPACES.length) % SPACES.length];
 // マスの丸い台(tools/mpl_spaces.py の KINDS と同じ順番)。台の上の面は 2/16 ブロックの高さ
 const SPACE_KIND = ["blue", "red", "happen", "event", "lucky", "shop", "skull", "bank", "shuffle", "mirror", "start"];
+// 岸の波(tools/mpl_waves.py)。場所と向きは BD.waves
+function placeWaves() {
+    cmd("kill @e[type=mmgplus:wave]");
+    for (const [x, z, yaw] of BD.waves ?? []) { const e = spawnAt("mmgplus:wave", { x: x + 0.5, y: 0, z: z + 0.5 }); try { e?.setRotation({ x: 0, y: yaw }); } catch {} }
+}
 function placeSpaces() {
+    placeWaves();
     cmd("kill @e[type=mmgplus:space]");
     SPACES.forEach((sp, i) => {
         const k = SPACE_KIND.indexOf(sp.kind === "event" && !sp.ev ? "happen" : sp.kind);
