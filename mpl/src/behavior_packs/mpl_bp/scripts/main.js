@@ -2412,7 +2412,7 @@ async function turnNews(last) {
     const news = [];
     if (G.turn === G.sale - 1) news.push(["お知らせだYO！ 次のターンは…ショップがタイムセール！ 全品半額だぜ！", 1]);
     if (G.turn === G.sale) news.push(["タイムセール開始！ 今のターンはショップ全品半額！ 急げ急げ〜！", 1]);
-    if (G.turn % 5 === 0 && !G.ghost) news.push(["な、なんだあれは…！？ 幽霊船が港に来たぞ！ 船の道を通るとトクベツな店があるらしい…", 2]);
+    if (G.turn % 5 === 0 && !G.ghost) news.push(["な、なんだあれは…！？ 幽霊船が港に来たぞ！ 帆船の上のマスを通ると、幽霊船の店に寄れるらしい…", 2]);
     if (G.turn % 3 === 0) news.push(["潮が満ちてきた！ 港の浜の道は今のターン通れないぜ！", 1]);
     const ruleTurn = G.turns - Math.floor(G.turns / 3) + 1;
     if (G.turn === ruleTurn && !G.rule) news.push(["RULE", 2]);
@@ -2499,27 +2499,87 @@ async function coolLava(show) {
     for (let y = v.y1; y >= v.y0; y--) { cmd(`fill ${x1} ${y} ${z1} ${x2} ${y} ${z2} air replace lava`); cmd(`fill ${x1} ${y} ${z1} ${x2} ${y} ${z2} air replace flowing_lava`); if (show) await wait(4); }
 }
 // 幽霊船: 沖からゆっくり港へ(1tick ずつ動かす)。次の5ターンまで止まって、そのあと帰る
+// 幽霊船: 霧の中から沖をゆっくり進んで、船の横に着く → 板の橋がかかり、ガイコツの店主が立つ。3ターンたつと出航
+//   乗れる場所: 船の上のマス(zone ship)。通ると1回だけ店に寄れる(頭の上に看板)
+let ghostKeeper = null, ghostSign = null;
+function ghostPlank(on) {
+    const k = BD.ghost?.plank; if (!k) return;
+    const { x, edge } = k;
+    cmd(`fill ${x} 1 ${edge - 3} ${x} 1 ${edge - 2} ${on ? "warped_planks" : "air"}`);
+    cmd(`setblock ${x} 2 ${edge - 1} ${on ? "warped_planks" : "air"}`);
+    cmd(`setblock ${x} 3 ${edge} ${on ? "air" : "dark_oak_fence"}`);
+    for (const dx of [-1, 1]) { cmd(`setblock ${x + dx} 2 ${edge - 2} ${on ? "warped_fence" : "air"}`); cmd(`setblock ${x + dx} 3 ${edge - 2} ${on ? "soul_lantern" : "air"}`); }
+}
+function ghostCleanup() {
+    try { G.ghost?.remove(); } catch {} G.ghost = null;
+    try { ghostKeeper?.remove(); } catch {} ghostKeeper = null;
+    try { ghostSign?.remove(); } catch {} ghostSign = null;
+    ghostPlank(false);
+}
 async function ghostArrive() {
-    const g = BD.ghost; try { G.ghost?.remove(); } catch {}
-    G.ghost = spawnAt("mmgplus:ghostship", { x: g.from.x, y: -1.4, z: g.from.z }); G.ghostUsed = [];
+    const g = BD.ghost; ghostCleanup();
+    G.ghost = spawnAt("mmgplus:ghostship", { x: g.from.x, y: -0.8, z: g.from.z }); G.ghostUsed = []; G.ghostTurn = G.turn;
     if (!G.ghost) return;
     try { G.ghost.setRotation({ x: 0, y: -90 }); } catch {}
-    cam.to("@a[tag=mpl_board]", { x: g.to.x - 6, y: 14, z: g.to.z + 26 }, { x: g.to.x, y: 4, z: g.to.z }, 1.2);
-    soundAllPlayers("mob.zombie.unfect", 0.6);
-    for (let t = 1; t <= 120; t++) {
-        const u = 1 - (1 - t / 120) ** 3;
-        try { G.ghost.teleport({ x: g.from.x + (g.to.x - g.from.x) * u, y: -1.4, z: g.from.z }, { rotation: { x: 0, y: -90 } }); } catch {}
-        if (t % 6 === 0) cmd(`particle minecraft:soul_particle ${g.from.x + (g.to.x - g.from.x) * u} 6 ${g.from.z}`);
+    cmd("time set 14200");   // 夕暮れの暗さ
+    soundAllPlayers("ambient.cave", 0.8);
+    ribbon("purple", "GHOST SHIP!", "霧の向こうから、幽霊船が…", 90);
+    const T = 170;
+    for (let t = 1; t <= T; t++) {
+        const u = 1 - (1 - t / T) ** 3, gx = g.from.x + (g.to.x - g.from.x) * u;
+        try { G.ghost.teleport({ x: gx, y: -0.8, z: g.from.z }, { rotation: { x: 0, y: -90 } }); } catch {}
+        if (t % 20 === 1) cam.to("@a[tag=mpl_board]", { x: gx + 11, y: 5.5, z: g.to.z - 15 }, { x: gx, y: 3.5, z: g.to.z }, 1, "linear");
+        if (t % 3 === 0) cmd(`particle minecraft:campfire_tall_smoke_particle ${gx + rand(-9, 9)} 0.5 ${g.from.z + rand(-5, 5)}`);
+        if (t % 5 === 0) cmd(`particle minecraft:soul_particle ${gx + rand(-6, 6)} ${2 + Math.random() * 6} ${g.from.z + rand(-2, 2)}`);
+        if (t % 40 === 0) soundAllPlayers("mob.zombie.unfect", 0.55);
         await wait(1);
     }
-    soundAllPlayers("mob.wither.ambient", 1.4);
+    // 着いた: 板の橋 → ガイコツの店主と看板
+    soundAllPlayers("random.anvil_land", 0.5); cmd("camerashake add @a 0.25 0.4 positional");
+    const k = BD.ghost.plank, kp = { x: k.x + 0.5, y: 3, z: k.edge + 1.5 };
+    cam.to("@a[tag=mpl_board]", { x: kp.x + 5, y: kp.y + 2.5, z: kp.z - 7 }, { x: kp.x, y: kp.y + 1, z: kp.z - 1 }, 0.8);
+    await wait(16);
+    ghostPlank(true); soundAllPlayers("random.door_open", 0.7);
+    for (let i = 0; i < 6; i++) { cmd(`particle minecraft:soul_particle ${kp.x} ${kp.y + Math.random() * 2} ${kp.z - 2 + Math.random() * 2}`); await wait(2); }
+    ghostKeeper = spawnAt("mmgplus:mirrorskel", kp);
+    try { ghostKeeper?.setRotation({ x: 0, y: 0 }); ghostKeeper?.setProperty("mmgplus:act", 2); } catch {}
+    ghostSign = spawnAt("mmgplus:board", { x: kp.x, y: kp.y + 2.6, z: kp.z });
+    if (ghostSign) ghostSign.nameTag = "§d§l幽霊船の店§r\n§f船の上のマスを通ると1回だけ寄れる";
+    soundAllPlayers("mob.skeleton.say", 0.9);
+    ribbon("purple", "GHOST SHOP OPEN!", "船の上のマスを通ると 1回だけ寄れる（3ターンで出航）", 110);
+    await wait(80);
+    try { ghostKeeper?.setProperty("mmgplus:act", 0); } catch {}
+    cmd("time set 6000");
+    await wait(10);
+}
+// 出航: 店主が消えて橋が外れ、霧の中へ
+async function ghostLeave() {
+    const g = BD.ghost; if (!G.ghost) return;
+    cam.to("@a[tag=mpl_board]", { x: g.to.x + 12, y: 6, z: g.to.z - 16 }, { x: g.to.x, y: 3, z: g.to.z }, 1);
     await wait(20);
+    ribbon("gray", "GHOST SHIP LEAVES", "幽霊船は霧の中へ帰っていった…", 80);
+    try { if (ghostKeeper) cmd(`particle minecraft:soul_particle ${ghostKeeper.location.x} ${ghostKeeper.location.y + 1} ${ghostKeeper.location.z}`); ghostKeeper?.remove(); } catch {} ghostKeeper = null;
+    try { ghostSign?.remove(); } catch {} ghostSign = null;
+    ghostPlank(false); soundAllPlayers("mob.zombie.unfect", 0.5);
+    for (let t = 1; t <= 120 && G.ghost?.isValid; t++) {
+        const u = (t / 120) ** 2, gx = g.to.x - (g.to.x - g.from.x) * u;
+        try { G.ghost.teleport({ x: gx, y: -0.8 - u * 2, z: g.to.z }, { rotation: { x: 0, y: -90 } }); } catch {}
+        if (t % 3 === 0) cmd(`particle minecraft:campfire_tall_smoke_particle ${gx + rand(-8, 8)} 0.5 ${g.to.z + rand(-4, 4)}`);
+        await wait(1);
+    }
+    ghostCleanup();
 }
 // 幽霊船の店: 船・港の道を通ると1回だけ
 async function ghostShop(p) {
     const name = p.name; G.ghostUsed.push(name);
     const goods = [["star", `${I.star} スター`, 15], ["gold", "金のパイプ", 12], ["triple", "トリプルサイコロ", 9]];
-    banner("shop", "幽霊船の店", 40); soundAllPlayers("mob.zombie.unfect", 1.2); await wait(20);
+    if (ghostKeeper?.isValid) {
+        const l = ghostKeeper.location;
+        cam.to("@a[tag=mpl_board]", { x: l.x + 4.5, y: l.y + 2.2, z: l.z + 3.5 }, { x: l.x - 1, y: l.y + 1.2, z: l.z }, 0.7);
+        try { ghostKeeper.setProperty("mmgplus:act", 2); } catch {}
+    }
+    banner("shop", "幽霊船の店", 40); soundAllPlayers("mob.skeleton.say", 1.1); await wait(24);
+    try { ghostKeeper?.setProperty("mmgplus:act", 1); } catch {}
     let pick = null;
     if (isBot(p)) { pick = goods.find(([, , c]) => c <= (G.coins[name] ?? 0))?.[0] ?? null; await wait(30); }
     else {
@@ -2530,6 +2590,7 @@ async function ghostShop(p) {
         try { uiManager.closeAllForms(p); } catch {}
         if (!r.canceled && r.selection < goods.length && (G.coins[name] ?? 0) >= goods[r.selection][2]) pick = goods[r.selection][0];
     }
+    try { ghostKeeper?.setProperty("mmgplus:act", pick ? 2 : 0); } catch {}
     if (!pick) { ribbon("gray", "SEE YOU AGAIN!", name, 25); await wait(20); return; }
     const [, t, c] = goods.find((g) => g[0] === pick);
     addCoins(name, -c);
@@ -2672,7 +2733,7 @@ async function startParty(turns, players, hc = {}) {
         for (G.turn = 1; G.turn <= G.turns && G.on; G.turn++) {
             const last = G.turn > G.turns - 3;
             hud();
-            cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); setBridge(bridgeDown()); await setTide(tideHigh());
+            cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); setBridge(bridgeDown()); await setTide(tideHigh()); if (G.ghost && G.turn - (G.ghostTurn ?? G.turn) >= 3) await ghostLeave();
             banner(last ? "lastspurt" : "turn", (last ? `TURN ${G.turn} / ${G.turns}  青と赤のマスが2倍` : `${G.turn} / ${G.turns}`) + (bridgeDown() ? "   §aドローブリッジ: 通れる" : "   §cドローブリッジ: 通行止め"), 55);
             soundAllPlayers("random.levelup", last ? 0.7 : 0.9);
             await wait(55);
@@ -2690,7 +2751,7 @@ async function startParty(turns, players, hc = {}) {
         }
         if (G.on) await finale();
     } finally {
-        try { djEntity?.remove(); } catch {} try { G.ghost?.remove(); } catch {} G.ghost = null; setTide(false, false); coolLava(false); cmd("time set 6000");
+        try { djEntity?.remove(); } catch {} ghostCleanup(); setTide(false, false); coolLava(false); cmd("time set 6000");
         G.on = false; G.now = null;
         bgm(null); unlockAll(); cam.clear();
         for (const p of world.getPlayers()) { p.removeTag("mpl_board"); }
@@ -2764,17 +2825,16 @@ async function takeTurn(p, last, nextName) {
         cnt(name, "steps");
         const here = SPACES[G.pos[name]];
         if (k > 1 && here.kind === "bank" && (G.coins[name] ?? 0) > 0) { const d = Math.min(3, G.coins[name]); addCoins(name, -d); G.bank = (G.bank ?? 0) + d; ribbon("blue", `BANK +${d}${I.coin}`, `銀行に ${G.bank}${I.coin} たまっている`, 30); await wait(14); }
-        if (G.ghost && ["ship", "harbor"].includes(here.zone) && !G.ghostUsed.includes(name)) await ghostShop(p);
+        if (G.ghost && here.zone === "ship" && !G.ghostUsed.includes(name)) await ghostShop(p);
         if (G.pos[name] === G.star) await buyStar(p);
         if (G.pos[name] === 0) { addCoins(name, 5); ribbon("gold", `PASSED START +5${I.coin}`, name, 25); }
     }
     delete G.magnet[name];
     // 止まったマス: 着地の音 + マスの名前(青・赤はコインの帯がそのかわり)
     const sp = spaceAt(G.pos[name]), mul = last ? 2 : 1;
-    const LAND = { blue: ["random.orb", 1.6], red: ["note.bass", 0.6], event: ["note.chime", 1.2], lucky: ["random.levelup", 1.8], shop: ["note.bell", 1.4], skull: ["mob.wither.hurt", 1.6], bank: ["note.bell", 0.9], shuffle: ["note.chime", 0.8] };
+    const LAND = { blue: ["random.orb", 1.6], red: ["note.bass", 0.6], event: ["note.chime", 1.2], lucky: ["random.levelup", 1.8], shop: ["note.bell", 1.4], skull: ["note.bass", 0.5], bank: ["note.bell", 0.9], shuffle: ["note.chime", 0.8], mirror: ["note.chime", 0.6] };
     if (LAND[sp.kind]) cmd(`execute as @a at @s run playsound ${LAND[sp.kind][0]} @s ~ ~ ~ 1 ${LAND[sp.kind][1]}`);
-    const KN = { event: "ハプニングマス", lucky: "ラッキーマス", shop: "ショップ", skull: "ドクロマス", bank: "銀行マス", shuffle: "シャッフルマス", mirror: "鏡のマス" };
-    if (KN[sp.kind]) { ribbon("purple", KN[sp.kind], name, 22); await wait(18); }
+    // (マスの名前の帯はやめた: どのマスも自分のタイトルを出すので二重になっていた)
     cnt(name, sp.kind);
     if (sp.kind === "bank") { const g = G.bank ?? 0; G.bank = 0; if (g > 0) cnt(name, "bank"); addCoins(name, g); banner("lucky", `BANK ${g}${I.coin} ぜんぶもらった！  ${name}`, 60); soundAllPlayers("random.totem", 1.2); await react(p, g > 0); }
     else if (sp.kind === "shuffle") await shuffleSpace(p);
@@ -2946,7 +3006,8 @@ async function buyStar(p) {
     addCoins(name, -price); if (price < STAR_PRICE && (G.crystal[name] ?? 0) >= 3) G.crystal[name] = 0; G.stars[name] = (G.stars[name] ?? 0) + 1; hud();
     cmd("time set 18000"); system.runTimeout(() => cmd("time set 6000"), 170); // スポットライト: まわりを暗く
     const keep = bgmNow; bgm(null);
-    cmd("execute as @a at @s run playsound mpl.star_get @s ~ ~ ~ 1 1");
+    // BGM を止めたのと同じ瞬間に鳴らすと消えることがあるので、少し待つ(音は読みこみ済みにした)
+    system.runTimeout(() => cmd("execute as @a at @s run playsound mpl.star_get @s ~ ~ ~ 1 1"), 3);
     try { starEntity?.remove(); } catch {}
     const c = p.location;
     // スターが頭の上をくるくる回りながら下りてきて、体に吸いこまれる(約5秒)
@@ -3072,7 +3133,7 @@ async function happening(p) {
 // ドクロのマス: コイン半分 か スターを1つ取られる(まれ)
 async function skull(p) {
     const name = p.name;
-    cmd(`camera @a fade time 0.2 0.6 0.4 color 80 0 0`); soundAllPlayers("mob.wither.ambient", 0.8); pose(p, "surprise");
+    cmd(`camera @a fade time 0.2 0.6 0.4 color 80 0 0`); soundAllPlayers("ambient.cave", 1.2); soundAllPlayers("note.bass", 0.5); pose(p, "surprise");
     await wait(20);
     if ((G.stars[name] ?? 0) > 0 && Math.random() < 0.25) { G.stars[name]--; hud(); banner("skull", `${I.star} を1つ失った…  ${name}`, 70); }
     else { const n = Math.floor((G.coins[name] ?? 0) / 2); addCoins(name, -n); banner("skull", `コインが半分… -${n}${I.coin}  ${name}`, 70); }
@@ -3349,7 +3410,7 @@ async function menu(p) {
 function resetAll() {
     G.on = false; run.active = false; setScore("game", "playing", 0); setScore("game", "selectgame", 0);
     cam.clear(); unlockAll(); bgm(null); cmd("time set 6000");
-    setTide(false, false); coolLava(false);
+    setTide(false, false); coolLava(false); ghostCleanup();
     for (const t of ["mmgplus:dice", "mmgplus:star", "mmgplus:coin", "mmgplus:dj", "mmgplus:ghostship", "mmgplus:mirrorskel", "mmgplus:steve", "mmgplus:cannonball", "mmgplus:fireball"]) cmd(`kill @e[type=${t}]`);
     for (let i = 0; i < 6; i++) cmd(`kill @e[type=mmgplus:racehorse${i}]`);
     for (const p of world.getPlayers()) { p.removeTag("mpl_board"); p.removeTag("playing"); p.removeTag("mmgplus_out"); try { p.setGameMode(ADVENTURE); } catch {} p.teleport(LOBBY, lookCenter); }

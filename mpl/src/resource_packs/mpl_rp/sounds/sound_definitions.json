@@ -52,7 +52,8 @@
      "name": "sounds/mpl/fanfare_star",
      "stream": false,
      "volume": 1.0,
-     "is3D": false
+     "is3D": false,
+     "load_on_low_memory": true
     }
    ]
   },
@@ -61,9 +62,10 @@
    "sounds": [
     {
      "name": "sounds/mpl/star_get",
-     "stream": true,
+     "stream": false,
      "volume": 1.0,
-     "is3D": false
+     "is3D": false,
+     "load_on_low_memory": true
     }
    ]
   },
@@ -72,8 +74,106 @@
    "sounds": [
     {
      "name": "sounds/mpl/drumroll",
-     "stream": true,
+     "stream": false,
      "volume": 1.0,
+     "is3D": false,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "mplx.ambient.cave": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/cave/cave1",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave2",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave3",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave4",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave5",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave6",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave7",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave8",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave9",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave10",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave11",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave12",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave13",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave14",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave15",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave16",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave17",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave18",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave19",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave20",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave21",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave22",
+     "is3D": false
+    },
+    {
+     "name": "sounds/cave/cave23",
      "is3D": false
     }
    ]
@@ -463,52 +563,6 @@
     }
    ]
   },
-  "mplx.mob.wither.ambient": {
-   "category": "ui",
-   "sounds": [
-    {
-     "name": "sounds/mob/wither/idle1",
-     "volume": 0.2,
-     "is3D": false
-    },
-    {
-     "name": "sounds/mob/wither/idle2",
-     "volume": 0.2,
-     "is3D": false
-    },
-    {
-     "name": "sounds/mob/wither/idle3",
-     "volume": 0.2,
-     "is3D": false
-    },
-    {
-     "name": "sounds/mob/wither/idle4",
-     "volume": 0.2,
-     "is3D": false
-    }
-   ]
-  },
-  "mplx.mob.wither.hurt": {
-   "category": "ui",
-   "sounds": [
-    {
-     "name": "sounds/mob/wither/hurt1",
-     "is3D": false
-    },
-    {
-     "name": "sounds/mob/wither/hurt2",
-     "is3D": false
-    },
-    {
-     "name": "sounds/mob/wither/hurt3",
-     "is3D": false
-    },
-    {
-     "name": "sounds/mob/wither/hurt4",
-     "is3D": false
-    }
-   ]
-  },
   "mplx.mob.zombie.unfect": {
    "category": "ui",
    "sounds": [
@@ -606,6 +660,29 @@
     {
      "name": "sounds/random/click",
      "volume": 0.2,
+     "is3D": false
+    }
+   ]
+  },
+  "mplx.random.door_open": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/random/door_open",
+     "volume": 0.4,
+     "pitch": 1.0,
+     "is3D": false
+    },
+    {
+     "name": "sounds/random/door_open",
+     "volume": 0.4,
+     "pitch": 1.1,
+     "is3D": false
+    },
+    {
+     "name": "sounds/random/door_open",
+     "volume": 0.4,
+     "pitch": 0.9,
      "is3D": false
     }
    ]

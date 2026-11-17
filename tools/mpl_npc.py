@@ -77,8 +77,12 @@ for mz, mh in ((-10, 40), (10, 32)):
     ship += [C([-0.2, 8 + mh, mz + 1], [0.4, 5, 7], (20, 20, 20), flat=True), C([-0.3, 9.6 + mh, mz + 3], [0.5, 2.2, 2.2], (240, 240, 230), flat=True)]
 ship += [C([x, 10, z], [1.2, 1.6, 1.2], GLOW, flat=True) for x in (-9, 8) for z in (-18, -2, 14)]
 ship += [C([-0.5, 6, -32], [1, 1, 8], (60, 44, 34))]
+# v41: 遠くからでも幽霊船とわかるように、ふちに緑の光の線・マストの上にランタン・船首に骨の飾り
+ship += [C([-9.6, 9.8, -22], [0.6, 0.6, 44], GLOW, flat=True), C([9.0, 9.8, -22], [0.6, 0.6, 44], GLOW, flat=True)]
+ship += [C([-1.5, 8 + mh + 5.5, mz - 0.5], [3, 3, 3], GLOW, flat=True) for mz, mh in ((-10, 40), (10, 32))]
+ship += [C([-2, 6, -34], [4, 4, 3], (230, 226, 210)), C([-1.4, 7.4, -34.3], [1, 1, 0.3], (20, 20, 20), flat=True), C([0.4, 7.4, -34.3], [1, 1, 0.3], (20, 20, 20), flat=True)]
 M.model('ghostship', '幽霊船(港に来る)', ship, anim={'root': {'rotation': ["math.sin(q.life_time * 60) * 2", 0, "math.sin(q.life_time * 45) * 3"], 'position': [0, "math.sin(q.life_time * 80) * 0.6", 0]}},
-        box=(1.0, 1.0), scale=3.0)
+        box=(1.0, 1.0), scale=4.0)
 os.makedirs(M.PREVIEW, exist_ok=True)
 for d in [os.path.join(M.RP, 'models', 'entity'), os.path.join(M.RP, 'animations'), os.path.join(M.RP, 'entity'), os.path.join(M.BP, 'entities')]: os.makedirs(d, exist_ok=True)
 for n in ('dj', 'ghostship', 'mirrorskel'): M.write(n, M.MODELS[n])
