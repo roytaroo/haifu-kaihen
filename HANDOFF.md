@@ -341,3 +341,7 @@
 
 ## 紹介画像
 - tools/mpl_keyart.py → mpl/keyart.png(1920x1080)・mpl/keyart_square.png(1080x1080)。ロゴ・ボードの見本・幽霊船・BOT と DJ のスキン(斜め前から描く)・スターとコイン・キャッチコピーと特ちょう。
+
+## 紹介画像 v2(BOWFLIT と同じ作り方)
+- tools/mpl_promo_assets.py(キャラの立ち絵・顔・アイコン・島 → mpl/promo/assets)→ tools/mpl_promo.py(HTML を組んでブラウザで 1920x1080 の画像 6 枚: 01_kv 表紙 / 02_rules あそびかた / 03_island 女神の島 / 04_chars BOT 10人 / 05_minigames / 06_credits)。
+- フォントは npm の @fontsource(noto-sans-jp・dela-gothic-one・dotgothic16・m-plus-rounded-1c)。場所は環境変数 MPL_FONTS。
