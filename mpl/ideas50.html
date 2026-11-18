@@ -1,0 +1,225 @@
+<title>VENUS PARTY アイデア50</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* レイアウト: 上に絞りこみ、下に「ゲーム画面の小さな見本 + 説明」のカードが並ぶ図鑑 */
+:root{
+  --bg:#eef4fb; --panel:#ffffff; --ink:#18203a; --sub:#5b6788; --line:#d5deee;
+  --gold:#e79a08; --gold2:#ffd65a; --navy:#1b2147; --sky:#58b7f5; --grass:#5cc04a; --red:#e2463f; --purple:#8a4be0; --pink:#ec5aa6;
+  --chip:#e3ebf8; --chipon:#1b2147; --chipon-ink:#ffffff;
+  --disp:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+  --body:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1328;--panel:#1a2040;--ink:#eef2ff;--sub:#a3add0;--line:#2c3564;--chip:#262e58;--chipon:#ffd65a;--chipon-ink:#18203a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1328;--panel:#1a2040;--ink:#eef2ff;--sub:#a3add0;--line:#2c3564;--chip:#262e58;--chipon:#ffd65a;--chipon-ink:#18203a;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;padding-block:28px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font-family:var(--disp);font-weight:900;font-size:clamp(26px,5vw,40px);line-height:1.2;margin:0;text-wrap:balance}
+h1 b{color:var(--gold)}
+.lead{color:var(--sub);max-width:46em;margin:0}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar span.l{font-size:12px;color:var(--sub);font-weight:700;letter-spacing:.08em;margin-right:4px}
+button.chip{font:inherit;font-size:13px;font-weight:700;border:0;border-radius:999px;padding:6px 13px;background:var(--chip);color:var(--ink);cursor:pointer}
+button.chip[aria-pressed="true"]{background:var(--chipon);color:var(--chipon-ink)}
+button.chip:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.count{font-size:13px;color:var(--sub)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.txt{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px}
+.no{font-family:var(--disp);font-weight:900;font-size:13px;color:var(--gold)}
+.card h3{font-family:var(--disp);font-weight:800;font-size:16px;line-height:1.35;margin:0}
+.card p{margin:0;font-size:13.5px;color:var(--sub);line-height:1.65}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.tag{font-size:11.5px;font-weight:700;border-radius:6px;padding:1px 7px;background:var(--chip);color:var(--ink)}
+.tag.e1{background:#d8f3d2;color:#1d5a17}.tag.e2{background:#ffeac2;color:#7a4a00}.tag.e3{background:#ffd9d6;color:#8a1d17}
+.tag.v{background:transparent;color:var(--gold);padding-left:0;letter-spacing:.05em}
+/* ===== ゲーム画面の見本(どのテーマでも同じ色: ゲームの中の絵なので固定)===== */
+.shot{position:relative;aspect-ratio:16/9;max-width:100%;overflow:hidden;background:linear-gradient(#7cc8ff 0 55%,#69c455 55% 100%);font-family:var(--disp);color:#fff}
+.shot.dark{background:linear-gradient(#232a5c,#11163a)}
+.shot.sea{background:linear-gradient(#7cc8ff 0 45%,#2f7fe0 45% 100%)}
+.shot.lava{background:linear-gradient(#3a2530 0 50%,#231820 50% 100%)}
+.shot.night{background:linear-gradient(#141a44 0 60%,#2b4a2f 60% 100%)}
+.shot>*{position:absolute}
+.logo{left:0;right:0;top:12%;text-align:center;font-weight:900;font-style:italic;font-size:clamp(17px,2.6vw,25px);line-height:1;letter-spacing:.01em;
+  background:linear-gradient(#fff3a0,#ffa30a);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1px #6e3200;filter:drop-shadow(0 2px 0 #1b1030) drop-shadow(0 0 0 #fff)}
+.logo.r{background-image:linear-gradient(#ffc9b0,#e82b33);-webkit-text-stroke-color:#5a0008}
+.logo.b{background-image:linear-gradient(#bfeaff,#2c7bff);-webkit-text-stroke-color:#0b2a78}
+.logo.g{background-image:linear-gradient(#dcffb0,#33b84a);-webkit-text-stroke-color:#06481a}
+.logo.p{background-image:linear-gradient(#ecc4ff,#8d3fe6);-webkit-text-stroke-color:#36085e}
+.rib{left:50%;top:14%;transform:translateX(-50%);white-space:nowrap;font-weight:800;font-size:12.5px;padding:4px 20px;color:#fff;text-shadow:0 1px 0 #0006;
+  clip-path:polygon(0 0,100% 0,calc(100% - 9px) 50%,100% 100%,0 100%,9px 50%);background:linear-gradient(#ffd24a,#e07a00)}
+.rib.b{background:linear-gradient(#63adff,#1b4fc9)}.rib.r{background:linear-gradient(#ff7a70,#bd1a24)}.rib.g{background:linear-gradient(#83e672,#1c8e37)}.rib.p{background:linear-gradient(#c98aff,#6e2bc9)}.rib.k{background:linear-gradient(#8d93a8,#454a60)}
+.sub{left:50%;top:39%;transform:translateX(-50%);white-space:nowrap;font-size:10.5px;font-weight:800;background:#0f0b22e0;border:1.5px solid #ffc83d;border-radius:7px;padding:1px 9px}
+.sub.low{top:auto;bottom:8%}
+.fig{bottom:14%;width:9%;aspect-ratio:1/2.3;background:linear-gradient(var(--c,#3aa0ff) 0 0) center 34%/100% 40% no-repeat,linear-gradient(#f0c8a0 0 0) center 0/72% 30% no-repeat,linear-gradient(#2d3a8a 0 0) center 100%/78% 30% no-repeat}
+.fig.up::before,.fig.up::after{content:"";position:absolute;top:-6%;width:26%;height:40%;background:var(--c,#3aa0ff)}
+.fig.up::before{left:-28%;transform:rotate(-16deg)}.fig.up::after{right:-28%;transform:rotate(16deg)}
+.fig.sad{transform:rotate(14deg);transform-origin:bottom}
+.tile{width:11%;aspect-ratio:1;border-radius:3px;border:2px solid #fff;background:var(--c,#3aa0ff);bottom:8%}
+.star{width:12%;aspect-ratio:1;background:#ffd21f;clip-path:polygon(50% 0,62% 35%,100% 38%,70% 60%,80% 100%,50% 76%,20% 100%,30% 60%,0 38%,38% 35%);filter:drop-shadow(0 0 4px #fff8)}
+.coin{width:6%;aspect-ratio:1;border-radius:50%;background:radial-gradient(#fff3a0,#f2a60a);border:1.5px solid #9a5a00}
+.hud{right:3%;top:8%;width:46%;background:#0e0a1ee0;border-top:2px solid #ffc83d;border-bottom:2px solid #ffc83d;padding:3px 5px;font-size:9.5px;font-weight:800;line-height:1.55}
+.hud div{display:flex;gap:4px;white-space:nowrap}.hud i{font-style:normal;color:#ffd21f}.hud u{text-decoration:none;color:#ffa726}.hud s{text-decoration:none;color:#9fd0ff;margin-left:auto}
+.menu{left:50%;top:50%;transform:translate(-50%,-50%);width:62%;background:linear-gradient(#332a66,#171333);border:2px solid #ffc83d;border-radius:9px;padding:5px 6px 6px;display:flex;flex-direction:column;gap:3px;font-size:10px;font-weight:800;text-align:center}
+.menu h4{margin:0 -10px 1px;font-size:10.5px;background:linear-gradient(#ffd24a,#e07a00);clip-path:polygon(0 0,100% 0,calc(100% - 7px) 50%,100% 100%,0 100%,7px 50%);padding:1px 0}
+.menu div{background:linear-gradient(#5a6fd2,#2d378c);border-radius:5px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu div.on{background:linear-gradient(#ffe26e,#f09614);color:#3a2000}.menu div.off{background:#4a4d63;color:#a9acc0}
+.item{left:50%;top:50%;transform:translate(-50%,-50%);width:34%;aspect-ratio:1;border-radius:12px;background:linear-gradient(#fff,#dfe6ff);border:3px solid var(--c,#8a4be0);display:grid;place-items:center;color:var(--c,#8a4be0);font-size:clamp(20px,3vw,30px);font-weight:900;box-shadow:0 4px 0 #0004}
+.price{left:50%;bottom:7%;transform:translateX(-50%);font-size:11px;font-weight:800;background:#0f0b22e0;border-radius:6px;padding:0 9px;white-space:nowrap}
+.arena{left:18%;right:18%;top:20%;bottom:10%;border-radius:8px;background:var(--c,#4a4f66);border:3px solid #fff8}
+.dot{width:6%;aspect-ratio:1;border-radius:50%;background:var(--c,#fff)}
+.wave{left:8%;right:8%;top:30%;bottom:30%;display:flex;align-items:center;gap:3%}
+.wave i{flex:1;background:#ffd65a;border-radius:3px}
+.medal{left:50%;top:50%;transform:translate(-50%,-50%);width:30%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c2,var(--c,#f0a71a));border:3px solid #fff;display:grid;place-items:center;color:#4a2b00;font-size:11px;font-weight:900;text-align:center;line-height:1.15;box-shadow:0 3px 0 #0005}
+.bub{font-size:10px;font-weight:800;color:#18203a;background:#fff;border-radius:9px;padding:1px 8px;white-space:nowrap}
+.gauge{left:8%;right:8%;top:8%;height:9%;background:#0f0b22c0;border-radius:99px;overflow:hidden}.gauge i{display:block;height:100%;background:linear-gradient(90deg,#ffd65a,#ff8a1f)}
+.water{left:0;right:0;bottom:0;background:#2f7fe0d0}
+.letter{left:0;right:0;height:12%;background:#000}
+/* 選ぶ・補足 */
+.pick{display:flex;flex-direction:column;gap:8px;margin-top:6px;padding-top:10px;border-top:1px dashed var(--line)}
+.sel{display:flex;gap:6px}
+.sel button{flex:1;font:inherit;font-size:13px;font-weight:800;border:2px solid var(--line);background:var(--panel);color:var(--sub);border-radius:9px;padding:5px 0;cursor:pointer}
+.sel button[aria-pressed="true"].yes{background:#2f9e44;border-color:#2f9e44;color:#fff}
+.sel button[aria-pressed="true"].maybe{background:#e79a08;border-color:#e79a08;color:#fff}
+.sel button[aria-pressed="true"].no{background:#8a90a8;border-color:#8a90a8;color:#fff}
+.sel button:focus-visible,.note:focus-visible{outline:3px solid var(--sky);outline-offset:1px}
+.note{font:inherit;font-size:13px;width:100%;min-height:54px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--bg);color:var(--ink)}
+.saved{font-size:11.5px;color:var(--sub);min-height:1em}
+.card.yes{border-color:#2f9e44;box-shadow:0 0 0 2px #2f9e4455}.card.maybe{border-color:#e79a08}.card.no{opacity:.55}
+.status{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-size:14px;font-weight:700}
+.status .n{font-family:var(--disp);font-size:20px;font-weight:900}
+.status .ok{color:#2f9e44}.status .mb{color:#e79a08}
+.status .msg{font-weight:500;color:var(--sub);font-size:13px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+footer{color:var(--sub);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+@media (prefers-reduced-motion:no-preference){.card{transition:transform .15s}.card:hover{transform:translateY(-2px)}}
+</style>
+<div class="wrap">
+  <h1>VENUS PARTY<br><b>演出・置物・イベント・UI のアイデア 50</b></h1>
+  <p class="lead">各カードの上の絵は、入れたときのゲーム画面のイメージ。作業量は「小＝すぐできる」「中＝1回の作業でできる」「大＝何回かに分ける」。★は効果の大きさ。<br>カードごとに「やる・保留・やらない」を選んで、補足を書ける。選んだ内容は自動で保存されて、Claude が読める。</p>
+  <div class="status" id="status"><span>やる <span class="n ok" id="cYes">0</span></span><span>保留 <span class="n mb" id="cMaybe">0</span></span><span>やらない <span class="n" id="cNo">0</span></span><span class="msg" id="msg">読みこみ中…</span></div>
+  <div class="bar" id="cats"><span class="l">ジャンル</span></div>
+  <div class="bar" id="effs"><span class="l">作業量</span></div>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+  <footer>絵はイメージ。マイクラの中では、ロゴ・帯・カメラ・モデルで同じ内容を表現する。</footer>
+</div>
+<script>
+const fig=(x,c,cls="")=>`<div class="fig ${cls}" style="left:${x}%;--c:${c}"></div>`;
+const tiles=(cols,from=6)=>cols.map((c,i)=>`<div class="tile" style="left:${from+i*13}%;--c:${c}"></div>`).join("");
+const B="#3aa0ff",R="#e2463f",G="#5cc04a",Y="#f5c21b",P="#8a4be0",K="#23232b",W="#ffffff";
+const M={
+ logo:(t,c="",s="",bg="")=>`<div class="shot ${bg}"><div class="logo ${c}">${t}</div>${s?`<div class="sub">${s}</div>`:""}${fig(45,B,"up")}</div>`,
+ rib:(t,c="",s="",bg="")=>`<div class="shot ${bg}"><div class="rib ${c}">${t}</div>${s?`<div class="sub">${s}</div>`:""}${fig(45,B)}${tiles([B,R,G,B,Y,B,P])}</div>`,
+ hud:(rows,bg="")=>`<div class="shot ${bg}"><div class="hud">${rows.map(r=>`<div>${r}</div>`).join("")}</div>${fig(18,B)}${tiles([B,G,B],6)}</div>`,
+ menu:(h,items)=>`<div class="shot dark"><div class="menu"><h4>${h}</h4>${items.map(i=>`<div class="${i[1]||""}">${i[0]}</div>`).join("")}</div></div>`,
+ board:(cols,extra="",bg="")=>`<div class="shot ${bg}">${extra}${tiles(cols)}</div>`,
+ item:(g,c,price)=>`<div class="shot dark"><div class="item" style="--c:${c}">${g}</div><div class="price">${price}</div></div>`,
+ game:(c,inner,t="")=>`<div class="shot dark">${t?`<div class="rib p" style="top:4%">${t}</div>`:""}<div class="arena" style="--c:${c}"></div>${inner}</div>`,
+ cam:(inner,bg="")=>`<div class="shot ${bg}"><div class="letter" style="top:0"></div><div class="letter" style="bottom:0"></div>${inner}</div>`,
+ wave:(hs,t)=>`<div class="shot dark"><div class="wave">${hs.map(h=>`<i style="height:${h}%"></i>`).join("")}</div><div class="sub low">${t}</div></div>`,
+ medal:(t,c,s)=>`<div class="shot dark"><div class="medal" style="--c:${c}">${t}</div>${s?`<div class="sub low">${s}</div>`:""}</div>`,
+ bot:(t,c="#e2463f")=>`<div class="shot">${fig(40,c)}<div class="bub" style="left:52%;top:26%">${t}</div>${tiles([B,B,G,B,R,B,Y])}</div>`,
+};
+const dot=(x,y,c)=>`<div class="dot" style="left:${x}%;top:${y}%;--c:${c}"></div>`;
+const coin=(x,y)=>`<div class="coin" style="left:${x}%;top:${y}%"></div>`;
+const star=(x,y,w=12)=>`<div class="star" style="left:${x}%;top:${y}%;width:${w}%"></div>`;
+const C=["演出","置物・景色","ボードのイベント","UI・画面","マス・道","ミニゲームまわり","やり込み"];
+// [ジャンル, 題, 説明, 作業量(1-3), 効果(1-3), 見本]
+const D=[
+[0,"スターが空から落ちてくる","新しいスターが出るとき、空から光の柱が落ちてきて、マスが金色に光ってからスターが現れる。",1,3,`<div class="shot night">${star(44,18)}<div class="water" style="left:47%;right:47%;top:0;bottom:30%;background:#fff6b0aa"></div>${tiles([B,B,Y,B,R],18)}</div>`],
+[0,"出目ごとの演出","10が出たら花火と特別な音、1ならしょんぼりした音とため息。出目でリアクションが変わる。",1,2,M.logo("10!!","","花火ドーン！","night")],
+[0,"頭の上にコインの数字","コインが増えたり減ったりすると、頭の上に「+3」「-5」がポンと出て上に消える。",1,3,`<div class="shot">${fig(45,B,"up")}<div class="bub" style="left:44%;top:12%;color:#e07a00">+3 ●</div>${tiles([B,B,B])}</div>`],
+[0,"ラスト3ターンの夕焼け","ラスト3ターンは空が夕焼けになり、DJが「ラストスパート！」、BGMが速くなる。",1,3,M.logo("LAST SPURT!","r","空が夕焼けに","lava")],
+[0,"逆転の瞬間","順位が1位に上がった瞬間、時間がゆっくりになったようなカメラと、きらっとした音。",2,2,M.rib("1位に浮上！","","Daiki")],
+[0,"キャラの入場","ゲーム開始時、1人ずつスポットライトで登場して名前と称号を紹介。",2,3,M.logo("Daiki","","火山の主","night")],
+[0,"表彰台がせり上がる","最後の結果発表で、1〜3位の台が床からせり上がり、その上に立つ。",2,3,`<div class="shot dark">${fig(43,Y,"up")}${fig(23,"#c0c6d8")}${fig(63,"#c8783c")}<div class="arena" style="left:40%;right:40%;top:72%;bottom:0;--c:#f5c21b"></div><div class="arena" style="left:20%;right:60%;top:80%;bottom:0;--c:#c0c6d8"></div><div class="arena" style="left:60%;right:20%;top:85%;bottom:0;--c:#c8783c"></div></div>`],
+[0,"ボーナススター発表","最後に「ミニゲーム王」「コイン王」「ハプニング王」をルーレットで選んで発表。",2,3,M.menu("BONUS STAR",[["ミニゲーム王","on"],["コイン王"],["ハプニング王"]])],
+[0,"スター購入の花火","スターを買うと、広場から本物の花火（ロケット花火）が何発も上がる。",1,2,`<div class="shot night">${star(44,30)}<div class="dot" style="left:20%;top:15%;--c:#ff6ad5;width:10%"></div><div class="dot" style="left:70%;top:12%;--c:#6ad5ff;width:12%"></div>${fig(45,B,"up")}</div>`],
+[0,"スターを取られる演出","スターを奪われたとき、スターが体から飛び出して、くるくる回りながら相手のほうへ飛んでいく。",1,3,`<div class="shot">${fig(20,B,"sad")}${star(44,20,10)}${fig(70,R,"up")}</div>`],
+[1,"回る灯台","灯台の光が回って海を照らす。夕暮れの演出（幽霊船・スター購入）のときに目立つ。",2,2,`<div class="shot night"><div class="arena" style="left:44%;right:44%;top:20%;bottom:15%;--c:#e8e8f0"></div><div class="water" style="left:50%;right:5%;top:22%;bottom:62%;background:#fff6b088"></div></div>`],
+[1,"風車が回る","丘の風車の羽根を回るモデルにする。",1,1,`<div class="shot"><div class="arena" style="left:44%;right:44%;top:40%;bottom:12%;--c:#d9c7a0"></div>${star(41,14,18)}</div>`],
+[1,"広場の噴水と女神像","スタートの広場に女神像と噴水。水が上がって、夜は光る。",2,2,`<div class="shot">${fig(46,"#f0e0ff")}<div class="water" style="left:30%;right:30%;top:78%;bottom:6%"></div></div>`],
+[1,"カモメと魚","浜の上をカモメが飛び、海ではときどき魚がはねる。",2,2,`<div class="shot sea"><div class="bub" style="left:20%;top:18%">〜v〜</div><div class="bub" style="left:60%;top:28%">〜v〜</div><div class="dot" style="left:48%;top:58%;--c:#ffb04a"></div></div>`],
+[1,"空の気球","島の上をDJの広告つき気球がゆっくり回る。",1,1,`<div class="shot"><div class="dot" style="left:44%;top:12%;width:14%;--c:#ec5aa6"></div><div class="bub" style="left:41%;top:40%">DJトシオ</div></div>`],
+[1,"神殿の大きな女神像","島の真ん中の神殿に大きな女神像。スターを買うと目が光る。",2,3,`<div class="shot">${fig(44,"#f6eaff","up")}<div class="sub low">女神の祝福</div></div>`],
+[1,"ショップの店員をオリジナルに","屋台の店員を村人から、オリジナルのキャラ（タヌキの商人など）に。",2,2,M.bot("いらっしゃい！","#c8873c")],
+[1,"広場の観客","広場に観客（オリジナルの小さいキャラ）がいて、結果発表で拍手・歓声。",2,2,`<div class="shot">${fig(10,P)}${fig(24,G)}${fig(70,Y)}${fig(84,R)}<div class="bub" style="left:40%;top:20%">わーっ！</div></div>`],
+[1,"分かれ道の矢印看板","分かれ道に木の矢印看板。行き先の絵（火山・船・森）がついている。",1,2,`<div class="shot"><div class="bub" style="left:20%;top:30%">← 火山</div><div class="bub" style="left:58%;top:30%">ふもと →</div>${tiles([B,G,B],30)}</div>`],
+[1,"夕方の街灯","暗い演出のとき、道ぞいの街灯がぽっと点く。",1,1,`<div class="shot night"><div class="dot" style="left:20%;top:40%;--c:#ffe28a"></div><div class="dot" style="left:50%;top:40%;--c:#ffe28a"></div><div class="dot" style="left:80%;top:40%;--c:#ffe28a"></div></div>`],
+[2,"流れ星","たまに流れ星。止まっている人のマスにコインが降ってくる。",1,2,`<div class="shot night">${star(20,10,8)}<div class="water" style="left:26%;right:40%;top:14%;bottom:80%;background:#fff6"></div>${coin(46,60)}${coin(52,64)}${fig(45,B,"up")}</div>`],
+[2,"竜巻","浜に竜巻が通り、巻きこまれた人はどこかのマスへ飛ばされる。",2,2,`<div class="shot sea"><div class="arena" style="left:40%;right:44%;top:14%;bottom:30%;--c:#c8d6e6;border-radius:50% 50% 10% 10%"></div>${fig(56,B)}</div>`],
+[2,"クジラ","沖にクジラが現れて潮をふく。近くの人にコイン。",2,2,`<div class="shot sea"><div class="arena" style="left:30%;right:30%;top:48%;bottom:30%;--c:#3b5fa8;border-radius:50%"></div><div class="water" style="left:48%;right:48%;top:20%;bottom:52%;background:#e8f6ff"></div></div>`],
+[2,"宝の小島","沖に小島が現れ、そのターンだけボートで行ける。宝箱にスターかコイン。",3,3,`<div class="shot sea"><div class="arena" style="left:60%;right:10%;top:44%;bottom:40%;--c:#e8d48a;border-radius:50%"></div><div class="item" style="left:72%;top:36%;width:10%;--c:#c8873c">?</div></div>`],
+[2,"女神のルーレット","3ターンに1回、女神が出てきてルーレット。全員コイン+5、順位入れかえなど。",2,3,M.menu("女神のルーレット",[["全員 +5●"],["1位と最下位を入れかえ","on"],["スターの場所が変わる"]])],
+[2,"地震で道がふさがる","噴火の前ぶれで地面がゆれ、落石で道が1つ一時的に通れなくなる。",2,2,M.rib("EARTHQUAKE!","r","ふもとの道が落石で通れない")],
+[2,"雷雨","天気が雨になり、雷が落ちたマスが一時的にドクロマスに変わる。",2,2,`<div class="shot night"><div class="logo" style="top:6%">⚡</div>${tiles([B,K,B,R],20)}</div>`],
+[2,"夜のいたずら","鏡のガイコツが夜に出てきて、マスの色をいくつか入れかえていく。",2,2,M.rib("いたずら！","p","青マスが赤マスに…")],
+[2,"闇市","まれに闇市のターン。ふつうは売っていないレアアイテムだけ並ぶ。",2,2,M.menu("闇市",[["スター半額券 ●30","on"],["2ターン無敵 ●25"]])],
+[3,"次の人の顔の列","画面の上に、ターンの順番どおりにみんなの顔アイコンが並び、今の人が大きくなる。",2,3,`<div class="shot">${[10,22,34,46].map((x,i)=>`<div class="dot" style="left:${x}%;top:6%;width:${i?8:12}%;--c:${[B,R,G,Y][i]}"></div>`).join("")}</div>`],
+[3,"小さな地図","右上に島の小さな地図。みんなの位置とスターの場所が点で出る。",3,3,`<div class="shot"><div class="arena" style="left:66%;right:4%;top:6%;bottom:52%;--c:#3a8a4a"></div>${dot(72,20,"#ffd21f")}${dot(80,30,B)}${dot(86,18,R)}</div>`],
+[3,"スターの方向の矢印","自分の番のあいだ、足もとにスターの方向を指す矢印が出る。",1,3,`<div class="shot">${fig(45,B)}<div class="bub" style="left:44%;top:80%">➜ ★</div></div>`],
+[3,"アイテムを使うカード","アイテムを使うと、カードが画面の真ん中でくるっと回って光ってから消える。",1,2,M.item("⚄⚄","#3aa0ff","ダブルサイコロ！")],
+[3,"コインの数字がカラカラ回る","順位表のコインが増えるとき、数字がスロットのように回って止まる。",2,2,M.hud(["① <i>★2</i> <u>●34→37</u> Daiki","② <i>★1</i> <u>●51</u> Jack"])],
+[3,"最後のグラフ","結果発表のあと、コイン・ミニゲーム・ハプニングの数を人ごとに棒グラフで見せる。",2,2,M.wave([80,40,60,30,90,50,20,70],"項目ごとの成績")],
+[3,"止まる前のマスのアイコン","進んでいる途中、次に止まりそうなマスのアイコンが頭の上に出る。",1,1,M.bot("+ のマス","#3aa0ff")],
+[3,"BOTの考え中","BOTが選んでいるとき、頭の上に「…」の吹き出しが出る。",1,2,M.bot("…")],
+[4,"ワープマス","2つの光るマスがつながっていて、止まると相手のマスへワープ。",2,2,M.board([B,P,B,B,P,B],`<div class="sub" style="top:20%">ワープ！</div>`)],
+[4,"ルーレットマス","止まるとルーレットが回る。コイン・アイテム・はずれ。",1,2,M.menu("ルーレット",[["+10●"],["アイテム","on"],["はずれ"]])],
+[4,"VSマス","止まると全員がコインを出し合い、ミニゲームで勝った人が総取り。",2,3,M.logo("VS!","p","全員10コインかけて勝負","night")],
+[4,"光る矢印の床","一方通行の道の床に、進む方向へ光が流れる矢印。",1,1,M.board([B,B,B,B],`<div class="sub" style="top:30%">➜ ➜ ➜</div>`)],
+[4,"回る橋","分かれ道の先の橋が毎ターン回って、行ける方向が変わる。",3,3,M.rib("橋が回った！","b","今は 森の方へ")],
+[4,"かくれマス","道のどこかに見えないマスがあり、止まると現れて大当たり。",1,2,M.rib("HIDDEN!","","+20 ●")],
+[5,"ステージの紹介","ミニゲームの前に、カメラがステージをぐるっと回りながらルールを見せる。",2,3,M.cam(`<div class="arena" style="--c:#4a5fa0"></div><div class="sub low">ステージ紹介</div>`)],
+[5,"練習タイム","本番の前に10秒の練習。準備できた人は「OK」を出す。",2,2,M.menu("練習",[["Daiki OK","on"],["Jack 練習中"]])],
+[5,"チーム戦","止まったマスの色（青・赤）でチーム分けして、1対3・2対2のミニゲーム。",3,3,M.logo("2 vs 2","b","青チーム vs 赤チーム","night")],
+[5,"ミニゲームの前の予想","始まる前に誰が勝つか予想。当たるとコイン。",1,2,M.menu("だれが勝つ？",[["Daiki","on"],["Jack"],["Oracle"]])],
+[6,"キャラ選び","10人のキャラから自分の見た目を選べる（プレイヤーもBOTと同じスキンに）。",2,3,`<div class="shot dark">${fig(15,R)}${fig(35,B,"up")}${fig(55,G)}${fig(75,Y)}<div class="sub low">キャラを選ぶ</div></div>`],
+[6,"2つ目のボード","別のテーマのボード（雪山・お化け屋敷など）を選べる。",3,3,M.menu("ボードを選ぶ",[["女神の島","on"],["雪山のお城"],["お化け屋敷"]])],
+[6,"ターン数とルールの保存","前回の設定（ターン数・BOT・ルール）を覚えて、次はすぐ始められる。",1,1,M.menu("前回と同じで始める",[["10ターン・BOT3人","on"]])],
+];
+const E=["","小","中","大"];
+let cat=-1,eff=0,only="";
+const picks={};let db=null;const timers={};
+const grid=document.getElementById("grid"),cnt=document.getElementById("count");
+function chip(parent,label,on,fn){const b=document.createElement("button");b.className="chip";b.type="button";b.textContent=label;b.setAttribute("aria-pressed",on);b.onclick=fn;parent.appendChild(b);return b;}
+function draw(){
+  grid.innerHTML=D.map((d,i)=>[d,i]).filter(([d,i])=>(cat<0||d[0]===cat)&&(!eff||d[3]===eff)&&(!only||picks[id(i)]?.choice===only)).map(([d,i])=>
+    `<article class="card ${picks[id(i)]?.choice||""}" data-i="${i}">${d[5]}<div class="txt"><div class="no">No.${String(i+1).padStart(3,"0")}　${C[d[0]]}</div><h3>${d[1]}</h3><p>${d[2]}</p><div class="meta"><span class="tag e${d[3]}">作業量 ${E[d[3]]}</span><span class="tag v">${"★".repeat(d[4])}${"☆".repeat(3-d[4])}</span></div>
+    <div class="pick"><div class="sel" role="group" aria-label="No.${i+1} を選ぶ">${[["yes","やる"],["maybe","保留"],["no","やらない"]].map(([k,l])=>`<button type="button" class="${k}" data-k="${k}" aria-pressed="${picks[id(i)]?.choice===k}">${l}</button>`).join("")}</div>
+    <textarea class="note" id="note-${i+1}" placeholder="補足（例: もっと派手に / 先にこっち）">${esc(picks[id(i)]?.note||"")}</textarea><div class="saved"></div></div></div></article>`).join("");
+  cnt.textContent=grid.children.length+" 個を表示中（全 "+D.length+" 個）";
+}
+const id=(i)=>"n"+String(i+1).padStart(3,"0");
+const esc=(t)=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const msg=(t)=>{document.getElementById("msg").textContent=t;};
+function counts(){const v=Object.values(picks);for(const[k,e]of[["yes","cYes"],["maybe","cMaybe"],["no","cNo"]])document.getElementById(e).textContent=v.filter(p=>p.choice===k).length;}
+function save(i){
+  if(!db){msg("保存できません（サインインしていないか、読みこみに失敗）");return;}
+  const k=id(i),p=picks[k]||{};clearTimeout(timers[k]);
+  timers[k]=setTimeout(async()=>{try{await db.collection("picks50").doc(k).set({no:i+1,title:D[i][1],choice:p.choice||"",note:p.note||""});const c=grid.querySelector(`[data-i="${i}"] .saved`);if(c)c.textContent="保存しました";msg("保存しました");}catch(e){msg("保存できませんでした: "+(e?.code||e));}},400);
+}
+grid.addEventListener("click",e=>{const b=e.target.closest(".sel button");if(!b)return;const card=b.closest(".card"),i=+card.dataset.i,k=id(i);
+  const cur=picks[k]?.choice;const nv=cur===b.dataset.k?"":b.dataset.k;picks[k]={...(picks[k]||{}),choice:nv};
+  card.className="card "+nv;card.querySelectorAll(".sel button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.k===nv));counts();save(i);});
+grid.addEventListener("input",e=>{if(!e.target.classList.contains("note"))return;const i=+e.target.closest(".card").dataset.i,k=id(i);picks[k]={...(picks[k]||{}),note:e.target.value};const c=e.target.nextElementSibling;if(c)c.textContent="保存中…";save(i);});
+const cb=document.getElementById("cats"),eb=document.getElementById("effs");const cs=[],es=[];
+cs.push(chip(cb,"全部",true,()=>setC(-1)));C.forEach((c,i)=>cs.push(chip(cb,c,false,()=>setC(i))));
+es.push(chip(eb,"全部",true,()=>setE(0)));[1,2,3].forEach(i=>es.push(chip(eb,E[i],false,()=>setE(i))));
+function setC(i){cat=i;cs.forEach((b,k)=>b.setAttribute("aria-pressed",k===i+1));draw();}
+function setE(i){eff=i;es.forEach((b,k)=>b.setAttribute("aria-pressed",k===i));draw();}
+const ob=document.createElement("div");ob.className="bar";ob.innerHTML='<span class="l">選んだもの</span>';eb.after(ob);const os=[];
+[["","全部"],["yes","やるだけ"],["maybe","保留だけ"],["no","やらないだけ"]].forEach(([k,l],j)=>os.push(chip(ob,l,j===0,()=>{only=k;os.forEach((b,n)=>b.setAttribute("aria-pressed",n===j));draw();})));
+(async()=>{
+  const t=setTimeout(()=>msg("保存先につながりません。選んだ内容はこの画面にだけ残ります"),10000);
+  db=window.claude?.use?await window.claude.use("db"):null;
+  if(!db){clearTimeout(t);msg("保存先につながりません（サインインが必要）");return;}
+  db.collection("picks50").onSnapshot(snap=>{clearTimeout(t);
+    const typing=document.activeElement?.classList?.contains("note");
+    for(const d of snap.docs){const v=d.data();if(v)picks[d.id]={choice:v.choice||"",note:v.note||""};}
+    counts();if(!typing)draw();msg(Object.keys(picks).length?"保存した内容を読みこみました":"まだ何も選んでいません");
+  },e=>{clearTimeout(t);msg("読みこめませんでした: "+(e?.code||""));});
+})();
+draw();
+</script>
