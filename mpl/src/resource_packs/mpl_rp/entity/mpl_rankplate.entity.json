@@ -1,0 +1,35 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:rankplate",
+   "materials": {
+    "default": "entity_alphablend"
+   },
+   "textures": {
+    "r1": "textures/entity/mpl_rank/r1",
+    "r2": "textures/entity/mpl_rank/r2",
+    "r3": "textures/entity/mpl_rank/r3",
+    "r4": "textures/entity/mpl_rank/r4",
+    "r5": "textures/entity/mpl_rank/r5",
+    "r6": "textures/entity/mpl_rank/r6",
+    "r7": "textures/entity/mpl_rank/r7",
+    "r8": "textures/entity/mpl_rank/r8"
+   },
+   "geometry": {
+    "default": "geometry.mpl.rankplate"
+   },
+   "render_controllers": [
+    "controller.render.mpl_rankplate"
+   ],
+   "animations": {
+    "a": "animation.mpl.rankplate"
+   },
+   "scripts": {
+    "animate": [
+     "a"
+    ]
+   }
+  }
+ }
+}

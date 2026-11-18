@@ -3273,17 +3273,30 @@ async function minigameRound() {
     // 結果: 同点はサイコロ → 結果発表の場所に順位の順で並ぶ(1位が真ん中)→ 上からコインが落ちてくる → 喜ぶ / 落ち込む
     const order = lastRank.length ? await breakTies(groups) : [], PRIZE = [10, 5, 3, 1];
     if (order.length) {
-        const slots = order.map((_, r) => (r % 2 ? -1 : 1) * Math.ceil(r / 2) * 2.4);
-        order.forEach((n, r) => world.getPlayers({ name: n })[0]?.teleport({ x: 0.5 + slots[r], y: 1, z: BD.finaleZ }, { facingLocation: { x: 0.5 + slots[r], y: 1.6, z: BD.finaleZ - 10 } }));
-        cam.to("@a[tag=mpl_board]", { x: 0.5, y: 2.6, z: BD.finaleZ - 7.5 }, { x: 0.5, y: 1.9, z: BD.finaleZ }, 0.8);
-        banner("result", "", 40); await wait(30);
-        for (let r = order.length - 1; r >= 0; r--) {
+        // 順位の順に左(1位)から横一列。足もとに 1st / 2nd ... の文字(mmgplus:rankplate)
+        const N = order.length, xs = order.map((_, r) => 0.5 + ((N - 1) / 2 - r) * 2.4), Z = BD.finaleZ;
+        order.forEach((n, r) => world.getPlayers({ name: n })[0]?.teleport({ x: xs[r], y: 1, z: Z }, { facingLocation: { x: xs[r], y: 1.6, z: Z - 10 } }));
+        cam.to("@a[tag=mpl_board]", { x: 0.5, y: 2.5, z: Z - 6.5 - N * 0.6 }, { x: 0.5, y: 1.45, z: Z }, 0.8);
+        banner("result", "", 40); await wait(26);
+        const plates = [];
+        for (let r = N - 1; r >= 0; r--) {
+            const e = spawnAt("mmgplus:rankplate", { x: xs[r], y: 1.0, z: Z - 1.1 });
+            try { e?.setRotation({ x: 0, y: 180 }); e?.setProperty("mmgplus:rank", Math.min(8, r + 1)); } catch {}
+            if (e) plates.push(e);
+            soundAllPlayers(r === 0 ? "random.levelup" : "random.pop", r === 0 ? 1.5 : 0.8 + (N - r) * 0.1);
+            await wait(r === 0 ? 4 : 9);
+        }
+        // みんな同時にポーズ: 1位は喜ぶ / 最下位は落ちこむ / 間は拍手
+        order.forEach((n, r) => { const q = world.getPlayers({ name: n })[0]; if (!q) return; pose(q, r === 0 ? "cheer" : r === N - 1 ? "sad" : "clap"); botSay(q, r === 0 ? "win" : r === N - 1 ? "lose" : "good", r === 0 ? 0.9 : 0.4); });
+        await wait(30);
+        for (let r = N - 1; r >= 0; r--) {
             const n = order[r], q = world.getPlayers({ name: n })[0], c = (PRIZE[r] ?? 1) * (bonus ? 2 : 1);
             addCoins(n, c, true); if (r === 0) G.mgWins[n] = (G.mgWins[n] ?? 0) + 1;
-            if (r === 0) banner("win", `${n}  +${c}${I.coin}`, 70); else ribbon(["gold", "blue", "purple", "gray"][Math.min(3, r)], `${r + 1}位  ${n}  +${c}${I.coin}`, "", 30);
-            if (q) { coinRain(q, c); pose(q, r === 0 ? "cheer" : r === order.length - 1 ? "sad" : "clap"); botSay(q, r === 0 ? "win" : r === order.length - 1 ? "lose" : "good", r === 0 ? 0.9 : 0.4); }
-            await wait(r === 0 ? 70 : 34);
+            if (r === 0) banner("win", `${n}  +${c}${I.coin}`, 70); else ribbon(["gold", "blue", "purple", "gray"][Math.min(3, r)], `${n}  +${c}${I.coin}`, "", 26);
+            if (q) coinRain(q, c);
+            await wait(r === 0 ? 60 : 22);
         }
+        plates.forEach((e) => { try { e.remove(); } catch {} });
         cam.fade(); await wait(8);
         for (const q of gp()) q.teleport(spot(G.pos[q.name], G.players.indexOf(q.name)), lookCenter);
         cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 0.6);
@@ -3433,7 +3446,7 @@ function resetAll() {
     G.on = false; run.active = false; setScore("game", "playing", 0); setScore("game", "selectgame", 0);
     cam.clear(); unlockAll(); bgm(null); cmd("time set 6000");
     setTide(false, false); coolLava(false); ghostCleanup();
-    for (const t of ["mmgplus:dice", "mmgplus:star", "mmgplus:coin", "mmgplus:dj", "mmgplus:ghostship", "mmgplus:mirrorskel", "mmgplus:steve", "mmgplus:cannonball", "mmgplus:fireball"]) cmd(`kill @e[type=${t}]`);
+    for (const t of ["mmgplus:dice", "mmgplus:star", "mmgplus:coin", "mmgplus:dj", "mmgplus:ghostship", "mmgplus:mirrorskel", "mmgplus:rankplate", "mmgplus:steve", "mmgplus:cannonball", "mmgplus:fireball"]) cmd(`kill @e[type=${t}]`);
     for (let i = 0; i < 6; i++) cmd(`kill @e[type=mmgplus:racehorse${i}]`);
     for (const p of world.getPlayers()) { p.removeTag("mpl_board"); p.removeTag("playing"); p.removeTag("mmgplus_out"); try { p.setGameMode(ADVENTURE); } catch {} p.teleport(LOBBY, lookCenter); }
     toast("§eリセットしました");
