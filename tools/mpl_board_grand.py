@@ -1,6 +1,5 @@
 # 女神の島 v6「大建築」: mpl_board.py の最後(コマンドにまとめる前)に exec で読みこむ。道とマスはさわらない
-#   1. 大聖堂: 丘の南(階段の上)に正面(門・ばら窓・破風・中央の尖塔・左右の塔)、道の両がわに奥行きのある礼拝堂 2 棟
-#      (控え柱・小尖塔・とがった窓・軒の金・紫の屋根・屋根窓)、北のはしに小さな門。道の上には屋根をかけない
+#   1. 大聖堂(白い外装のお城): 灰色のレンガ + 白い太いわく、白い大アーチ 3 つ、バルコニー、三角屋根、塔 4 本(青緑の広がる屋根・旗)、うしろに棟 2 棟
 #   2. 天使の像: 正面の階段の左右に1体ずつ
 #   3. 火山: 火口のふちのギザギザの岩、斜面に光る溶岩の川(流れない)
 #   4. 回廊: 火山のふもと東西のアーチの壁と、かざりのある塔
@@ -53,103 +52,159 @@ def deco_tower(cx, cz, base, top, r=2.4, kind='stone', roof='deepslate_tiles', b
     for y in range(top - 3, top + 1): put(bx_, y, bz_, banner)
     put(bx_, top - 4, bz_, 'yellow_wool')
 
-# ---------- 1. 大聖堂 ----------
+# ---------- 1. 大聖堂(白い外装のお城) ----------
+#   参考: 明るい灰色のレンガの壁 + 白い太いわく(窓・アーチ・柱・軒)、1階は白い大アーチ 3 つ、2階に白い手すりのバルコニーと木の帯、
+#   真ん中は大きな三角屋根(屋根のふちが白い破風を A の字にかこむ・上に窓)、塔 4 本(内がわ 2 本が高い)、
+#   青緑の屋根は段ごとに外へ広がる(スカート)・先に金属のかざり・ピンクと白の旗
 B = 9                                                     # 丘の上の床の上
 hill = {c for c, h in H.items() if h == 8 and abs(c[0]) <= 12 and wz(-1.5) < c[1] < wz(4.75)}
 hill_s = min(z for (x, z) in hill if x == 0); hill_n = max(z for (x, z) in hill if x == 0)
-G_clear_above(-14, hill_s - 6, 14, hill_n + 2, 9, 40)     # 前の神殿をすべて消す(床と道はのこす)
-FZ0, FZ1 = hill_s, hill_s + 2                              # 正面(南向き)。厚み3
-HZ0, HZ1 = FZ1 + 1, hill_n - 3                             # 礼拝堂の長さ
-def fwall(x1, x2, y1, y2, z0=None, z1=None):
-    for x in range(x1, x2 + 1):
-        for z in range(z0 if z0 is not None else FZ0, (z1 if z1 is not None else FZ1) + 1):
-            for y in range(y1, y2 + 1): put(x, y, z, white())
+G_clear_above(-18, hill_s - 6, 18, hill_n + 2, 9, 48)
+FZ0 = hill_s                                               # 正面の面(南向き)
+HZ0, HZ1 = FZ0 + 9, hill_n - 3                             # うしろの棟
+GREY = lambda: rnd.choice(['stone_bricks'] * 7 + ['polished_andesite', 'andesite', 'cracked_stone_bricks'])
+WHT, WHT2, ROOF, ROOF2, GLASS, WOOD = 'white_concrete', 'smooth_quartz', 'prismarine_bricks', 'prismarine', 'blue_stained_glass', 'stripped_spruce_log'
+def ground(x, z): return H.get((x, z), 8)
+def colfill(x, z, y1, y2, b):
+    for y in range(min(ground(x, z) + 1, y1), y2 + 1): put(x, y, z, b() if callable(b) else b)
 def open_road(x1, x2, z0, z1, top):
     for x in range(x1, x2 + 1):
         for z in range(z0, z1 + 1):
-            lo = ROAD.get((x, z), H.get((x, z), 8)) + 1
+            lo = ROAD.get((x, z), ground(x, z)) + 1
             for y in range(lo, top + 1): V.pop((x, y, z), None)
-# 正面: 中央(x -4..4)
-fwall(-4, 4, B - 2, B + 17)
-open_road(-2, 2, FZ0, FZ1, B + 6); open_road(-1, 1, FZ0, FZ1, B + 7)          # 門の口(上はアーチ)
-for x in (-3, 3):
-    for y in range(B - 2, B + 9): put(x, y, FZ0 - 1, 'quartz_pillar')          # 門の柱(前に出る)
-    put(x, B + 9, FZ0 - 1, 'chiseled_quartz_block'); put(x, B + 10, FZ0 - 1, GOLD)
-for x in range(-2, 3): put(x, B + 8, FZ0 - 1, 'chiseled_quartz_block' if abs(x) < 2 else 'quartz_bricks'); put(x, B + 9, FZ0 - 1, GOLD if x == 0 else 'quartz_slab')
-for y in range(B + 11, B + 17):                                                 # ばら窓
-    for x in range(-3, 4):
-        r = math.hypot(x, y - (B + 14))
-        if r <= 2.7: put(x, y, FZ0, GOLD if r > 2.0 else ('purple_stained_glass' if (x + y) % 2 else 'light_blue_stained_glass'))
-for k in range(6):                                                             # 破風(三角)
-    for x in range(-4 + k, 5 - k):
-        for z in range(FZ0, FZ1 + 1): put(x, B + 18 + k, z, white())
-    put(-4 + k, B + 18 + k, FZ0 - 1, 'quartz_slab'); put(4 - k, B + 18 + k, FZ0 - 1, 'quartz_slab')
-for y in range(B + 22, B + 32):                                                # 中央の尖塔
-    for x in range(-1, 2):
-        for z in range(FZ0 + 1, FZ1 + 2):
-            if not (x == 0 and z == FZ0 + 1 and y % 4 == 1): put(x, y, z, white())
-            else: put(x, y, z, 'light_blue_stained_glass')
-    if y in (B + 25, B + 29):
-        for x in (-2, 2):
-            for z in (FZ0, FZ1 + 2): put(x, y, z, 'chiseled_quartz_block'); put(x, y + 1, z, GOLD)
-for k in range(5):
-    w = 2 - k // 2
-    for x in range(-w, w + 1):
-        for z in range(FZ0 + 2 - w, FZ0 + 2 + w + 1): put(x, B + 32 + k, z, 'purple_concrete' if k < 4 else GOLD)
-box(0, B + 37, FZ0 + 2, 0, B + 39, FZ0 + 2, GOLD); put(0, B + 40, FZ0 + 2, 'lightning_rod')
-# 正面の左右(x 5..10)と角の塔
+def flared_roof(cx, cz, y0, r0, hgt, tip=True):
+    """塔の屋根: 下は塔より広く、段ごとに細くなる。3 段ごとに外へ 1 つ広い輪(スカート)"""
+    for k in range(hgt):
+        t = k / hgt
+        r = max(0.0, r0 * (1 - t) ** 1.25)
+        R = int(r) + 2
+        for x in range(cx - R, cx + R + 1):
+            for z in range(cz - R, cz + R + 1):
+                d = math.hypot(x - cx, z - cz)
+                if d <= r + 0.35: put(x, y0 + k, z, ROOF if (x + z + k) % 7 else ROOF2)
+                elif k % 3 == 0 and k < hgt - 3 and d <= r + 1.35: put(x, y0 + k - 1, z, ROOF)
+    if tip:
+        put(cx, y0 + hgt, cz, 'iron_block'); box(cx, y0 + hgt + 1, cz, cx, y0 + hgt + 2, cz, 'iron_bars'); put(cx, y0 + hgt + 3, cz, 'lightning_rod')
+def flag(x, y, z, s):
+    """ピンクと白の旗(風でなびく形)"""
+    box(x, y, z, x, y + 3, z, 'iron_bars')
+    for (i, k) in ((1, 3), (2, 3), (3, 2), (4, 2), (5, 3), (1, 2), (2, 2), (3, 1), (4, 1), (5, 2)):
+        put(x + s * i, y + k, z, 'pink_wool' if (i + k) % 2 else 'white_wool')
+def castle_tower(cx, cz, top, r, roof_h, window=True):
+    """丸い塔: 灰色のレンガ・白い台座の帯・白いわくの縦長の青い窓・上の白い軒・広がる屋根"""
+    R = int(r) + 2
+    for x in range(cx - R, cx + R + 1):
+        for z in range(cz - R, cz + R + 1):
+            d = math.hypot(x - cx, z - cz)
+            if d <= r:
+                if d > r - 1.1: colfill(x, z, B - 2, top, GREY)
+                else: colfill(x, z, B - 2, B - 1, GREY)
+            if r < d <= r + 1.0:
+                put(x, B - 1, z, WHT)                                   # 台座の白い帯
+                put(x, top + 1, z, WHT)                                 # 上の白い軒
+    for (dx, dz) in ((0, -1), (-1, 0), (1, 0)):                       # 窓(前と左右)
+        x, z = round(cx + dx * r), round(cz + dz * r)
+        y1, y2 = (B + 3, B + 8) if window else (B + 4, B + 5)
+        for y in range(y1, y2 + 1): put(x, y, z, GLASS)
+        for y in range(y1 - 1, y2 + 2):
+            for (ox, oz) in ((dz, dx), (-dz, -dx)): put(x + ox, y, z + oz, WHT)
+        put(x, y1 - 1, z, WHT); put(x, y2 + 1, z, WHT)
+        for y in (top - 4, top - 3): put(x, y, z, GLASS)                # 上の小さい窓
+        put(x, top - 5, z, WHT); put(x, top - 2, z, WHT)
+    flared_roof(cx, cz, top + 2, r + 1.6, roof_h)
+# --- 塔 4 本: 外がわは低く太い、内がわは高い ---
 for s in (-1, 1):
-    fwall(min(s * 5, s * 10), max(s * 5, s * 10), B - 2, B + 13)
-    for x in (s * 7,):
-        for y in range(B + 2, B + 10): put(x, y, FZ0, 'light_blue_stained_glass')
-        put(x, B + 10, FZ0, 'purple_stained_glass'); put(x - 1, B + 10, FZ0, 'chiseled_quartz_block'); put(x + 1, B + 10, FZ0, 'chiseled_quartz_block'); put(x, B + 11, FZ0, GOLD)
-    for x in (s * 5, s * 9):
-        for y in range(B - 2, B + 14): put(x, y, FZ0 - 1, 'quartz_pillar')
-        put(x, B + 14, FZ0 - 1, 'chiseled_quartz_block'); box(x, B + 15, FZ0 - 1, x, B + 16, FZ0 - 1, GOLD)
-    for x in range(min(s * 5, s * 10), max(s * 5, s * 10) + 1): put(x, B + 14, FZ0, GOLD if x % 2 else 'chiseled_quartz_block')
-    deco_tower(s * 13, FZ0 + 1, B - 1, B + 24, 2.4, 'white', 'purple_concrete', 'purple_wool')
-# 礼拝堂 2 棟(道の左右、x 5..10)
+    castle_tower(s * 14, FZ0 + 3, B + 13, 3.4, 15)
+    castle_tower(s * 8, FZ0 + 5, B + 20, 2.6, 17)
+flag(14 + 1, B + 31, FZ0 + 3, 1); flag(-14 - 1, B + 31, FZ0 + 3, -1)
+# --- 真ん中の棟(x -11..11): 1階の白い大アーチ 3 つ ---
+for x in range(-11, 12):
+    for z in range(FZ0, HZ0):
+        edge = z == FZ0 or abs(x) == 11 or z == HZ0 - 1
+        if edge: colfill(x, z, B - 2, B + 8, GREY)
+        put(x, B - 1, z, 'polished_andesite')
+for (ax, hw, ht) in ((0, 3, 6), (-8, 1, 4), (8, 1, 4)):              # アーチ(白い太いわく、上は丸い)
+    for x in range(ax - hw - 2, ax + hw + 3):
+        for y in range(B - 1, B + ht + 3):
+            dxx = abs(x - ax); top_curve = B + ht - (1 if dxx >= hw else 0)
+            inside = dxx <= hw and y <= top_curve
+            ring = (dxx <= hw + 2 and y <= top_curve + 2) and not inside
+            if ring: put(x, y, FZ0, WHT if (dxx >= hw + 1 or y > top_curve) else WHT2); put(x, y, FZ0 - 1, WHT) if dxx in (hw + 1, hw + 2) and y < top_curve else None
+            if inside and ax != 0: put(x, y, FZ0, GLASS if y > B + 1 else WHT)
+open_road(-3, 3, FZ0 - 1, HZ0 - 1, B + 5); open_road(-2, 2, FZ0 - 1, HZ0 - 1, B + 6)   # 真ん中のアーチの下は道(あける)。上は丸く、白いわくはのこす
+for z in range(FZ0, HZ0):                                                              # アーチの中: 赤いじゅうたんの両わき
+    for x in (-3, 3): put(x, ROAD.get((x, z), 8), z, 'red_concrete') if (x, z) not in ROAD else None
+# --- 1階と2階のあいだ: 木の帯 + 白い手すりのバルコニー ---
+for x in range(-11, 12):
+    put(x, B + 9, FZ0, WOOD if abs(x) % 4 else WHT)
+    put(x, B + 10, FZ0 - 1, WHT2); put(x, B + 11, FZ0 - 1, 'diorite_wall' if x % 2 else WHT)
+    put(x, B + 10, FZ0, WHT2)
+# --- 2階: 灰色の壁・白い柱・まんなかのバルコニーの扉 ---
+for x in range(-7, 8):
+    for z in range(FZ0 + 1, HZ0):
+        if abs(x) == 7 or z == FZ0 + 1: colfill(x, z, B + 11, B + 17, GREY)
+for x in (-7, -4, 4, 7):
+    for y in range(B + 11, B + 18): put(x, y, FZ0 + 1, WHT)
+for x in (-6, -5, 5, 6):
+    for y in range(B + 13, B + 16): put(x, y, FZ0 + 1, GLASS)
+for y in range(B + 11, B + 15):
+    for x in (-1, 0, 1): put(x, y, FZ0 + 1, 'spruce_planks' if y < B + 14 else WHT)
+put(0, B + 12, FZ0 + 1, 'lantern')
+for x in range(-3, 4): put(x, B + 11, FZ0, WHT2); put(x, B + 12, FZ0 - 0, 'diorite_wall') if abs(x) == 3 else None
+# --- 真ん中の大きな三角屋根: ふちが白い破風を A の字にかこむ。うしろへ棟がつづく ---
+RY0, RH, RHW = B + 18, 15, 9
+for k in range(RH):
+    hw = RHW - k * RHW / RH
+    for x in range(-int(hw) - 1, int(hw) + 2):
+        ax_ = abs(x)
+        if ax_ > hw + 0.6: continue
+        outer = ax_ > hw - 2.2                       # 屋根のふち(前の面)
+        for z in range(FZ0 + 1, HZ0 + 2):
+            if outer or z > FZ0 + 2: put(x, RY0 + k, z, ROOF if (x + k) % 6 else ROOF2) if (outer or z == HZ0 + 1 or ax_ > hw - 1.2) else None
+        if not outer: put(x, RY0 + k, FZ0 + 1, WHT if ax_ > hw - 3.2 else GREY())   # 白い破風(内がわは灰色)
+    if k % 3 == 0 and hw > 2:                        # 段のスカート(ふちの外へ 1 つ)
+        for x in (-int(hw) - 1, int(hw) + 1): put(x, RY0 + k - 1, FZ0 + 1, ROOF)
+for y in range(RY0 + 6, RY0 + 10):                   # 破風の窓
+    for x in (-1, 0, 1): put(x, y, FZ0 + 1, GLASS if abs(x) < 1 or y < RY0 + 9 else WHT)
+for x in (-2, 2):
+    for y in range(RY0 + 5, RY0 + 11): put(x, y, FZ0 + 1, WHT)
+put(0, RY0 + RH, FZ0 + 2, 'iron_block'); box(0, RY0 + RH + 1, FZ0 + 2, 0, RY0 + RH + 2, FZ0 + 2, 'iron_bars'); put(0, RY0 + RH + 3, FZ0 + 2, 'lightning_rod')
+# ---------- うしろの棟 2 棟(道の左右): 灰色の壁・白いわくの窓と柱・青緑の屋根 ----------
 for s in (-1, 1):
     xi, xo = s * 5, s * 10
     xa, xb = min(xi, xo), max(xi, xo)
     for z in range(HZ0, HZ1 + 1):
         for x in range(xa, xb + 1):
-            edge = x in (xa, xb) or z in (HZ0, HZ1)
-            g = H.get((x, z), 8)
-            for y in range(min(g + 1, B), B + 11):
-                if edge: put(x, y, z, white())
-            put(x, B - 1, z, 'quartz_bricks')
-    for z in range(HZ0 + 2, HZ1 - 1, 4):                                        # とがった窓(外と内)
+            if x in (xa, xb) or z in (HZ0, HZ1): colfill(x, z, B - 2, B + 9, GREY)
+            put(x, B - 1, z, 'polished_andesite')
+        for x in (xi, xo): put(x, B + 10, z, WHT)                              # 軒(白)
+    for z in range(HZ0 + 2, HZ1 - 1, 4):                                      # 白いわくの縦長の窓(外と内)
         for x in (xi, xo):
-            for y in range(B + 2, B + 8): put(x, y, z, 'light_blue_stained_glass' if y < B + 7 else 'purple_stained_glass')
-            put(x, B + 8, z, 'chiseled_quartz_block')
-    for z in range(HZ0, HZ1 + 1, 4):                                            # 控え柱(外がわ)と小尖塔
+            for y in range(B + 2, B + 7): put(x, y, z, GLASS)
+            for y in range(B + 1, B + 8):
+                put(x, y, z - 1, WHT); put(x, y, z + 1, WHT)
+            put(x, B + 1, z, WHT); put(x, B + 7, z, WHT)
+    for z in range(HZ0, HZ1 + 1, 4):                                          # 白い柱(外がわ)
         x = xo + s
-        g = H.get((x, z), 0)
-        for y in range(max(0, g + 1), B + 9): put(x, y, z, 'quartz_bricks' if y < B + 6 else 'smooth_quartz')
-        put(x, B + 9, z, 'quartz_slab'); put(xo, B + 11, z, 'chiseled_quartz_block'); put(xo, B + 12, z, 'quartz_pillar'); put(xo, B + 13, z, GOLD)
-    for k in range(4):                                                          # 屋根(紫、とがる)
-        for z in range(HZ0, HZ1 + 1):
-            for x in range(xa + k, xb + 1 - k):
-                if (x, B + 11 + k, z) in V and V[(x, B + 11 + k, z)] in ('chiseled_quartz_block', 'quartz_pillar', GOLD): continue
-                put(x, B + 11 + k, z, 'purple_terracotta' if (x + z + k) % 5 == 0 else 'purple_concrete')
-    for z in range(HZ0, HZ1 + 1): put((xa + xb) // 2, B + 14, z, GOLD)          # 屋根の背
-    for z in range(HZ0 + 4, HZ1 - 2, 8):                                        # 屋根窓(道がわ)
-        put(xi, B + 12, z, 'yellow_stained_glass'); put(xi, B + 13, z, 'quartz_slab')
-    for x in range(xa, xb + 1): put(x, B + 10, HZ0, GOLD if x % 2 else 'chiseled_quartz_block')   # 南の妻の軒
-    put((xa + xb) // 2, B + 6, HZ0, 'purple_stained_glass'); put((xa + xb) // 2, B + 5, HZ0, 'light_blue_stained_glass')
-# 北のはしの小さな門(道をまたぐ)
+        g = ground(x, z)
+        for y in range(max(0, g + 1), B + 10): put(x, y, z, WHT if (y - B) % 5 else WHT2)
+    for k in range(5):                                                        # 青緑の屋根(とがる、端は 1 つ下へ)
+        for z in range(HZ0 - 1, HZ1 + 2):
+            for x in range(xa - 1 + k, xb + 2 - k):
+                put(x, B + 11 + k, z, ROOF if (x + z + k) % 7 else ROOF2)
+        put(xa - 1 + k, B + 10 + k, HZ0 - 1, ROOF); put(xb + 1 - k, B + 10 + k, HZ0 - 1, ROOF)
+    put((xa + xb) // 2, B + 16, HZ0, 'iron_block'); put((xa + xb) // 2, B + 17, HZ0, 'lightning_rod')
+# 北のはしの門(白い太いアーチ)
 for x in range(-4, 5):
-    for y in range(B + 7, B + 10): put(x, y, HZ1 + 1, white())
-    put(x, B + 10, HZ1 + 1, GOLD if x % 2 else 'chiseled_quartz_block')
+    for y in range(B + 7, B + 11): put(x, y, HZ1 + 1, WHT if (y == B + 10 or abs(x) == 4) else GREY())
 for x in (-4, 4):
-    for y in range(B, B + 7): put(x, y, HZ1 + 1, 'quartz_pillar')
-# 道の両がわの白い手すりと灯り(礼拝堂のあいだ)
+    for y in range(B, B + 7): put(x, y, HZ1 + 1, WHT)
+# 道の両がわの白い手すりと灯り(うしろの棟のあいだ)
 for z in range(HZ0, HZ1 + 1):
     for x in (-3, 3):
         if (x, z) in ROAD or H.get((x, z)) != 8: continue
-        put(x, B, z, 'quartz_slab' if z % 6 else 'chiseled_quartz_block')
-        if z % 6 == 0: box(x, B + 1, z, x, B + 2, z, 'quartz_pillar'); put(x, B + 3, z, 'lantern')
+        put(x, B, z, 'diorite_wall' if z % 6 else WHT)
+        if z % 6 == 0: box(x, B + 1, z, x, B + 2, z, WHT2); put(x, B + 3, z, 'lantern')
 # ---------- 2. 天使の像(正面の階段の左右) ----------
 def angel(ax, az):
     g = max(H.get((ax + i, az + j), 0) for i in (-1, 0, 1) for j in (-1, 0, 1))
@@ -162,9 +217,7 @@ def angel(ax, az):
         for k in range(1, 5):
             for y in range(b + 3 + k // 2, b + 8 + k - (2 if k == 4 else 0)):
                 if y - (b + 3) < 2 + k: put(ax + side * k, y, az + 1, 'white_wool' if k < 4 else 'white_concrete')
-for ax in (-6, 6):
-    az = FZ0 - 4
-    if (ax, az) in H and not near_road(ax, az, 1): angel(ax, az)
+# (天使の像は置かない: お城の 1 階の白いアーチがかくれるため)
 # ---------- 3. 火山: ふちのギザギザ・光る溶岩の川 ----------
 for (x, z), h in list(H.items()):
     d = vol(x, z)
@@ -201,7 +254,7 @@ for (a0, a1) in ((0.95, 2.3), (-2.3, -0.95)):
     for t in ((ok[0], ok[len(ok) // 2], ok[-1]) if ok else ()):
         deco_tower(t[0], t[1], 7, 24, 2.4, 'stone', 'deepslate_tiles', 'red_wool')
 # ---------- 5. 大きな桜 ----------
-for (x, z) in ((-12, wz(-1.4)), (12, wz(-1.2)), (-17, wz(2)), (18, wz(2.5)), (-20, wz(4)), (21, wz(-0.5))):
+for (x, z) in ((-19, wz(2)), (20, wz(2.5)), (-21, wz(4)), (22, wz(-0.5))):   # お城の正面の前には植えない
     if (x, z) in H and not near_road(x, z, 3) and H[(x, z)] >= 0:
         G_clear_above(x - 4, z - 4, x + 4, z + 4, H[(x, z)] + 1, H[(x, z)] + 14, True)
         tree_(x, z, 'cherry', big=True)

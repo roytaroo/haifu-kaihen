@@ -642,7 +642,7 @@ for (x, z) in coast:
     WAVES.append([x, z, yaw])
 print('waves', len(WAVES))
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'island': [X0, YB, 44, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': globals().get('STAGE_Z', wz(-9) - 4.5), 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 19, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
+        'finaleZ': globals().get('STAGE_Z', wz(-9) - 4.5), 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 20, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 
