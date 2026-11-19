@@ -32,22 +32,23 @@ pages.append(page('01_kv', f'''
 <div class="glow"></div>
 <img class="isl" src="{A}/island.png">
 <div class="fade"></div>
-<img class="dj" src="{A}/char_dj.png">
+<div class="sh"></div><img class="dj" src="{A}/char_dj.png">
 <div class="left">
   <img class="logo" src="{A}/logo.png">
   <p class="copy">島じゅう巻きこむ、<br>すごろくパーティ。</p>
-  <p class="foot">Minecraft 統合版 ワールド</p>
+  <p class="foot">Minecraft 統合版</p>
 </div>
 ''', '''
 body{background:linear-gradient(120deg,#100d2c 0%,#1d1650 38%,#2a2a7a 70%,#2f5aa8 100%)}
-.glow{position:absolute;right:120px;top:120px;width:1100px;height:900px;background:radial-gradient(closest-side,rgba(120,170,255,.35),rgba(120,170,255,0))}
-.isl{position:absolute;right:-40px;top:110px;width:1180px}
-.fade{position:absolute;inset:0;background:linear-gradient(90deg,#100d2c 0%,rgba(16,13,44,.85) 30%,rgba(16,13,44,0) 52%)}
-.dj{position:absolute;left:700px;bottom:-50px;height:780px;image-rendering:pixelated}
-.left{position:absolute;left:110px;top:250px;width:700px}
-.logo{display:block;width:640px;margin-left:-12px}
-.copy{margin-top:32px;font-weight:900;font-size:46px;line-height:1.4;letter-spacing:.02em}
-.foot{margin-top:36px;font-weight:700;font-size:22px;color:#a7a3d6;letter-spacing:.04em}
+.glow{position:absolute;right:60px;top:140px;width:1000px;height:860px;background:radial-gradient(closest-side,rgba(120,170,255,.35),rgba(120,170,255,0))}
+.isl{position:absolute;right:-70px;top:150px;width:1060px}
+.fade{position:absolute;inset:0;background:linear-gradient(90deg,#100d2c 0%,rgba(16,13,44,.8) 34%,rgba(16,13,44,0) 50%)}
+.dj{position:absolute;left:930px;bottom:70px;height:640px;image-rendering:pixelated}
+.sh{position:absolute;left:930px;bottom:46px;width:300px;height:56px;border-radius:50%;background:radial-gradient(closest-side,rgba(5,4,20,.65),rgba(5,4,20,0))}
+.left{position:absolute;left:96px;top:200px;width:860px}
+.logo{display:block;width:840px;margin-left:-16px}
+.copy{margin-top:26px;font-weight:900;font-size:40px;line-height:1.45;letter-spacing:.02em}
+.foot{margin-top:30px;font-weight:700;font-size:22px;color:#a7a3d6;letter-spacing:.04em}
 .grain{display:none}
 '''))
 # ===== 2. あそびかた =====
