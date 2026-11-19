@@ -345,3 +345,11 @@
 ## 紹介画像 v2(BOWFLIT と同じ作り方)
 - tools/mpl_promo_assets.py(キャラの立ち絵・顔・アイコン・島 → mpl/promo/assets)→ tools/mpl_promo.py(HTML を組んでブラウザで 1920x1080 の画像 6 枚: 01_kv 表紙 / 02_rules あそびかた / 03_island 女神の島 / 04_chars BOT 10人 / 05_minigames / 06_credits)。
 - フォントは npm の @fontsource(noto-sans-jp・dela-gothic-one・dotgothic16・m-plus-rounded-1c)。場所は環境変数 MPL_FONTS。
+
+## v47 大建築(tools/mpl_board_grand.py を mpl_board.py の最後に exec。NO_GRAND=1 で外せる)
+- 大聖堂: 丘の北のはし(z 149〜151)に道をまたぐ正面。中央の門(道の上はあける)・ばら窓・三角の破風・紫の屋根の尖塔と金の先、左右の翼(縦長の窓・控え柱・小さな尖塔・紫の屋根)、外の塔2本。道の両がわに白い手すりと金の灯り。
+- 天使の像2体(道の左右、翼・頭の上の輪)。金の輪: 尖塔のまわり2つ、火山の上1つ。
+- 火山: 火口のふちに低いギザギザの岩、斜面に光る溶岩の川6本(ochre_froglight + magma、流れない)。
+- 回廊: 火山のふもとの東西にアーチの壁と塔3本ずつ(尖った屋根・金の先・光る窓)。
+- 丘の段: 東西のがけに滝(下の受け池でとまる)、がけの上から藤、大きな桜6本。
+- YT を 48 に、ボードの版 17。道がふさがっていないことを確認(前からある7か所=帆船のへりだけ)。未確認。

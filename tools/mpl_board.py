@@ -12,7 +12,7 @@ OUT_JS = os.path.join(ROOT, 'mpl', 'src', 'behavior_packs', 'mpl_bp', 'scripts',
 OUT_PNG = os.path.join(ROOT, 'mpl', 'preview_board.png')
 random.seed(11)
 G, ZC = 6, 124
-X0, X1, Z0, Z1, YB, YT = -68, 64, 44, 196, -4, 36
+X0, X1, Z0, Z1, YB, YT = -68, 64, 44, 196, -4, 48
 wx = lambda gx: int(round(gx * G))
 wz = lambda gz: int(round(ZC + gz * G))
 V = {}
@@ -547,6 +547,8 @@ for i in range(900):
     h = H.get((x, z))
     if h in (0, 4) and not near_road(x, z, 1) and (x, z) not in RESERVED and V.get((x, h, z)) == 'grass_block' and (x, h + 1, z) not in V:
         put(x, h + 1, z, random.choice(['poppy', 'dandelion', 'cornflower', 'allium', 'pink_tulip', 'azure_bluet', 'oxeye_daisy', 'short_grass', 'short_grass']))
+# ===== v5 大建築(大聖堂・天使・金の輪・火山・回廊・滝・藤・桜)=====
+if not os.environ.get('NO_GRAND'): exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mpl_board_grand.py'), encoding='utf-8').read())
 # ===== コマンドにまとめる =====
 def merge():
     by = {}
@@ -628,7 +630,7 @@ for (x, z) in coast:
     WAVES.append([x, z, yaw])
 print('waves', len(WAVES))
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 16, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
+        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 17, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 
@@ -645,7 +647,7 @@ C = {'grass_block': (110, 170, 70), 'moss_block': (90, 140, 50), 'dirt': (130, 9
      'sea_lantern': (200, 230, 230), 'gold_block': (250, 210, 60), 'quartz_pillar': (235, 230, 220), 'chiseled_quartz_block': (230, 225, 215), 'amethyst_block': (150, 100, 200), 'purple_stained_glass': (170, 110, 220),
      'dark_oak_planks': (65, 45, 25), 'white_wool': (245, 245, 245), 'red_wool': (180, 40, 40), 'polished_diorite': (200, 200, 200), 'smooth_stone': (170, 170, 170), 'stone_brick_wall': (120, 120, 120),
      'stripped_spruce_log': (140, 110, 70), 'stripped_birch_wood': (200, 180, 120), 'oak_fence': (150, 120, 70), 'barrel': (120, 85, 50), 'hay_block': (200, 170, 40), 'coal_block': (20, 20, 20),
-     'iron_bars': (150, 150, 150), 'pink_concrete': (240, 140, 180), 'cyan_concrete': (30, 140, 150), 'polished_blackstone': (50, 45, 55), 'polished_blackstone_slab': (55, 50, 60), 'note_block': (110, 70, 50), 'black_concrete': (20, 20, 25), 'red_terracotta': (145, 60, 45), 'waterlily': (40, 120, 50), 'red_nether_brick_slab': (90, 15, 15)}
+     'iron_bars': (150, 150, 150), 'pink_concrete': (240, 140, 180), 'cyan_concrete': (30, 140, 150), 'polished_blackstone': (50, 45, 55), 'polished_blackstone_slab': (55, 50, 60), 'note_block': (110, 70, 50), 'black_concrete': (20, 20, 25), 'red_terracotta': (145, 60, 45), 'waterlily': (40, 120, 50), 'red_nether_brick_slab': (90, 15, 15), 'quartz_bricks': (236, 232, 224), 'smooth_quartz': (240, 236, 228), 'calcite': (225, 225, 220), 'ochre_froglight': (255, 190, 70), 'magma_block': (190, 70, 20), 'deepslate_tiles': (55, 55, 60), 'glowstone': (255, 220, 120), 'light_blue_stained_glass': (120, 190, 240), 'chiseled_stone_bricks': (125, 125, 125), 'stone_bricks': (120, 120, 120), 'mossy_stone_bricks': (100, 120, 95), 'polished_andesite': (135, 135, 135), 'basalt': (75, 75, 80), 'blackstone': (40, 35, 45), 'quartz_slab': (236, 232, 224), 'azalea_leaves ["persistent_bit"=true]': (110, 150, 70), 'water': (55, 120, 220)}
 def colr(b):
     if b in C: return C[b]
     if 'leaves' in b: return {'oak': (60, 130, 40), 'bir': (110, 150, 60), 'aza': (90, 140, 70), 'che': (240, 170, 200), 'jun': (50, 140, 40), 'spr': (45, 90, 55)}[b[:3]]
