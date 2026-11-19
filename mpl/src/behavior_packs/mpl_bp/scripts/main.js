@@ -2297,7 +2297,35 @@ async function doBuildBoard() {
 }
 // はね橋: 偶数ターンは下りていて通れる。奇数ターンは上がっていて通行止め
 const bridgeDown = () => G.turn % 2 === 0;
-function setBridge(down) { const b = BD.bridge; if (b) cmd(`fill ${b[0]} ${b[1]} ${b[2]} ${b[3]} ${b[4]} ${b[5]} ${down ? "dark_oak_planks" : "air"}`); }
+// ドローブリッジ: 橋(3 ブロック)は南のはし(b[2])をちょうつがいにして回る。下りている = 横、上がっている = 立つ
+let bridgeNow = null, bridgeCells = [];
+function bridgeFrame(deg) {
+    const b = BD.bridge; if (!b) return;
+    for (const [x, y, z] of bridgeCells) cmd(`setblock ${x} ${y} ${z} air`);
+    bridgeCells = [];
+    const r = (deg * Math.PI) / 180;
+    for (const k of [0.5, 1.5, 2.5]) {
+        const dz = Math.floor(k * Math.cos(r)), dy = Math.floor(k * Math.sin(r));
+        for (let x = b[0]; x <= b[3]; x++) { const c = [x, b[1] + dy, b[2] + dz]; cmd(`setblock ${c[0]} ${c[1]} ${c[2]} dark_oak_planks`); bridgeCells.push(c); }
+    }
+}
+function setBridge(down) { const b = BD.bridge; if (b) cmd(`fill ${b[0]} ${b[1]} ${b[2]} ${b[3]} ${b[1] + 2} ${b[5]} air`); bridgeCells = []; bridgeNow = down; bridgeFrame(down ? 0 : 90); }
+// ターンのはじめ: 上下が変わるときは、橋を映してゆっくり上げる / 下ろす(文字のお知らせはしない)
+async function bridgeTurn(down) {
+    const b = BD.bridge;
+    if (!b || bridgeNow === down) { setBridge(down); return; }
+    const cx = (b[0] + b[3]) / 2 + 0.5, cz = (b[2] + b[5]) / 2 + 0.5;
+    cam.to("@a[tag=mpl_board]", { x: cx + 9, y: b[1] + 6, z: cz - 7 }, { x: cx, y: b[1] + 1, z: cz }, 1.2);
+    await wait(26);
+    const from = down ? 90 : 0, to = down ? 0 : 90;
+    for (let i = 1; i <= 6; i++) {
+        bridgeFrame(from + (to - from) * i / 6);
+        soundAllPlayers(i % 2 ? "random.door_open" : "random.click", 0.55 + i * 0.03);
+        await wait(9);
+    }
+    bridgeNow = down; soundAllPlayers("random.anvil_land", 0.5); cmd("camerashake add @a 0.15 0.3 positional");
+    await wait(22);
+}
 // 分かれ道: 上から見せて、行き先を選ぶ(BOT はおまかせ)。はね橋が上がっている・関所のコインが足りない道は選べない
 async function chooseWay(p, all) {
     const name = p.name, s = SPACES[G.pos[name]];
@@ -2775,8 +2803,9 @@ async function startParty(turns, players, hc = {}) {
         for (G.turn = 1; G.turn <= G.turns && G.on; G.turn++) {
             const last = G.turn > G.turns - 3;
             hud();
-            cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); setBridge(bridgeDown()); await setTide(tideHigh()); if (G.ghost && G.turn - (G.ghostTurn ?? G.turn) >= 3) await ghostLeave();
-            banner(last ? "lastspurt" : "turn", (last ? `TURN ${G.turn} / ${G.turns}  青と赤のマスが2倍` : `${G.turn} / ${G.turns}`) + (bridgeDown() ? "   §aドローブリッジ: 通れる" : "   §cドローブリッジ: 通行止め") + (tideHigh() ? "   §b満潮: 潮の道が開く" : "   §e干潮: 浜の近道が通れる"), 55);
+            await bridgeTurn(bridgeDown());   // ドローブリッジが上がる / 下がるところから
+            cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); await setTide(tideHigh()); if (G.ghost && G.turn - (G.ghostTurn ?? G.turn) >= 3) await ghostLeave();
+            banner(last ? "lastspurt" : "turn", (last ? `TURN ${G.turn} / ${G.turns}  青と赤のマスが2倍` : `${G.turn} / ${G.turns}`) + (tideHigh() ? "   §b満潮: 潮の道が開く" : "   §e干潮: 浜の近道が通れる"), 55);
             soundAllPlayers("random.levelup", last ? 0.7 : 0.9);
             await wait(55);
             await turnNews(last);
