@@ -41,13 +41,14 @@ pages.append(page('01_kv', f'''
 ''', '''
 body{background:linear-gradient(120deg,#100d2c 0%,#1d1650 38%,#2a2a7a 70%,#2f5aa8 100%)}
 .glow{position:absolute;right:60px;top:140px;width:1000px;height:860px;background:radial-gradient(closest-side,rgba(120,170,255,.35),rgba(120,170,255,0))}
-.isl{position:absolute;right:-70px;top:150px;width:1060px}
+.isl{position:absolute;right:-150px;top:170px;width:1000px}
 .fade{position:absolute;inset:0;background:linear-gradient(90deg,#100d2c 0%,rgba(16,13,44,.8) 34%,rgba(16,13,44,0) 50%)}
-.dj{position:absolute;left:930px;bottom:70px;height:640px;image-rendering:pixelated}
-.sh{position:absolute;left:930px;bottom:46px;width:300px;height:56px;border-radius:50%;background:radial-gradient(closest-side,rgba(5,4,20,.65),rgba(5,4,20,0))}
-.left{position:absolute;left:96px;top:200px;width:840px;text-align:center}
-.logo{display:block;width:840px;margin:0 auto}
-.copy{margin-top:26px;font-weight:900;font-size:40px;line-height:1.45;letter-spacing:.02em}
+.dj{position:absolute;left:1040px;bottom:70px;height:620px;image-rendering:pixelated}
+.sh{position:absolute;left:1035px;bottom:46px;width:300px;height:56px;border-radius:50%;background:radial-gradient(closest-side,rgba(5,4,20,.65),rgba(5,4,20,0))}
+.left{position:absolute;left:70px;top:170px;width:900px}
+.logo{display:block;width:900px}
+.left p{padding-left:193px}   /* PARTY の P の左はしにそろえる(ロゴの幅の 21.5%) */
+.copy{margin-top:64px;font-weight:900;font-size:40px;line-height:1.45;letter-spacing:.02em}
 .foot{margin-top:30px;font-weight:700;font-size:22px;color:#a7a3d6;letter-spacing:.04em}
 .grain{display:none}
 '''))
