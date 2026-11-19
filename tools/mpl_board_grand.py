@@ -258,30 +258,4 @@ for (x, z) in ((-19, wz(2)), (20, wz(2.5)), (-21, wz(4)), (22, wz(-0.5))):   # �
     if (x, z) in H and not near_road(x, z, 3) and H[(x, z)] >= 0:
         G_clear_above(x - 4, z - 4, x + 4, z + 4, H[(x, z)] + 1, H[(x, z)] + 14, True)
         tree_(x, z, 'cherry', big=True)
-# ---------- 6. 結果発表の会場(島の南の海の上) ----------
-STAGE_Z = 31                                   # 人が並ぶ列(BD.finaleZ)。床の上は y=1
-SX0, SX1, SZ0, SZ1 = -14, 14, 26, 37
-for x in range(SX0, SX1 + 1):
-    for z in range(SZ0, SZ1 + 1):
-        edge = x in (SX0, SX1) or z in (SZ0, SZ1)
-        put(x, 0, z, GOLD if (edge and (x + z) % 4 == 0) else 'polished_blackstone_bricks' if edge else ('polished_deepslate' if (x + z) % 2 else 'deepslate_tiles'))
-for x in range(-3, 4):                         # 真ん中の赤いじゅうたん(前から列まで)
-    for z in range(SZ0, STAGE_Z + 2): put(x, 0, z, 'red_concrete' if abs(x) < 3 else 'gold_block')
-for x in range(SX0, SX1 + 1, 4): put(x, 0, SZ0, 'sea_lantern')
-for (x, z) in ((SX0, SZ0), (SX1, SZ0), (SX0, SZ1), (SX1, SZ1), (0, SZ0), (0, SZ1)):
-    box(x, -4, z, x, -1, z, 'polished_blackstone_bricks')
-BZ = SZ1 + 1                                   # うしろの壁: わく・赤い幕・紫の板と金の星・上の灯り
-for x in range(SX0, SX1 + 1):
-    for y in range(1, 15):
-        frame = x in (SX0, SX1, -8, 8) or y in (1, 14)
-        if frame: put(x, y, BZ, 'polished_blackstone_bricks' if y < 14 else 'chiseled_polished_blackstone')
-        elif abs(x) < 8: put(x, y, BZ, 'purple_concrete' if (x + y) % 6 else 'purple_terracotta')
-        else:
-            hang = 13 - (abs(x) - 8) * 2
-            put(x, y, BZ, 'red_wool' if y >= 14 - hang or (abs(x) - 8) < 2 else 'polished_blackstone')
-    put(x, 15, BZ, 'polished_blackstone_wall' if x % 2 else 'lantern')
-STAR = [(0, 6), (-1, 5), (0, 5), (1, 5), (-1, 4), (0, 4), (1, 4), (-4, 4), (-3, 4), (-2, 4), (2, 4), (3, 4), (4, 4), (-3, 3), (-2, 3), (-1, 3), (0, 3), (1, 3), (2, 3), (3, 3),
-        (-2, 2), (-1, 2), (0, 2), (1, 2), (2, 2), (-2, 1), (-1, 1), (1, 1), (2, 1), (-3, 0), (-2, 0), (2, 0), (3, 0)]
-for (i, j) in STAR: put(i, 4 + j, BZ - 1, GOLD)
-for x in (-6, -3, 3, 6): put(x, 13, BZ - 1, 'end_rod ["facing_direction"=0]')
-for s in (-1, 1): deco_tower(s * 18, SZ1 - 1, 0, 16, 2.4, 'white', 'purple_concrete', 'purple_wool')
+# (結果発表の会場は帆船の甲板の DJ ブースへ移した: tools/mpl_board_ship.py)

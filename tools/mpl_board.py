@@ -12,7 +12,7 @@ OUT_JS = os.path.join(ROOT, 'mpl', 'src', 'behavior_packs', 'mpl_bp', 'scripts',
 OUT_PNG = os.path.join(ROOT, 'mpl', 'preview_board.png')
 random.seed(11)
 G, ZC = 6, 124
-X0, X1, Z0, Z1, YB, YT = -68, 64, 16, 196, -4, 48
+X0, X1, Z0, Z1, YB, YT = -68, 64, 30, 196, -4, 48
 wx = lambda gx: int(round(gx * G))
 wz = lambda gz: int(round(ZC + gz * G))
 V = {}
@@ -373,23 +373,7 @@ for (bx_, bz_) in ((-11, PCZ - 4), (-11, PCZ + 1)):               # 高くした
     if all(H.get((bx_ + i, bz_ + j)) == 0 and (bx_ + i, bz_ + j) not in ROAD for i in range(5) for j in range(3)): planter(bx_, bz_)
 for (lx_, lz_) in ((-6, pz - 10), (6, pz - 10), (-13, pz - 6)):   # 街灯(作りこみ版)
     if H.get((lx_, lz_)) == 0 and (lx_, lz_) not in ROAD: lamp(lx_, lz_)
-# DJ ブース(広場の東): ステージ・光る DJ 卓(ターンテーブル2つ + ミキサー)・スピーカー・トラス + スポットライト・動くイコライザーの壁
-dbx, dbz = 10, wz(-9) - 7
-clear(dbx - 3, 1, dbz - 2, dbx + 3, 8, dbz + 2)   # 広場の柱などが重ならないように(広場のあとに置く)
-box(dbx - 3, 0, dbz - 2, dbx + 3, 0, dbz + 2, 'polished_deepslate')
-for x in (dbx - 2, dbx, dbx + 2): put(x, 0, dbz - 2, 'sea_lantern')                                   # ステージの前のふちの光
-box(dbx - 2, 1, dbz - 1, dbx + 2, 1, dbz - 1, 'black_concrete')                                        # 卓(DJ のすぐ前)
-box(dbx - 2, 1, dbz - 2, dbx + 2, 1, dbz - 2, 'black_concrete'); box(dbx - 1, 1, dbz - 2, dbx + 1, 1, dbz - 2, 'pearlescent_froglight')  # 卓の前が光る
-put(dbx - 1, 2, dbz - 1, 'heavy_weighted_pressure_plate'); put(dbx + 1, 2, dbz - 1, 'heavy_weighted_pressure_plate'); put(dbx, 2, dbz - 1, 'polished_blackstone_pressure_plate')
-for sx in (dbx - 3, dbx + 3):                                                                           # スピーカー
-    put(sx, 1, dbz - 1, 'polished_blackstone_bricks'); put(sx, 2, dbz - 1, 'black_concrete'); put(sx, 3, dbz - 1, 'polished_blackstone_bricks'); put(sx, 4, dbz - 1, 'pearlescent_froglight')
-    box(sx, 1, dbz - 2, sx, 5, dbz - 2, 'iron_bars'); box(sx, 1, dbz + 1, sx, 5, dbz + 1, 'iron_bars')   # トラスの柱
-    box(sx, 6, dbz - 2, sx, 6, dbz + 2, 'black_concrete')
-box(dbx - 3, 6, dbz - 2, dbx + 3, 6, dbz - 2, 'black_concrete')                                        # トラスのはり
-for x in (dbx - 2, dbx, dbx + 2): put(x, 5, dbz - 2, 'end_rod ["facing_direction"=0]')                 # スポットライト(下向き)
-box(dbx - 3, 1, dbz + 2, dbx + 3, 6, dbz + 2, 'black_concrete')                                        # 後ろの画面(わく)
-EQ = {'x0': dbx - 2, 'y0': 2, 'z': dbz + 2, 'w': 5, 'h': 4}                                             # 中の 5x4 はゲームで動かす
-DJ = {'x': dbx + 0.5, 'y': 1, 'z': dbz + 0.5, 'cam': {'x': dbx + 0.5, 'y': 3.4, 'z': dbz - 6}}
+# (DJ ブースは帆船の甲板へ移した: tools/mpl_board_ship.py)
 # 帆船(船の上が道)
 def ship_(cx, cz, L=34):
     for i in range(L):
@@ -409,7 +393,8 @@ def ship_(cx, cz, L=34):
     box(cx - L // 2 + 1, 3, cz - 3, cx - L // 2 + 5, 6, cz + 3, 'dark_oak_planks'); box(cx - L // 2 + 2, 4, cz - 2, cx - L // 2 + 4, 5, cz + 2, 'air')
     for dz in (-2, 0, 2): put(cx - L // 2 + 5, 5, cz + dz, 'glass')
     box(cx + 3, 3, cz - 4, cx + 4, 3, cz - 4, 'black_concrete'); put(cx + 5, 3, cz - 4, 'coal_block')  # 大砲
-ship_(int(wx(-4.5)), wz(-11))
+# 大きな帆船 + 甲板の DJ ブース(tools/mpl_board_ship.py)
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mpl_board_ship.py'), encoding='utf-8').read())
 # 森: 大きい木とキノコ、木の上の小屋
 for i in range(140):
     x, z = random.randint(-62, -32), random.randint(wz(-4), wz(5))
@@ -642,7 +627,7 @@ for (x, z) in coast:
     WAVES.append([x, z, yaw])
 print('waves', len(WAVES))
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'island': [X0, YB, 44, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': globals().get('STAGE_Z', wz(-9) - 4.5), 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 20, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
+        'finaleZ': STAGE['z'], 'stage': STAGE, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 21, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': SHIP_GHOST_Z}, 'to': {'x': -27, 'z': SHIP_GHOST_Z}, 'plank': {'x': -27, 'edge': SHIP_CZ - SHIP_HW}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 

@@ -5,13 +5,13 @@ V,R=g['V'],g['ROAD']
 blocked=[1 for (x,z),y in R.items() if any((x,yy,z) in V and V[(x,yy,z)] not in ('air',) and not V[(x,yy,z)].startswith(('lantern',)) for yy in (y+1,y+2))]
 miss=[1 for (x,z),y in R.items() if (x,y,z) not in V]
 print('blocked',len(blocked),'missing',len(miss))
-C=dict(g['C']); C.update({'white_concrete':(242,242,242),'prismarine_bricks':(90,175,160),'prismarine':(80,150,145),'blue_stained_glass':(60,90,210),'diorite_wall':(205,205,205),'iron_block':(220,220,220),'iron_bars':(170,170,170),'polished_andesite':(140,145,145),'andesite':(130,130,130),'cracked_stone_bricks':(115,115,115),'stripped_spruce_log':(140,110,70),'pink_wool':(240,150,180),'white_wool':(245,245,245),'red_concrete':(170,30,30),'spruce_planks':(110,85,50),'lightning_rod':(200,120,80),'lantern':(255,200,90)})
+C=dict(g['C']); C.update({'white_concrete':(242,242,242),'prismarine_bricks':(90,175,160),'prismarine':(80,150,145),'blue_stained_glass':(60,90,210),'diorite_wall':(205,205,205),'iron_block':(220,220,220),'iron_bars':(170,170,170),'polished_andesite':(140,145,145),'andesite':(130,130,130),'cracked_stone_bricks':(115,115,115),'stripped_spruce_log':(140,110,70),'pink_wool':(240,150,180),'white_wool':(245,245,245),'red_concrete':(170,30,30),'spruce_planks':(110,85,50),'lightning_rod':(200,120,80),'lantern':(255,200,90),'oak_planks':(170,135,80),'oak_fence':(160,128,76),'honeycomb_block':(230,160,40),'stripped_oak_log':(180,145,90),'dispenser':(110,110,110),'blast_furnace':(80,80,85),'heavy_weighted_pressure_plate':(200,200,205),'polished_deepslate':(70,70,75),'deepslate_tiles':(55,55,60),'end_rod':(240,240,230),'stripped_spruce_log':(115,90,55),'spruce_planks':(115,85,50),'dark_oak_planks':(65,45,25),'dark_oak_fence':(70,50,30),'spruce_log':(80,60,35),'spruce_fence':(95,70,40),'glass':(200,230,240),'pearlescent_froglight':(240,200,230),'light_blue_stained_glass':(150,200,240),'amethyst_block':(150,100,200),'polished_blackstone_slab':(55,50,60),'iron_block':(220,220,220),'white_concrete':(240,240,240)})
 def col(b):
     k=b.split(' ')[0]
     if k in C: return C[k]
     return g['colr'](k)
 x0,x1,z0,z1=int(sys.argv[1]),int(sys.argv[2]),int(sys.argv[3]),int(sys.argv[4])
-S=24; W,Hh=1500,1500
+S=int(sys.argv[6]) if len(sys.argv)>6 else 24; W,Hh=1500,1500
 img=Image.new('RGB',(W,Hh),(120,180,230)); d=ImageDraw.Draw(img)
 def proj(x,y,z): return W/2+(x-(x0+x1)/2)*S*1.0+(z-z0)*S*0.35, Hh*0.98-(z-z0)*S*0.45-(y-6)*S*0.95
 items=[(k,b) for k,b in V.items() if x0<=k[0]<=x1 and z0<=k[2]<=z1 and b!='air']

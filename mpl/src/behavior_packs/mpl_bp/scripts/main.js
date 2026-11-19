@@ -2053,7 +2053,7 @@ async function breakTies(groups) {
 // 同率の人をステージに横に並べ、カウントダウンで全員いっしょに自動ジャンプ → 頭の上のサイコロが止まる。同じ目の人はもう一度
 async function tieRoll(g, round = 1) {
     const board = G.on && world.getPlayers({ name: g[0] })[0]?.hasTag("mpl_board");
-    const st = board ? { x: 0.5, y: 1, z: BD.finaleZ } : { x: LOBBY.x, y: LOBBY.y, z: LOBBY.z };
+    const st = board ? { ...STG() } : { x: LOBBY.x, y: LOBBY.y, z: LOBBY.z };
     const xs = g.map((_, i) => st.x + (i - (g.length - 1) / 2) * 2.4);
     g.forEach((n, i) => world.getPlayers({ name: n })[0]?.teleport({ x: xs[i], y: st.y, z: st.z }, { facingLocation: { x: xs[i], y: st.y + 1.6, z: st.z - 10 } }));
     cam.to("@a", { x: st.x, y: st.y + 2.4, z: st.z - 4 - g.length * 1.3 }, { x: st.x, y: st.y + 2.2, z: st.z }, 0.6);
@@ -2170,8 +2170,9 @@ function warpIn(p) { const q = p.location; cmd(`particle minecraft:knockback_roa
 async function vsScreen() {
     const ps = gp(); if (ps.length < 2) return;
     cam.fade(); await wait(8);
-    ps.forEach((q, i) => q.teleport({ x: 0.5 + (i - (ps.length - 1) / 2) * 2.4, y: 1, z: BD.finaleZ }, { facingLocation: { x: 0.5 + (i - (ps.length - 1) / 2) * 2.4, y: 1.6, z: BD.finaleZ - 10 } }));
-    cam.to("@a[tag=mpl_board]", { x: 0.5, y: 2.4, z: BD.finaleZ - 7.5 }, { x: 0.5, y: 2.1, z: BD.finaleZ }, 0.1);
+    const S0 = STG();
+    ps.forEach((q, i) => q.teleport({ x: S0.x + (i - (ps.length - 1) / 2) * 2.4, y: S0.y, z: S0.z }, { facingLocation: { x: S0.x + (i - (ps.length - 1) / 2) * 2.4, y: S0.y + 0.6, z: S0.z - 10 } }));
+    cam.to("@a[tag=mpl_board]", { x: S0.x, y: S0.y + 1.4, z: S0.z - 7.5 }, { x: S0.x, y: S0.y + 1.1, z: S0.z }, 0.1);
     banner("vs", ps.map((q) => `${G.color[q.name] ?? "§f"}${q.name}`).join(" §7vs "), 60); soundAllPlayers("random.levelup", 1.2);
     ps.forEach((q, i) => system.runTimeout(() => { if (q.isValid) pose(q, "guts"); }, 8 + i * 6));
     await wait(62);
@@ -2245,6 +2246,8 @@ function follow(p, sec = 0.6, at = null) {
 // マスは高さつき。next が2つあるマスは分かれ道(way = 選ぶ時の名前)。ショップの n は屋台の向き
 const BOARD = BD.center;
 const LOBBY = BD.lobby;
+// 結果発表・集合の会場(帆船の上の DJ ブースの前)。人は x を中心に横一列、カメラは z の小さい方から
+const STG = () => BD.stage ?? { x: 0.5, y: 1, z: BD.finaleZ };
 const SPACES = BD.spaces;
 let building = null;
 function buildBoard() { if (!building) building = doBuildBoard().finally(() => { building = null; }); return building; }
@@ -2526,7 +2529,7 @@ function ghostPlank(on) {
     const { x, edge } = k;
     // 板の橋は甲板と同じ高さ(y=2、上の面 3)。海面を上げたので幽霊船の甲板もほぼ同じ高さ
     cmd(`fill ${x} 2 ${edge - 3} ${x} 2 ${edge - 1} ${on ? "warped_planks" : "air"}`);
-    cmd(`setblock ${x} 3 ${edge} ${on ? "air" : "dark_oak_fence"}`);
+    cmd(`setblock ${x} 3 ${edge} ${on ? "air" : "oak_fence"}`);
     for (const dx of [-1, 1]) { cmd(`setblock ${x + dx} 3 ${edge - 2} ${on ? "warped_fence" : "air"}`); cmd(`setblock ${x + dx} 4 ${edge - 2} ${on ? "soul_lantern" : "air"}`); }
 }
 function ghostCleanup() {
@@ -2636,7 +2639,7 @@ async function shuffleSpace(p) {
 // 全体を見るカメラ(南の上空から)と、広場から神殿を見るカメラ
 const [AX0, , AZ0, AX1, , AZ1] = BD.island ?? BD.area;   // 島の範囲(結果発表の舞台は島の外の海の上)
 const VIEW = { pos: { x: 0.5, y: 92, z: (AZ0 + AZ1) / 2 - 28 }, look: { x: 0.5, y: 0, z: (AZ0 + AZ1) / 2 + 2 } }; // 前より近く(奥がかすまないように)
-const PLAZA = { pos: { x: 0.5, y: 5, z: BD.finaleZ - 6 }, look: { x: 0.5, y: 16, z: BOARD.z } };
+const PLAZA = { pos: { x: STG().x, y: STG().y + 4, z: STG().z - 6 }, look: { x: 0.5, y: 16, z: BOARD.z } };
 
 // ===== すごろく =====
 const G = { on: false, turn: 0, turns: 10, cnt: {}, prevRank: {}, subst: {}, played: [], mgCount: 0, fixRoll: {}, slow: {}, magnet: {}, reverse: {}, crystal: {}, color: {}, bank: 0, ghost: null, ghostUsed: [], ticket: null, sale: 0, rule: null, players: [], star: 0, stars: {}, coins: {}, pos: {}, items: {}, mgWins: {}, coinsGot: {}, now: null };
@@ -3277,13 +3280,13 @@ async function minigameRound() {
     const order = lastRank.length ? await breakTies(groups) : [], PRIZE = [10, 5, 3, 1];
     if (order.length) {
         // 順位の順に左(1位)から横一列。足もとに 1st / 2nd ... の文字(mmgplus:rankplate)
-        const N = order.length, xs = order.map((_, r) => 0.5 + ((N - 1) / 2 - r) * 2.4), Z = BD.finaleZ;
-        order.forEach((n, r) => world.getPlayers({ name: n })[0]?.teleport({ x: xs[r], y: 1, z: Z }, { facingLocation: { x: xs[r], y: 1.6, z: Z - 10 } }));
-        cam.to("@a[tag=mpl_board]", { x: 0.5, y: 2.5, z: Z - 6.5 - N * 0.6 }, { x: 0.5, y: 1.45, z: Z }, 0.8);
+        const S0 = STG(), N = order.length, xs = order.map((_, r) => S0.x + ((N - 1) / 2 - r) * 2.4), Z = S0.z, Y = S0.y;
+        order.forEach((n, r) => world.getPlayers({ name: n })[0]?.teleport({ x: xs[r], y: Y, z: Z }, { facingLocation: { x: xs[r], y: Y + 0.6, z: Z - 10 } }));
+        cam.to("@a[tag=mpl_board]", { x: S0.x, y: Y + 1.5, z: Z - 6.5 - N * 0.6 }, { x: S0.x, y: Y + 0.45, z: Z }, 0.8);
         banner("result", "", 40); await wait(26);
         const plates = [];
         for (let r = N - 1; r >= 0; r--) {
-            const e = spawnAt("mmgplus:rankplate", { x: xs[r], y: 1.0, z: Z - 1.1 });
+            const e = spawnAt("mmgplus:rankplate", { x: xs[r], y: Y, z: Z - 1.1 });
             try { e?.setRotation({ x: 0, y: 180 }); e?.setProperty("mmgplus:rank", Math.min(8, r + 1)); } catch {}
             if (e) plates.push(e);
             soundAllPlayers(r === 0 ? "random.levelup" : "random.pop", r === 0 ? 1.5 : 0.8 + (N - r) * 0.1);
@@ -3345,17 +3348,18 @@ async function finale() {
     // 全員を城の前に横一列(順位はまだ秘密)
     cam.fade(); await wait(8);
     const line = [...G.players].sort(() => Math.random() - 0.5);
-    line.forEach((n, i) => world.getPlayers({ name: n })[0]?.teleport({ x: 0.5 + (i - (line.length - 1) / 2) * 2, y: 1, z: BD.finaleZ }, { facingLocation: { x: 0.5 + (i - (line.length - 1) / 2) * 2, y: 1.6, z: BD.finaleZ - 10 } }));
-    const left = 0.5 - (line.length - 1), right = 0.5 + (line.length - 1);
-    cam.to("@a", { x: left - 2, y: 2.2, z: BD.finaleZ - 4.5 }, { x: left, y: 1.6, z: BD.finaleZ }, 0.2);
+    const S0 = STG();
+    line.forEach((n, i) => world.getPlayers({ name: n })[0]?.teleport({ x: S0.x + (i - (line.length - 1) / 2) * 2, y: S0.y, z: S0.z }, { facingLocation: { x: S0.x + (i - (line.length - 1) / 2) * 2, y: S0.y + 0.6, z: S0.z - 10 } }));
+    const left = S0.x - (line.length - 1), right = S0.x + (line.length - 1);
+    cam.to("@a", { x: left - 2, y: S0.y + 1.2, z: S0.z - 4.5 }, { x: left, y: S0.y + 0.6, z: S0.z }, 0.2);
     banner("result", "", 160);
     await wait(6);
     cmd("execute as @a at @s run playsound mpl.drumroll @s ~ ~ ~ 1 1");
     // ドラムロールの間(約8秒): 左から右へゆっくり流れながら少し引く
-    cam.to("@a", { x: right + 2, y: 3.2, z: BD.finaleZ - 7 }, { x: right, y: 1.6, z: BD.finaleZ }, 7.6, "in_out_sine");
+    cam.to("@a", { x: right + 2, y: S0.y + 2.2, z: S0.z - 7 }, { x: right, y: S0.y + 0.6, z: S0.z }, 7.6, "in_out_sine");
     await wait(152);
     // 鳴り終わり: 優勝した人にズーム → 花火
-    const w0 = world.getPlayers({ name: winners[0] })[0], wl = w0?.location ?? { x: 0.5, y: 1, z: BD.finaleZ };
+    const w0 = world.getPlayers({ name: winners[0] })[0], wl = w0?.location ?? { ...STG() };
     cam.to("@a", { x: wl.x, y: wl.y + 1.9, z: wl.z - 3.2 }, { x: wl.x, y: wl.y + 2.2, z: wl.z }, 0.6, "out_back"); // 少し上を見て、人は画面の下半分に(ロゴと重ならない)
     await wait(12);
     banner("champion", `${I.crown} ${winners.join(" & ")} ${I.crown}`, 120);
