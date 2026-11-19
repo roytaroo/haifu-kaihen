@@ -103,15 +103,14 @@ for nd in nodes:
 RES_Y = {c: next(nd['y'] for nd in nodes if nd['kind'] == 'shop' and abs(nd['x'] - c[0]) < 10 and abs(nd['z'] - c[1]) < 10) for c in RESERVED}
 # 鏡のマス(2つ): 道の横の空いた側に大きな鏡。中からガイコツが出てくる
 MIRRORS = []
-for gg in [(-7, -2), (0, -4), (7, 3), (-4, 6), (-7, 4)]:
+for gg in [(-7, -2), (0, -4), (7, 3), (-4, 6), (-7, 4), (0, -5), (-7, 0), (7, -1), (-3, 6), (0, 3)]:
     if len(MIRRORS) >= 2 or gg not in at: continue
     nd = N(*gg)
     if nd['kind'] != 'blue' or 'gate' in nd: continue
     for n in ([1, 0], [-1, 0], [0, 1], [0, -1]):
         t = [-n[1], n[0]]
-        cells = [(nd['x'] + n[0] * a + t[0] * b, nd['z'] + n[1] * a + t[1] * b) for a in range(2, 7) for b in range(-3, 4)]
+        cells = [(nd['x'] + n[0] * a + t[0] * b, nd['z'] + n[1] * a + t[1] * b) for a in range(2, 17) for b in range(-8, 9)]   # 魔女の家(はば 17・おく 15)
         if any(c in ROAD or c in RESERVED or not (X0 + 3 <= c[0] <= X1 - 3 and Z0 + 3 <= c[1] <= Z1 - 3) for c in cells): continue
-        if any(c in ROAD for a in range(2, 7) for b in range(-3, 4) for c in [(nd['x'] + n[0] * a + t[0] * b + 0, nd['z'] + n[1] * a + t[1] * b)]): continue
         nd['kind'] = 'mirror'; nd['n'] = n; MIRRORS.append(nd)
         for c in cells: RESERVED.add(c); RES_Y[c] = nd['y']
         break
@@ -173,23 +172,8 @@ for (x, z), h in H.items():
     if top in ('grass_block', 'moss_block') and h > 0: put(x, h - 1, z, 'dirt')
     put(x, h, z, top)
     if h == CRATER and vol(x, z) < 1.0: put(x, CRATER + 1, z, 'lava'); put(x, CRATER, z, 'magma_block')   # 火口の溶岩(ふちに囲まれている)
-# 鏡: 金のわく(5x5)・中は黒いガラス + 奥に泣く黒曜石(紫に光る)・上にソウルランタン・前に黒い石の床
-for nd in MIRRORS:
-    n = nd['n']; t = [-n[1], n[0]]; y = nd['y']
-    P = lambda a, b: (nd['x'] + n[0] * a + t[0] * b, nd['z'] + n[1] * a + t[1] * b)
-    for a in range(2, 7):
-        for b in range(-3, 4):
-            x, z = P(a, b); clear(x, y + 1, z, x, y + 8, z)
-    for a in (2, 3):
-        for b in range(-2, 3): x, z = P(a, b); put(x, y, z, 'polished_blackstone_bricks' if (a + b) % 2 else 'deepslate_tiles')
-    for b in range(-2, 3):
-        for k in range(1, 6):
-            x, z = P(4, b); edge = abs(b) == 2 or k in (1, 5)
-            put(x, y + k, z, 'gold_block' if edge else 'black_stained_glass')
-            x2, z2 = P(5, b); put(x2, y + k, z2, 'polished_blackstone' if edge else 'crying_obsidian')
-    x, z = P(4, 0); put(x, y + 6, z, 'chiseled_polished_blackstone'); put(x, y + 7, z, 'soul_lantern')
-    for b in (-3, 3): x, z = P(4, b); put(x, y + 1, z, 'polished_blackstone_wall'); put(x, y + 2, z, 'soul_lantern')
-    nd['mirror'] = {'x': nd['x'] + n[0] * 4 + 0.5, 'y': y + 1, 'z': nd['z'] + n[1] * 4 + 0.5, 'nx': n[0], 'nz': n[1]}
+# 魔女の帽子の家(鏡のマスのかわり。ガイコツは家の扉から出てくる): tools/mpl_board_deco.py の witch_house
+for nd in MIRRORS: witch_house(nd)
 # 海とふち: 水面は y=0(浜の砂と同じ高さ。段差なし)。岸の近くは浅く(底が上がる)、沖ほど深い → 水の色が自然に変わる
 from collections import deque
 SEA_D = {}; dq = deque()
@@ -310,7 +294,7 @@ def _old_tree_(x, z, kind='oak', big=False):
             for dy in range(-1, 3):
                 if dx * dx + dz * dz + (dy * 1.5) ** 2 <= r * r + 1 and (x + dx, y + hgt + dy, z + dz) not in V and not (abs(dx) == r and abs(dz) == r):
                     put(x + dx, y + hgt + dy, z + dz, leaf(kind))
-def mushroom(x, z, red=True, h=None):
+def _old_mushroom(x, z, red=True, h=None):
     y = H.get((x, z)); h = h or random.randint(6, 9)
     box(x, y + 1, z, x, y + h, z, 'bone_block')
     cap = ('red' if red else 'brown') + '_mushroom_block ["huge_mushroom_bits"=14]'
@@ -627,7 +611,7 @@ for (x, z) in coast:
     WAVES.append([x, z, yaw])
 print('waves', len(WAVES))
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'island': [X0, YB, 44, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': STAGE['z'], 'stage': STAGE, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 21, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': SHIP_GHOST_Z}, 'to': {'x': -27, 'z': SHIP_GHOST_Z}, 'plank': {'x': -27, 'edge': SHIP_CZ - SHIP_HW}}}
+        'finaleZ': STAGE['z'], 'stage': STAGE, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 22, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': SHIP_GHOST_Z}, 'to': {'x': -27, 'z': SHIP_GHOST_Z}, 'plank': {'x': -27, 'edge': SHIP_CZ - SHIP_HW}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 

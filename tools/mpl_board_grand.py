@@ -257,5 +257,5 @@ for (a0, a1) in ((0.95, 2.3), (-2.3, -0.95)):
 for (x, z) in ((-19, wz(2)), (20, wz(2.5)), (-21, wz(4)), (22, wz(-0.5))):   # お城の正面の前には植えない
     if (x, z) in H and not near_road(x, z, 3) and H[(x, z)] >= 0:
         G_clear_above(x - 4, z - 4, x + 4, z + 4, H[(x, z)] + 1, H[(x, z)] + 14, True)
-        tree_(x, z, 'cherry', big=True)
+        cherry_big(x, z, 1.0)
 # (結果発表の会場は帆船の甲板の DJ ブースへ移した: tools/mpl_board_ship.py)
