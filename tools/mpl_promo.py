@@ -27,36 +27,27 @@ def page(name, body, extra=''):
 
 pages = []
 # ===== 1. 表紙 =====
-chars = [('humming', 0, 150, 560, 2), ('byte', 1, 1650 - 1920 + 1920 - 260, 560, 2), ('oracle', 0, 300, 620, 3), ('dj', 1, 1490 - 1920 + 1920 - 410, 620, 3), ('jack', 0, 520, 700, 4)]
-kv_chars = [  # (名前, 向き反転, 右からの位置px, 高さpx, 重なり)
-    ('humming', False, 760, 560, 1), ('comet', True, 40, 560, 1), ('oracle', False, 600, 640, 2), ('dj', True, 170, 640, 2), ('jack', False, 330, 740, 3)]
-ch_html = ''.join(f'<img class="ch" src="{A}/char_{n}{"_r" if fl else ""}.png" style="right:{r}px;height:{h}px;z-index:{z}">' for n, fl, r, h, z in kv_chars)
+#   飾りは足さない(光・ぼかし・透かし・浮かぶアイコンなし)。左は斜めに切った色の面にロゴとコピー、右は島の上に DJトシオ だけ
 pages.append(page('01_kv', f'''
-<div class="bgisl"></div><div class="shade"></div>
-<svg class="wm" viewBox="0 0 100 100"><polygon points="50,4 62,38 98,38 69,60 80,95 50,74 20,95 31,60 2,38 38,38" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round"/></svg>
+<img class="isl" src="{A}/island.png">
+<div class="panel"></div><div class="edge"></div>
+<img class="dj" src="{A}/char_dj_r.png">
 <div class="left">
-  <div class="tag dot">PARTY BOARD GAME&nbsp;&nbsp;-&nbsp;&nbsp;MINECRAFT BEDROCK</div>
   <img class="logo" src="{A}/logo.png">
-  <div class="copy dot">島じゅう巻きこむ、<br>すごろくパーティ。</div>
-  <div class="stats"><div class="st"><b class="dot gold">30</b><span class="dot">種類のミニゲーム</span></div><div class="st"><b class="dot pink">10</b><span class="dot">人の個性派BOT</span></div></div>
+  <p class="copy">島じゅう巻きこむ、<br>すごろくパーティ。</p>
+  <p class="foot">Minecraft 統合版 ワールド</p>
 </div>
-<div class="group">{ch_html}</div>
-<img class="fl" src="{A}/icon_star.png" style="right:930px;top:170px;width:120px;transform:rotate(-14deg)">
-<img class="fl" src="{A}/icon_coin.png" style="right:120px;top:210px;width:96px;transform:rotate(12deg)">
-<img class="fl" src="{A}/icon_dice.png" style="right:860px;top:640px;width:100px;transform:rotate(16deg)">
 ''', '''
-.bgisl{position:absolute;right:-380px;top:-160px;width:2300px;height:1500px;background:url(assets/island.png) center/contain no-repeat;filter:blur(7px) brightness(.62) saturate(1.15)}
-.shade{position:absolute;inset:0;background:linear-gradient(90deg,#0c0a20 0%,rgba(12,10,32,.92) 26%,rgba(12,10,32,.45) 52%,rgba(12,10,32,.15) 100%),linear-gradient(0deg,rgba(12,10,32,.7),transparent 30%)}
-.wm{position:absolute;right:120px;top:40px;width:820px;opacity:.10}
-.left{position:absolute;left:118px;top:200px;width:900px}
-.tag{font-size:34px;color:var(--sky);letter-spacing:.06em;text-shadow:0 0 18px rgba(79,210,255,.45)}
-.logo{display:block;width:820px;margin:18px 0 6px -18px;filter:drop-shadow(0 10px 30px rgba(0,0,0,.45))}
-.copy{font-size:64px;line-height:1.25;text-shadow:3px 3px 0 #0b0920,0 0 26px rgba(255,255,255,.25)}
-.stats{display:flex;gap:22px;margin-top:40px}
-.st{display:flex;align-items:baseline;gap:14px;border:3px solid var(--sky);background:rgba(12,10,32,.55);padding:10px 22px 12px;box-shadow:4px 4px 0 rgba(0,0,0,.5)}
-.st b{font-size:58px;font-weight:400;line-height:1}.st span{font-size:30px}
-.group .ch{position:absolute;bottom:40px;image-rendering:pixelated;filter:drop-shadow(0 18px 24px rgba(0,0,0,.55))}
-.fl{position:absolute;filter:drop-shadow(0 8px 14px rgba(0,0,0,.45))}
+body{background:#1b2a5e}
+.isl{position:absolute;right:-300px;top:60px;width:1560px;filter:saturate(.95)}
+.panel{position:absolute;inset:0;background:#15112f;clip-path:polygon(0 0,49% 0,37% 100%,0 100%)}
+.edge{position:absolute;inset:0;background:#ff5fa8;clip-path:polygon(49% 0,49.5% 0,37.5% 100%,37% 100%)}
+.dj{position:absolute;right:300px;bottom:-120px;height:980px;image-rendering:pixelated}
+.left{position:absolute;left:110px;top:230px;width:760px}
+.logo{display:block;width:700px;margin-left:-14px}
+.copy{margin-top:34px;font-weight:900;font-size:50px;line-height:1.35;letter-spacing:.02em}
+.foot{margin-top:40px;font-weight:700;font-size:24px;color:#9f9bcc;letter-spacing:.04em}
+.grain{display:none}
 '''))
 # ===== 2. あそびかた =====
 pages.append(page('02_rules', f'''

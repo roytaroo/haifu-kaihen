@@ -61,7 +61,7 @@ BOTS = ['jack', 'humming', 'widow', 'splash', 'oracle', 'byte', 'shade', 'jester
 for n in BOTS + ['dj']:
     t = Image.open(os.path.join(ROOT, 'mpl', 'assets', 'dj_skin.png') if n == 'dj' else os.path.join(RP, 'textures', 'entity', 'mpl_bots', f'{n}.png'))
     outlined(render(t, 22), 9).save(os.path.join(OUT, f'char_{n}.png'))
-    outlined(render(t, 22, flip=True), 9).save(os.path.join(OUT, f'char_{n}_r.png'))
+    outlined(render(t, 22), 9).transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(OUT, f'char_{n}_r.png'))   # 向きちがいは鏡うつし
     outlined(render(t, 26, only_head=True), 8).save(os.path.join(OUT, f'head_{n}.png'))
 # 大きいアイコン(tools/mpl_icons.py の形を大きく)
 spec = importlib.util.spec_from_file_location('icons', os.path.join(ROOT, 'tools', 'mpl_icons.py')); ic = importlib.util.module_from_spec(spec)

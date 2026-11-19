@@ -16,29 +16,23 @@ body{background:radial-gradient(1400px 900px at 70% 30%,#231a55 0%,var(--bg1) 70
 .sky{color:var(--sky)}.pink{color:var(--pink)}.gold{color:var(--gold)}.green{color:var(--green)}.purple{color:var(--purple)}.orange{color:var(--orange)}
 .grain{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 2px,transparent 2px 4px);pointer-events:none}
 
-.bgisl{position:absolute;right:-380px;top:-160px;width:2300px;height:1500px;background:url(assets/island.png) center/contain no-repeat;filter:blur(7px) brightness(.62) saturate(1.15)}
-.shade{position:absolute;inset:0;background:linear-gradient(90deg,#0c0a20 0%,rgba(12,10,32,.92) 26%,rgba(12,10,32,.45) 52%,rgba(12,10,32,.15) 100%),linear-gradient(0deg,rgba(12,10,32,.7),transparent 30%)}
-.wm{position:absolute;right:120px;top:40px;width:820px;opacity:.10}
-.left{position:absolute;left:118px;top:200px;width:900px}
-.tag{font-size:34px;color:var(--sky);letter-spacing:.06em;text-shadow:0 0 18px rgba(79,210,255,.45)}
-.logo{display:block;width:820px;margin:18px 0 6px -18px;filter:drop-shadow(0 10px 30px rgba(0,0,0,.45))}
-.copy{font-size:64px;line-height:1.25;text-shadow:3px 3px 0 #0b0920,0 0 26px rgba(255,255,255,.25)}
-.stats{display:flex;gap:22px;margin-top:40px}
-.st{display:flex;align-items:baseline;gap:14px;border:3px solid var(--sky);background:rgba(12,10,32,.55);padding:10px 22px 12px;box-shadow:4px 4px 0 rgba(0,0,0,.5)}
-.st b{font-size:58px;font-weight:400;line-height:1}.st span{font-size:30px}
-.group .ch{position:absolute;bottom:40px;image-rendering:pixelated;filter:drop-shadow(0 18px 24px rgba(0,0,0,.55))}
-.fl{position:absolute;filter:drop-shadow(0 8px 14px rgba(0,0,0,.45))}
+body{background:#1b2a5e}
+.isl{position:absolute;right:-300px;top:60px;width:1560px;filter:saturate(.95)}
+.panel{position:absolute;inset:0;background:#15112f;clip-path:polygon(0 0,49% 0,37% 100%,0 100%)}
+.edge{position:absolute;inset:0;background:#ff5fa8;clip-path:polygon(49% 0,49.5% 0,37.5% 100%,37% 100%)}
+.dj{position:absolute;right:300px;bottom:-120px;height:980px;image-rendering:pixelated}
+.left{position:absolute;left:110px;top:230px;width:760px}
+.logo{display:block;width:700px;margin-left:-14px}
+.copy{margin-top:34px;font-weight:900;font-size:50px;line-height:1.35;letter-spacing:.02em}
+.foot{margin-top:40px;font-weight:700;font-size:24px;color:#9f9bcc;letter-spacing:.04em}
+.grain{display:none}
 </style></head><body>
-<div class="bgisl"></div><div class="shade"></div>
-<svg class="wm" viewBox="0 0 100 100"><polygon points="50,4 62,38 98,38 69,60 80,95 50,74 20,95 31,60 2,38 38,38" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round"/></svg>
+<img class="isl" src="assets/island.png">
+<div class="panel"></div><div class="edge"></div>
+<img class="dj" src="assets/char_dj_r.png">
 <div class="left">
-  <div class="tag dot">PARTY BOARD GAME&nbsp;&nbsp;-&nbsp;&nbsp;MINECRAFT BEDROCK</div>
   <img class="logo" src="assets/logo.png">
-  <div class="copy dot">島じゅう巻きこむ、<br>すごろくパーティ。</div>
-  <div class="stats"><div class="st"><b class="dot gold">30</b><span class="dot">種類のミニゲーム</span></div><div class="st"><b class="dot pink">10</b><span class="dot">人の個性派BOT</span></div></div>
+  <p class="copy">島じゅう巻きこむ、<br>すごろくパーティ。</p>
+  <p class="foot">Minecraft 統合版 ワールド</p>
 </div>
-<div class="group"><img class="ch" src="assets/char_humming.png" style="right:760px;height:560px;z-index:1"><img class="ch" src="assets/char_comet_r.png" style="right:40px;height:560px;z-index:1"><img class="ch" src="assets/char_oracle.png" style="right:600px;height:640px;z-index:2"><img class="ch" src="assets/char_dj_r.png" style="right:170px;height:640px;z-index:2"><img class="ch" src="assets/char_jack.png" style="right:330px;height:740px;z-index:3"></div>
-<img class="fl" src="assets/icon_star.png" style="right:930px;top:170px;width:120px;transform:rotate(-14deg)">
-<img class="fl" src="assets/icon_coin.png" style="right:120px;top:210px;width:96px;transform:rotate(12deg)">
-<img class="fl" src="assets/icon_dice.png" style="right:860px;top:640px;width:100px;transform:rotate(16deg)">
 <div class="grain"></div></body></html>
