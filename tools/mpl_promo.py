@@ -40,9 +40,9 @@ pages.append(page('01_kv', f'''
 </div>
 ''', '''
 body{background:linear-gradient(120deg,#100d2c 0%,#1d1650 38%,#2a2a7a 70%,#2f5aa8 100%)}
-.glow{position:absolute;right:160px;top:150px;width:960px;height:820px;background:radial-gradient(closest-side,rgba(120,170,255,.35),rgba(120,170,255,0))}
-.isl{position:absolute;right:110px;top:200px;width:840px}   /* 島は全部見せる(画面の外に出さない) */
-.fade{position:absolute;inset:0;background:linear-gradient(90deg,#100d2c 0%,rgba(16,13,44,.8) 34%,rgba(16,13,44,0) 50%)}
+.glow{display:none;position:absolute;right:160px;top:150px;width:960px;height:820px;background:radial-gradient(closest-side,rgba(120,170,255,.35),rgba(120,170,255,0))}
+.isl{position:absolute;right:-180px;top:-60px;width:1560px;-webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.55) 22%,#000 48%);mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.55) 22%,#000 48%);filter:brightness(.82)}   /* 右がわ一面の背景。左へなめらかに消える */   /* 島は全部見せる(画面の外に出さない) */
+.fade{position:absolute;inset:0;background:linear-gradient(90deg,#100d2c 0%,rgba(16,13,44,.9) 30%,rgba(16,13,44,.35) 52%,rgba(16,13,44,0) 70%),linear-gradient(0deg,rgba(16,13,44,.55),rgba(16,13,44,0) 30%)}
 .dj{position:absolute;right:60px;bottom:56px;height:520px;image-rendering:pixelated}
 .sh{position:absolute;right:50px;bottom:34px;width:250px;height:46px;border-radius:50%;background:radial-gradient(closest-side,rgba(5,4,20,.65),rgba(5,4,20,0))}
 .left{position:absolute;left:56px;top:150px;width:960px}
