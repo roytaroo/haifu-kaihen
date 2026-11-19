@@ -12,7 +12,7 @@ OUT_JS = os.path.join(ROOT, 'mpl', 'src', 'behavior_packs', 'mpl_bp', 'scripts',
 OUT_PNG = os.path.join(ROOT, 'mpl', 'preview_board.png')
 random.seed(11)
 G, ZC = 6, 124
-X0, X1, Z0, Z1, YB, YT = -68, 64, 44, 196, -4, 48
+X0, X1, Z0, Z1, YB, YT = -68, 64, 16, 196, -4, 48
 wx = lambda gx: int(round(gx * G))
 wz = lambda gz: int(round(ZC + gz * G))
 V = {}
@@ -46,7 +46,9 @@ M = route(main); nodes[M[-1]]['next'].append(M[0])
 # 分かれ道(最初に書いた next が「本線」。あとから足すのが寄り道)
 ship = route([(-6, -10, 1, 'ship'), (-6, -11, 2, 'ship'), (-5, -11, 2, 'ship'), (-4, -11, 2, 'ship'), (-3, -11, 2, 'ship'), (-3, -10, 1, 'ship')], at[(-6, -9)], at[(-3, -9)])
 bridge = route([(5, -8, 0, 'beach'), (5, -7, 0, 'beach'), (5, -6, 0, 'beach'), (5, -5, 0, 'beach'), (5, -4, 0, 'beach'), (5, -3, 3, 'cliff'), (6, -3, 3, 'cliff')], at[(5, -9)], at[(7, -3)])
-volc = route([(4, 7, 9, 'volcano'), (4, 8, 12, 'volcano')] + [(x, 8, 12, 'volcano') for x in range(3, -5, -1)] + [(-4, 7, 9, 'volcano')], at[(4, 6)], at[(-4, 6)])
+# 火山の道: 盛り上がった斜面にそって上り下りする(地面より1低い切り通し)
+def vy(gx, gz): d = math.hypot(gx / 1.15, (gz - 9.8) / 0.75); return max(6, round(7 + max(0.0, 5.0 - d) ** 1.35 * 4.0) - 1)
+volc = route([(4, 7, vy(4, 7) + 2, 'volcano'), (4, 8, vy(4, 8), 'volcano')] + [(x, 8, vy(x, 8), 'volcano') for x in range(3, -5, -1)] + [(-4, 7, vy(-4, 7) + 2, 'volcano')], at[(4, 6)], at[(-4, 6)])
 center = route([(0, 5, 6, 'shrine'), (0, 4, 8, 'shrine'), (0, 3, 8, 'shrine'), (0, 2, 8, 'shrine'), (0, 1, 8, 'shrine'), (0, 0, 8, 'shrine'), (0, -1, 6, 'shrine'), (0, -2, 4, 'shrine'), (0, -3, 2, 'meadow'),
                 (0, -4, 0, 'meadow'), (0, -5, 0, 'meadow'), (0, -6, 0, 'meadow'), (0, -7, 0, 'port'), (0, -8, 0, 'port')], at[(0, 6)], at[(0, -9)])
 tree = route([(-8, 1, 5, 'tree'), (-9, 1, 7, 'tree'), (-9, 0, 7, 'tree'), (-9, -1, 7, 'tree'), (-9, -2, 7, 'tree'), (-9, -3, 7, 'tree'), (-8, -3, 5, 'tree')], at[(-7, 1)], at[(-7, -3)])
@@ -126,20 +128,23 @@ def river_d(x, z):
             best = min(best, math.hypot(u - ax - dx * t, v - az - dz * t))
     return best * G
 def vol(x, z): return math.hypot(x / G / 1.15, ((z - ZC) / G - 9.8) / 0.75)
+RIM, CRATER = 26, 19          # 火山: 火口のふち・火口の底(溶岩はその1つ上)
+def vh(d): return 7 + max(0.0, 5.0 - d) ** 1.35 * 4.0   # 火山の斜面(下はゆるく、上ほど急)
+def sstep(a, b, t): t = max(0.0, min(1.0, (t - a) / (b - a))); return t * t * (3 - 2 * t)
 def height(x, z):
     if not inside(x, z): return None
     u, v = x / G, (z - ZC) / G
     d = vol(x, z)
-    if d < 1.0: return 12          # 火口(溶岩)
-    if d < 1.9: return 18          # 火口のふち
-    if d < 5.0: return max(7, round(6 + (5.0 - d) * 3.6))   # 山の斜面(道は切り通し・石垣で通す)
-    if v >= 4.6: return 6          # 北の台地
-    if u >= 3.6 and v >= -1.6: return 6   # 東のクリスタル台地
-    if u <= -5.4 and -3.6 <= v < 4.6: return 3   # 西の森
+    if d < 1.0: return CRATER                      # 火口(溶岩)
+    if d < 1.9: return RIM                         # 火口のふち
+    if d < 5.0: return round(vh(d) + noise(x * 1.7, z * 1.7) * 0.6)   # 盛り上がった斜面(少しでこぼこ)
+    hs = [6 * sstep(4.0, 4.6, v)]                                     # 北の台地(なだらかに上がる)
+    hs.append(6 * sstep(3.0, 3.6, u) * sstep(-2.2, -1.6, v))          # 東のクリスタル台地
+    hs.append(3 * sstep(-4.8, -5.4, u) * sstep(-4.2, -3.6, v) * (1 - sstep(4.0, 4.6, v)))   # 西の森
     s = max(abs(u) / 1.7, abs(v - 2) / 2.7)
-    if s < 1: return 8             # 神殿の丘
-    if s < 1.3: return 4
-    return 0
+    hs.append(8 if s < 1 else 8 * (1 - sstep(1.0, 1.5, s)))         # 神殿の丘(まわりは坂)
+    h = max(hs)
+    return int(round(h)) if h >= 0.5 else 0
 H = {}
 for x in range(X0, X1 + 1):
     for z in range(Z0, Z1 + 1):
@@ -165,7 +170,7 @@ for (x, z), h in H.items():
     top = ZONE_TOP(x, z, h)
     if top in ('grass_block', 'moss_block') and h > 0: put(x, h - 1, z, 'dirt')
     put(x, h, z, top)
-    if h == 12 and vol(x, z) < 1.0: put(x, 13, z, 'lava'); put(x, 12, z, 'magma_block')   # 火口の溶岩(ふちに囲まれている)
+    if h == CRATER and vol(x, z) < 1.0: put(x, CRATER + 1, z, 'lava'); put(x, CRATER, z, 'magma_block')   # 火口の溶岩(ふちに囲まれている)
 # 鏡: 金のわく(5x5)・中は黒いガラス + 奥に泣く黒曜石(紫に光る)・上にソウルランタン・前に黒い石の床
 for nd in MIRRORS:
     n = nd['n']; t = [-n[1], n[0]]; y = nd['y']
@@ -241,6 +246,12 @@ for (x, z), y in ROAD.items():
         if zone in ('tree', 'ship', 'harbor') or over_water:
             if (x % 3 == 0 and z % 3 == 0): box(x, lo + 1, z, x, y - 1, z, 'spruce_log')
         else: box(x, lo + 1, z, x, y - 1, z, 'stone_bricks' if zone not in ('volcano', 'foot') else 'polished_blackstone_bricks')
+# 道を敷く順番で、となりの道の処理が先に敷いた道ブロックを消すことがある → 最後にもう一度、道ブロックと上の空間をそろえる
+for (x, z), y in ROAD.items():
+    nd = TILE.get((x, z)); zone = nd['zone'] if nd else EDGE_ZONE[(x, z)]
+    if (x, y, z) not in V: put(x, y, z, ROADMAT[zone])
+    for yy in range(y + 1, y + 4):
+        if V.get((x, yy, z), 'air') not in ('air', 'lantern') and not V.get((x, yy, z), '').startswith(('spruce_fence', 'lantern')): V.pop((x, yy, z), None)
 # 橋・木の上の道の手すり(道の外側 1ブロック)
 for (x, z), y in list(ROAD.items()):
     zone = TILE[(x, z)]['zone'] if (x, z) in TILE else EDGE_ZONE[(x, z)]
@@ -341,15 +352,31 @@ for gx, w in ((-5.0, 7), (-3.5, 7), (-1.5, 7), (1.2, 7), (3.6, 7), (5.4, 7)):
 TIDE = sorted({(x, z) for (x, z) in ROAD if wx(-5.5) <= x <= wx(-2.5) and wz(-9) - 1 <= z <= wz(-9) + 1})
 # 広場: スタートの南に石だたみ・アーチ・旗
 pz = wz(-9)
+# 広場: まるい石だたみ(同心円のもよう)・噴水(水の受け皿 + 白い柱 + 金のかざり)・花だん・ベンチ・街灯。門はなし
+PCX, PCZ = 0, pz - 5
 for x in range(-13, 14):
-    for z in range(pz - 9, pz - 1):
-        if H.get((x, z)) == 0 and (x, z) not in ROAD: put(x, 0, z, 'polished_diorite' if (x + z) % 2 else 'smooth_stone')
-box(-13, 0, pz - 10, 13, 0, pz - 10, 'gold_block') if all(H.get((x, pz - 10)) == 0 for x in (-13, 13)) else None
-for x in (-12, 12):
-    for z in (pz - 8, pz - 3):
-        if H.get((x, z)) == 0: box(x, 1, z, x, 4, z, 'quartz_pillar'); put(x, 5, z, 'sea_lantern')
-box(-5, 1, pz - 9, -5, 7, pz - 9, 'quartz_pillar'); box(5, 1, pz - 9, 5, 7, pz - 9, 'quartz_pillar'); box(-6, 8, pz - 9, 6, 8, pz - 9, 'quartz_block')
-for x, c in zip(range(-4, 5), ['red', 'orange', 'yellow', 'lime', 'green', 'light_blue', 'blue', 'purple', 'pink']): put(x, 9, pz - 9, f'{c}_concrete')
+    for z in range(pz - 10, pz - 1):
+        if H.get((x, z)) != 0 or (x, z) in ROAD: continue
+        r = math.hypot(x - PCX, (z - PCZ) * 1.3)
+        if r > 13.5: continue
+        ringn = int(r) // 2
+        put(x, 0, z, ['polished_andesite', 'smooth_stone', 'polished_diorite', 'smooth_stone', 'polished_andesite', 'chiseled_stone_bricks', 'smooth_stone'][ringn % 7])
+for x in range(PCX - 3, PCX + 4):                                   # 噴水: 受け皿(白い石のふち)と水
+    for z in range(PCZ - 2, PCZ + 3):
+        r = math.hypot(x - PCX, (z - PCZ) * 1.3)
+        if r <= 3.4: put(x, 0, z, 'quartz_bricks'); put(x, 1, z, 'quartz_slab' if r > 2.6 else 'water')
+box(PCX, 1, PCZ, PCX, 4, PCZ, 'quartz_pillar'); put(PCX, 5, PCZ, 'chiseled_quartz_block'); put(PCX, 6, PCZ, 'gold_block'); put(PCX, 7, PCZ, 'sea_lantern')
+for (i, j) in ((1, 0), (-1, 0), (0, 1), (0, -1)): put(PCX + i, 4, PCZ + j, 'quartz_slab'); put(PCX + i, 3, PCZ + j, 'water')   # 柱の上から水が落ちる
+for (bx_, bz_) in ((-8, PCZ - 3), (-9, PCZ + 2)):  # 花だん(ふち + 花)。東は DJ ブース
+    if H.get((bx_, bz_)) != 0: continue
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            if (bx_ + i, bz_ + j) in ROAD: continue
+            put(bx_ + i, 0, bz_ + j, 'grass_block' if (i, j) != (0, 0) else 'moss_block')
+            put(bx_ + i, 1, bz_ + j, ['pink_tulip', 'allium', 'oxeye_daisy', 'cornflower', 'azure_bluet'][(i + j + 4) % 5])
+    for i in (-2, 2): put(bx_ + i, 1, bz_, 'spruce_slab')
+for (lx_, lz_) in ((-12, pz - 8), (12, pz - 8), (-12, pz - 3), (12, pz - 3), (-5, pz - 10), (5, pz - 10)):   # 街灯(黒い柱 + ランタン)
+    if H.get((lx_, lz_)) == 0 and (lx_, lz_) not in ROAD: box(lx_, 1, lz_, lx_, 3, lz_, 'polished_blackstone_wall'); put(lx_, 4, lz_, 'lantern')
 # DJ ブース(広場の東): ステージ・光る DJ 卓(ターンテーブル2つ + ミキサー)・スピーカー・トラス + スポットライト・動くイコライザーの壁
 dbx, dbz = 10, wz(-9) - 7
 clear(dbx - 3, 1, dbz - 2, dbx + 3, 8, dbz + 2)   # 広場の柱などが重ならないように(広場のあとに置く)
@@ -610,10 +637,10 @@ for a in (-1.2, 1.5):   # 北がわ(-2.4・2.6)は海が近いので流さない
         if (x, z) == last: continue
         last = (x, z); h = H.get((x, z))
         if h is None or near_road(x, z, 5) or near_sea(x, z, 6) or (d > 1.9 and h < 7): break
-        y = 19 if d < 1.9 else h + 1
+        y = RIM + 1 if d < 1.9 else h + 1
         if V.get((x, y, z)) in (None, 'air'): f.append([x, y, z])
     FLOWS.append(f)
-VOLC = {'pool': [min(c[0] for c in POOL), min(c[1] for c in POOL), max(c[0] for c in POOL), max(c[1] for c in POOL)], 'y0': 14, 'y1': 18, 'flows': FLOWS}
+VOLC = {'pool': [min(c[0] for c in POOL), min(c[1] for c in POOL), max(c[0] for c in POOL), max(c[1] for c in POOL)], 'y0': CRATER + 2, 'y1': RIM, 'flows': FLOWS}
 print('mirrors', [m['g'] for m in MIRRORS]); print('flood runs', len(FLOOD), 'cells', len(dist), 'flows', [len(f) for f in FLOWS])
 # ===== 岸の波(mmgplus:wave を置く場所): 岸どなりの海のマスを 7 ブロックおきに。向きは陸の方。船・桟橋・道のそばはさける =====
 WAVES = []
@@ -629,8 +656,8 @@ for (x, z) in coast:
     yaw = round(math.degrees(math.atan2(-vx, vz)))   # 陸の方を向く(Bedrock の向き)
     WAVES.append([x, z, yaw])
 print('waves', len(WAVES))
-data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': wz(-9) - 4.5, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': 15, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 17, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
+data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'island': [X0, YB, 44, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
+        'finaleZ': globals().get('STAGE_Z', wz(-9) - 4.5), 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 18, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 

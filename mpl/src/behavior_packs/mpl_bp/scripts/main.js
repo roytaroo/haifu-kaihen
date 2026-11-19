@@ -2250,7 +2250,10 @@ let building = null;
 function buildBoard() { if (!building) building = doBuildBoard().finally(() => { building = null; }); return building; }
 async function doBuildBoard() {
     const [x0, y0, z0, x1, y1, z1] = BD.area;
-    cmd("tickingarea remove mpl_board"); cmd(`tickingarea add ${x0} ${y0} ${z0} ${x1} ${y1} ${z1} mpl_board true`);
+    // いつも読みこむ範囲(1つ 100 チャンクまで): 島と、南の海の結果発表の舞台を分ける
+    const iz0 = (BD.island ?? BD.area)[2];
+    cmd("tickingarea remove mpl_board"); cmd(`tickingarea add ${x0} ${y0} ${iz0} ${x1} ${y1} ${z1} mpl_board true`);
+    if (iz0 > z0) { cmd("tickingarea remove mpl_stage"); cmd(`tickingarea add -32 ${y0} ${z0} 32 ${y1} ${iz0 - 1} mpl_stage true`); }
     // 作っている間は、空の待合所で待つ(足もとが消えて落ちないように)
     const hx = Math.floor(LOBBY.x), hz = Math.floor(LOBBY.z);
     cmd(`fill ${hx - 3} 60 ${hz - 3} ${hx + 3} 60 ${hz + 3} glass`);
@@ -2631,7 +2634,7 @@ async function shuffleSpace(p) {
     hud(); ribbon("purple", `${kinds[k][1]} をシャッフルした！`, "", 50); await wait(40);
 }
 // 全体を見るカメラ(南の上空から)と、広場から神殿を見るカメラ
-const [AX0, , AZ0, AX1, , AZ1] = BD.area;
+const [AX0, , AZ0, AX1, , AZ1] = BD.island ?? BD.area;   // 島の範囲(結果発表の舞台は島の外の海の上)
 const VIEW = { pos: { x: 0.5, y: 92, z: (AZ0 + AZ1) / 2 - 28 }, look: { x: 0.5, y: 0, z: (AZ0 + AZ1) / 2 + 2 } }; // 前より近く(奥がかすまないように)
 const PLAZA = { pos: { x: 0.5, y: 5, z: BD.finaleZ - 6 }, look: { x: 0.5, y: 16, z: BOARD.z } };
 
