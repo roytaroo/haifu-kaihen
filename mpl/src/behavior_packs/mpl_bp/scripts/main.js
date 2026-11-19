@@ -2122,16 +2122,30 @@ function bgm(kind) {
 // ===== カメラ(演出)=====
 let lastCam = null;
 const cam = {
-    to: (who, pos, look, sec = 1, ease = "in_out_sine") => { if (who === "@a[tag=mpl_board]") lastCam = { pos, look }; cmd(`camera ${who}${who.startsWith("@a") && who !== "@a" ? "" : ""} set minecraft:free ease ${sec} ${ease} pos ${pos.x} ${pos.y} ${pos.z} facing ${look.x} ${look.y} ${look.z}`.replace("@a[tag=mpl_board]", "@a[tag=mpl_board,tag=!mpl_mapview]")); },
+    to: (who, pos, look, sec = 1, ease = "in_out_sine") => { if (G.on) pos = clearView(pos, look); if (who === "@a[tag=mpl_board]") lastCam = { pos, look }; cmd(`camera ${who}${who.startsWith("@a") && who !== "@a" ? "" : ""} set minecraft:free ease ${sec} ${ease} pos ${pos.x} ${pos.y} ${pos.z} facing ${look.x} ${look.y} ${look.z}`.replace("@a[tag=mpl_board]", "@a[tag=mpl_board,tag=!mpl_mapview]")); },
     clear: (who = "@a") => cmd(`camera ${who} clear`),
     fade: (who = "@a", inS = 0.3, hold = 0.3, outS = 0.4) => cmd(`camera ${who} fade time ${inS} ${hold} ${outS} color 0 0 0`),
 };
-// カメラ → 目の高さまでの間にブロックがあるか(あれば見えない)
+// カメラ → 目の高さまでの間にブロックがあるか(あれば見えない)。ガラス・さく・鉄格子・くさり・ランタンなど細いもの・すけるものは見える
+const SEE_THROUGH = /light|glass|pane|fence|bars|chain|lantern|rod|carpet|torch|flower|tulip|poppy|daisy|bluet|allium|dandelion|cornflower|grass|fern|button|pressure_plate|cobweb|vine|mushroom$|sapling|banner|sign/;
+// どのカメラも、うつす相手(look)が見えない位置なら、同じ距離のまま角度を変え、だめなら高くして、見える位置へ動かす(遠くからの全体のカメラは調べない)
+function clearView(pos, look) {
+    const dx = pos.x - look.x, dz = pos.z - look.z, dy = pos.y - look.y, dist = Math.hypot(dx, dy, dz);
+    if (dist > 40 || dist < 0.5 || !blocked(pos, look)) return pos;
+    const r = Math.max(1.5, Math.hypot(dx, dz)), a0 = Math.atan2(dz, dx);
+    for (const up of [0, 2, 5, 9]) for (const da of [0.45, -0.45, 0.9, -0.9, 1.4, -1.4, 2.0, -2.0, Math.PI]) {
+        if (up === 0 && da === 0) continue;
+        const q = { x: look.x + Math.cos(a0 + da) * r, y: pos.y + up, z: look.z + Math.sin(a0 + da) * r };
+        if (!blocked(q, look)) return q;
+    }
+    for (const up of [2, 5, 9, 14]) { const q = { x: pos.x, y: pos.y + up, z: pos.z }; if (!blocked(q, look)) return q; }
+    return { x: look.x + 0.01, y: look.y + 14, z: look.z + 0.01 };   // 最後は真上から
+}
 function blocked(a, b) {
     const d = dim(), n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z) * 3);
     for (let i = 1; i < n; i++) {
         const k = i / n, q = { x: Math.floor(a.x + (b.x - a.x) * k), y: Math.floor(a.y + (b.y - a.y) * k), z: Math.floor(a.z + (b.z - a.z) * k) };
-        try { const bl = d.getBlock(q); if (bl && !bl.isAir && !bl.isLiquid && !bl.typeId.includes("light")) return true; } catch {}
+        try { const bl = d.getBlock(q); if (bl && !bl.isAir && !bl.isLiquid && !SEE_THROUGH.test(bl.typeId)) return true; } catch {}
     }
     return false;
 }

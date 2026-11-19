@@ -60,7 +60,7 @@ for k in range(13):                                           # 帆柱(ななめ
     put(SHIP_X1 + k, DECK + 2 + k // 2, SHIP_CZ, 'stripped_oak_log' if k % 3 else 'honeycomb_block')
 BOW = (SHIP_X1 + 12, DECK + 8, SHIP_CZ)
 # ---- マスト 3 本・段の帆・横木・見張り台・旗 ----
-MASTS = [(-43, 24), (-33, 30), (-10, 26)]       # DJ ブース(x -31〜-13)のじゃまにならない位置
+MASTS = [(-43, 24), (-34, 30), (-10, 26)]       # DJ ブース(x -31〜-13)のじゃまにならない位置
 for (mx, mh) in MASTS:
     for y in range(-2, DECK + mh):
         if not ((mx, SHIP_CZ) in ROAD and DECK <= y <= DECK + 3): put(mx, y, SHIP_CZ, 'spruce_log')

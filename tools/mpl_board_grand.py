@@ -60,7 +60,10 @@ B = 9                                                     # 丘の上の床の�
 hill = {c for c, h in H.items() if h == 8 and abs(c[0]) <= 12 and wz(-1.5) < c[1] < wz(4.75)}
 hill_s = min(z for (x, z) in hill if x == 0); hill_n = max(z for (x, z) in hill if x == 0)
 G_clear_above(-18, hill_s - 6, 18, hill_n + 2, 9, 48)
-FZ0 = hill_s                                               # 正面の面(南向き)
+for (x, z), ry in ROAD.items():                            # 道の上に残った古い神殿のはりも消す
+    if -18 <= x <= 18 and hill_s - 6 <= z <= hill_n + 2:
+        for y in range(ry + 1, 49): V.pop((x, y, z), None)
+FZ0 = hill_s + 1                                           # 正面の面(南向き)。マスとマスのあいだの道の上(マスの上にはかけない)
 HZ0, HZ1 = FZ0 + 9, hill_n - 3                             # うしろの棟
 GREY = lambda: rnd.choice(['stone_bricks'] * 7 + ['polished_andesite', 'andesite', 'cracked_stone_bricks'])
 WHT, WHT2, ROOF, ROOF2, GLASS, WOOD = 'white_concrete', 'smooth_quartz', 'prismarine_bricks', 'prismarine', 'blue_stained_glass', 'stripped_spruce_log'
@@ -137,12 +140,13 @@ for z in range(FZ0, HZ0):                                                       
 # --- 1階と2階のあいだ: 木の帯 + 白い手すりのバルコニー ---
 for x in range(-11, 12):
     put(x, B + 9, FZ0, WOOD if abs(x) % 4 else WHT)
-    put(x, B + 10, FZ0 - 1, WHT2); put(x, B + 11, FZ0 - 1, 'diorite_wall' if x % 2 else WHT)
+    if abs(x) > 2: put(x, B + 10, FZ0 - 1, WHT2); put(x, B + 11, FZ0 - 1, 'diorite_wall' if x % 2 else WHT)   # 階段のマスの上にはかけない
     put(x, B + 10, FZ0, WHT2)
 # --- 2階: 灰色の壁・白い柱・まんなかのバルコニーの扉 ---
 for x in range(-7, 8):
     for z in range(FZ0 + 1, HZ0):
-        if abs(x) == 7 or z == FZ0 + 1: colfill(x, z, B + 11, B + 17, GREY)
+        if abs(x) == 7 or z == FZ0 + 1:
+            for y in range(B + 11, B + 18): put(x, y, z, GREY())   # 2 階だけ(地面からは積まない)
 for x in (-7, -4, 4, 7):
     for y in range(B + 11, B + 18): put(x, y, FZ0 + 1, WHT)
 for x in (-6, -5, 5, 6):
@@ -194,11 +198,11 @@ for s in (-1, 1):
                 put(x, B + 11 + k, z, ROOF if (x + z + k) % 7 else ROOF2)
         put(xa - 1 + k, B + 10 + k, HZ0 - 1, ROOF); put(xb + 1 - k, B + 10 + k, HZ0 - 1, ROOF)
     put((xa + xb) // 2, B + 16, HZ0, 'iron_block'); put((xa + xb) // 2, B + 17, HZ0, 'lightning_rod')
-# 北のはしの門(白い太いアーチ)
+# 北のはしの門(白い太いアーチ)。マスとマスのあいだ(hill_n)に置く
 for x in range(-4, 5):
-    for y in range(B + 7, B + 11): put(x, y, HZ1 + 1, WHT if (y == B + 10 or abs(x) == 4) else GREY())
+    for y in range(B + 7, B + 11): put(x, y, hill_n, WHT if (y == B + 10 or abs(x) == 4) else GREY())
 for x in (-4, 4):
-    for y in range(B, B + 7): put(x, y, HZ1 + 1, WHT)
+    for y in range(B, B + 7): put(x, y, hill_n, WHT)
 # 道の両がわの白い手すりと灯り(うしろの棟のあいだ)
 for z in range(HZ0, HZ1 + 1):
     for x in (-3, 3):

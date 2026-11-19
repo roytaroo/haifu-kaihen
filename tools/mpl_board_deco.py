@@ -324,16 +324,19 @@ def palm(x, z):
     if y is None: return
     hgt = _dr.randint(8, 11); dx = _dr.choice([1, -1]); cx = x
     for k in range(hgt):
-        if k > 1 and k % 2 == 0: cx += dx
+        sh = k > 1 and k % 2 == 0 and not near_road(cx + dx, z, 2)       # 道の方へはまがらない
+        if sh: cx += dx
         put(cx, y + 1 + k, z, 'jungle_log')
-        if k > 1 and k % 2 == 0: put(cx - dx, y + 1 + k, z, 'jungle_log')
+        if sh: put(cx - dx, y + 1 + k, z, 'jungle_log')
     tx, ty = cx, y + hgt
     put(tx, ty + 1, z, leaf('jungle')); put(tx, ty + 2, z, leaf('jungle'))
     for (i, j) in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)):
         for t in range(1, 5 if abs(i) + abs(j) == 1 else 4):
-            put(tx + i * t, ty + 1 - (t * t) // 5, z + j * t, leaf('jungle'))
-        put(tx + i * 4 if abs(i) + abs(j) == 1 else tx + i * 3, ty - 2, z + j * 4 if abs(i) + abs(j) == 1 else z + j * 3, leaf('jungle'))
-    put(tx + 1, ty - 1, z, 'brown_terracotta'); put(tx, ty - 1, z + 1, 'brown_terracotta')
+            if not near_road(tx + i * t, z + j * t, 1): put(tx + i * t, ty + 1 - (t * t) // 5, z + j * t, leaf('jungle'))
+        ex, ez = (tx + i * 4, z + j * 4) if abs(i) + abs(j) == 1 else (tx + i * 3, z + j * 3)
+        if not near_road(ex, ez, 1): put(ex, ty - 2, ez, leaf('jungle'))
+    for (i, j) in ((1, 0), (0, 1)):
+        if not near_road(tx + i, z + j, 1): put(tx + i, ty - 1, z + j, 'brown_terracotta')
 
 def witch_house(nd):
     """魔女の帽子の家: 1 階は木のわく + 青い壁(アーチの窓・扉)・オレンジの土台、緑の段のスカート、2 階は木のわく + 大きな丸い目の窓(紫)、

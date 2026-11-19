@@ -258,7 +258,6 @@ for z in range(bz + 2, bz + 5):
 for zz in (bz + 1, bz + 5):   # 橋の両はしの塔
     for xx in (bx - 2, bx + 2):
         box(xx, 0, zz, xx, 5, zz, 'stone_bricks'); put(xx, 6, zz, 'stone_brick_wall'); put(xx, 7, zz, 'lantern')
-    box(bx - 2, 5, zz, bx + 2, 5, zz, 'stone_bricks'); box(bx - 1, 4, zz, bx + 1, 4, zz, 'spruce_fence')
 # 関所(神殿の近道の入口): 石の門
 gx_, gz_ = wx(0), wz(6) - 3
 for xx in (-2, 2): box(gx_ + xx, 7, gz_, gx_ + xx, 11, gz_, 'polished_blackstone_bricks')
@@ -383,8 +382,12 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mpl_board_sh
 for i in range(140):
     x, z = random.randint(-62, -32), random.randint(wz(-4), wz(5))
     if free(x - 2, z - 2, x + 2, z + 2, 3, 0): tree_(x, z, random.choice(['oak', 'birch', 'spruce', 'oak']), big=random.random() < 0.5)
-for (x, z, red) in [(-36, wz(2) + 3, True), (-36, wz(-2), False), (-47, wz(3), True), (-48, wz(-1) - 3, True), (-60, wz(2), False)]:
-    if free(x - 1, z - 1, x + 1, z + 1, None, 0): mushroom(x, z, red)
+_ms = []                                                       # 大きなキノコ: かさが道の上に出ないよう、道から 8 以上はなれた場所
+for i in range(400):
+    x, z = random.randint(-62, -30), random.randint(wz(-4), wz(5))
+    if len(_ms) >= 5: break
+    if (x, z) in H and H[(x, z)] == 3 and not near_road(x, z, 8) and all(abs(x - a) + abs(z - b) > 13 for a, b in _ms) and free(x - 1, z - 1, x + 1, z + 1, None, 0):
+        mushroom(x, z, len(_ms) % 3 != 1); _ms.append((x, z))
 for gz in (1, -3):  # 木の上の小屋(道の西)
     x, z = wx(-9) - 6, wz(gz)
     if (x, z) in H:
@@ -611,7 +614,7 @@ for (x, z) in coast:
     WAVES.append([x, z, yaw])
 print('waves', len(WAVES))
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'island': [X0, YB, 44, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': STAGE['z'], 'stage': STAGE, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 22, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': SHIP_GHOST_Z}, 'to': {'x': -27, 'z': SHIP_GHOST_Z}, 'plank': {'x': -27, 'edge': SHIP_CZ - SHIP_HW}}}
+        'finaleZ': STAGE['z'], 'stage': STAGE, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 23, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': SHIP_GHOST_Z}, 'to': {'x': -27, 'z': SHIP_GHOST_Z}, 'plank': {'x': -27, 'edge': SHIP_CZ - SHIP_HW}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 
