@@ -27,26 +27,27 @@ def page(name, body, extra=''):
 
 pages = []
 # ===== 1. 表紙 =====
-#   飾りは足さない(光・ぼかし・透かし・浮かぶアイコンなし)。左は斜めに切った色の面にロゴとコピー、右は島の上に DJトシオ だけ
+#   背景はグラデーション。左にロゴとコピー、その右に DJトシオ(元の向きのまま、島の方を向く)、右に島の絵
 pages.append(page('01_kv', f'''
+<div class="glow"></div>
 <img class="isl" src="{A}/island.png">
-<div class="panel"></div><div class="edge"></div>
-<img class="dj" src="{A}/char_dj_r.png">
+<div class="fade"></div>
+<img class="dj" src="{A}/char_dj.png">
 <div class="left">
   <img class="logo" src="{A}/logo.png">
   <p class="copy">島じゅう巻きこむ、<br>すごろくパーティ。</p>
   <p class="foot">Minecraft 統合版 ワールド</p>
 </div>
 ''', '''
-body{background:#1b2a5e}
-.isl{position:absolute;right:-300px;top:60px;width:1560px;filter:saturate(.95)}
-.panel{position:absolute;inset:0;background:#15112f;clip-path:polygon(0 0,49% 0,37% 100%,0 100%)}
-.edge{position:absolute;inset:0;background:#ff5fa8;clip-path:polygon(49% 0,49.5% 0,37.5% 100%,37% 100%)}
-.dj{position:absolute;right:300px;bottom:-120px;height:980px;image-rendering:pixelated}
-.left{position:absolute;left:110px;top:230px;width:760px}
-.logo{display:block;width:700px;margin-left:-14px}
-.copy{margin-top:34px;font-weight:900;font-size:50px;line-height:1.35;letter-spacing:.02em}
-.foot{margin-top:40px;font-weight:700;font-size:24px;color:#9f9bcc;letter-spacing:.04em}
+body{background:linear-gradient(120deg,#100d2c 0%,#1d1650 38%,#2a2a7a 70%,#2f5aa8 100%)}
+.glow{position:absolute;right:120px;top:120px;width:1100px;height:900px;background:radial-gradient(closest-side,rgba(120,170,255,.35),rgba(120,170,255,0))}
+.isl{position:absolute;right:-40px;top:110px;width:1180px}
+.fade{position:absolute;inset:0;background:linear-gradient(90deg,#100d2c 0%,rgba(16,13,44,.85) 30%,rgba(16,13,44,0) 52%)}
+.dj{position:absolute;left:700px;bottom:-50px;height:780px;image-rendering:pixelated}
+.left{position:absolute;left:110px;top:250px;width:700px}
+.logo{display:block;width:640px;margin-left:-12px}
+.copy{margin-top:32px;font-weight:900;font-size:46px;line-height:1.4;letter-spacing:.02em}
+.foot{margin-top:36px;font-weight:700;font-size:22px;color:#a7a3d6;letter-spacing:.04em}
 .grain{display:none}
 '''))
 # ===== 2. あそびかた =====
@@ -90,7 +91,7 @@ EV = [('噴火', 'red', '溶岩が流れ出す。火山の上の人はコイン�
 ev_html = ''.join(f'<div class="ev"><h2 style="color:var(--{"pink" if c=="red" else c})">{t}</h2><p>{d}</p></div>' for t, c, d in EV)
 pages.append(page('03_island', f'''
 <div class="head"><img src="{A}/logo.png"><div class="bar"></div><h1>女神の島</h1><div class="right"><span>108マス</span><span>分かれ道 6</span><span>高低差あり</span></div></div>
-<img class="isl" src="{A}/island.png"><img class="gs" src="{A}/ghostship.png">
+<img class="isl" src="{A}/island.png">
 <div class="evs">{ev_html}</div>
 ''', '''
 .isl{position:absolute;left:30px;top:210px;width:960px;filter:drop-shadow(0 30px 40px rgba(0,0,0,.5))}

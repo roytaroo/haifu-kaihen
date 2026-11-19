@@ -72,6 +72,9 @@ for k, f in (('star', ic.star), ('coin', ic.coin), ('dice', ic.dice), ('crown', 
 bd = Image.open(os.path.join(ROOT, 'mpl', 'preview_board.png')).convert('RGBA')
 a = np.array(bd); diff = np.abs(a[:, :, :3].astype(int) - np.array([42, 106, 168])).sum(axis=2); a[:, :, 3] = np.where(diff < 30, 0, 255)
 isl = Image.fromarray(a); isl = isl.crop(isl.getbbox()); isl.save(os.path.join(OUT, 'island.png'))
+# 紹介画像の島は描きなおした絵(mpl/assets/island_art.png、背景とうめい)があればそれを使う
+art = os.path.join(ROOT, 'mpl', 'assets', 'island_art.png')
+if os.path.exists(art): im = Image.open(art).convert('RGBA'); im.crop(im.getbbox()).save(os.path.join(OUT, 'island.png'))
 for f in ('preview_ghostship.png', 'preview_mirrorskel.png', 'spaces_preview.png'):
     im = Image.open(os.path.join(ROOT, 'mpl', f)).convert('RGBA'); im.crop(im.getbbox()).save(os.path.join(OUT, f.replace('preview_', '')))
 lg = Image.open(os.path.join(RP, 'textures', 'ui', 'mpl', 'logo_venus.png')).convert('RGBA'); lg.crop(lg.getbbox()).save(os.path.join(OUT, 'logo.png'))
