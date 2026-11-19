@@ -26,6 +26,8 @@ def clear(x1, y1, z1, x2, y2, z2):
         for y in range(min(y1, y2), max(y1, y2) + 1):
             for z in range(min(z1, z2), max(z1, z2) + 1): V.pop((x, y, z), None)
 def leaf(k): return f'{k}_leaves ["persistent_bit"=true]'
+# 作りこみ版の小物(tree_ / palm / crystal / lamp と、岩・遺跡・パラソル・荷物・花だん・花畑)
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mpl_board_deco.py'), encoding='utf-8').read())
 
 # ===== マスと道(格子)=====
 nodes, at = [], {}
@@ -286,7 +288,7 @@ def free(x1, z1, x2, z2, y=None, margin=1):
             if (x, z) in ROAD or (x, z) in RESERVED or (x, z) not in H or H[(x, z)] == -3: return False
             if y is not None and H[(x, z)] != y: return False
     return all((x, H[(x, z)] + 1, z) not in V for x in range(x1, x2 + 1) for z in range(z1, z2 + 1))
-def lamp(x, z):
+def _old_lamp(x, z):
     y = H.get((x, z))
     if y is None or (x, z) in ROAD or (x, z) in RESERVED or (x, y + 1, z) in V: return
     box(x, y + 1, z, x, y + 3, z, 'dark_oak_fence'); put(x, y + 4, z, 'lantern')
@@ -297,7 +299,7 @@ for nd in nodes:
         if (nd['x'] + i, nd['z'] + j) not in ROAD and H.get((nd['x'] + i, nd['z'] + j)) == nd['y']: lamp(nd['x'] + i, nd['z'] + j); break
 
 # ===== 建物・飾り =====
-def tree_(x, z, kind='oak', big=False):
+def _old_tree_(x, z, kind='oak', big=False):
     y = H.get((x, z))
     if y is None or y < 0: return
     hgt = random.randint(7, 10) if big else random.randint(4, 6)
@@ -367,16 +369,10 @@ for x in range(PCX - 3, PCX + 4):                                   # 噴水: �
         if r <= 3.4: put(x, 0, z, 'quartz_bricks'); put(x, 1, z, 'quartz_slab' if r > 2.6 else 'water')
 box(PCX, 1, PCZ, PCX, 4, PCZ, 'quartz_pillar'); put(PCX, 5, PCZ, 'chiseled_quartz_block'); put(PCX, 6, PCZ, 'gold_block'); put(PCX, 7, PCZ, 'sea_lantern')
 for (i, j) in ((1, 0), (-1, 0), (0, 1), (0, -1)): put(PCX + i, 4, PCZ + j, 'quartz_slab'); put(PCX + i, 3, PCZ + j, 'water')   # 柱の上から水が落ちる
-for (bx_, bz_) in ((-8, PCZ - 3), (-9, PCZ + 2)):  # 花だん(ふち + 花)。東は DJ ブース
-    if H.get((bx_, bz_)) != 0: continue
-    for i in range(-1, 2):
-        for j in range(-1, 2):
-            if (bx_ + i, bz_ + j) in ROAD: continue
-            put(bx_ + i, 0, bz_ + j, 'grass_block' if (i, j) != (0, 0) else 'moss_block')
-            put(bx_ + i, 1, bz_ + j, ['pink_tulip', 'allium', 'oxeye_daisy', 'cornflower', 'azure_bluet'][(i + j + 4) % 5])
-    for i in (-2, 2): put(bx_ + i, 1, bz_, 'spruce_slab')
-for (lx_, lz_) in ((-12, pz - 8), (12, pz - 8), (-12, pz - 3), (12, pz - 3), (-5, pz - 10), (5, pz - 10)):   # 街灯(黒い柱 + ランタン)
-    if H.get((lx_, lz_)) == 0 and (lx_, lz_) not in ROAD: box(lx_, 1, lz_, lx_, 3, lz_, 'polished_blackstone_wall'); put(lx_, 4, lz_, 'lantern')
+for (bx_, bz_) in ((-11, PCZ - 4), (-11, PCZ + 1)):               # 高くした花だん(東は DJ ブース)
+    if all(H.get((bx_ + i, bz_ + j)) == 0 and (bx_ + i, bz_ + j) not in ROAD for i in range(5) for j in range(3)): planter(bx_, bz_)
+for (lx_, lz_) in ((-6, pz - 10), (6, pz - 10), (-13, pz - 6)):   # 街灯(作りこみ版)
+    if H.get((lx_, lz_)) == 0 and (lx_, lz_) not in ROAD: lamp(lx_, lz_)
 # DJ ブース(広場の東): ステージ・光る DJ 卓(ターンテーブル2つ + ミキサー)・スピーカー・トラス + スポットライト・動くイコライザーの壁
 dbx, dbz = 10, wz(-9) - 7
 clear(dbx - 3, 1, dbz - 2, dbx + 3, 8, dbz + 2)   # 広場の柱などが重ならないように(広場のあとに置く)
@@ -428,7 +424,7 @@ for gz in (1, -3):  # 木の上の小屋(道の西)
         box(x, y + 1, z, x, y + 2, z, 'air'); box(x - 5, y + 4, z - 3, x + 1, y + 4, z + 3, 'dark_oak_planks'); box(x - 4, y + 5, z - 2, x, y + 5, z + 2, 'dark_oak_planks'); put(x - 2, y + 6, z, 'lantern')
         for xx in range(x + 1, wx(-9) - 1): put(xx, y, z, 'spruce_planks')
 # クリスタル台地: 大きなクリスタル・こわれた柱・灯台
-def crystal(x, z, h):
+def _old_crystal(x, z, h):
     y = H[(x, z)]
     for k in range(h):
         r = 1 if k < h - 2 else 0
@@ -439,10 +435,9 @@ def crystal(x, z, h):
 for (gx, gz, h) in [(5.5, 1, 7), (8.6, 3, 9), (5.6, 4, 6), (8.7, -0.4, 6), (8.6, 5.4, 8), (4.6, 2.6, 5), (6, 5, 5)]:
     x, z = round(gx * G), round(wz(gz))
     if free(x - 1, z - 1, x + 1, z + 1, 6, 0): crystal(x, z, h)
-for (gx, gz) in [(5.3, -0.6), (6, 2.5), (8.5, 1.5), (5.4, 5.3), (8.8, 4.4)]:
+for (gx, gz) in [(6.2, 2.2), (8.6, 4.6)]:                     # こわれた柱廊(遺跡)
     x, z = round(gx * G), round(wz(gz))
-    if free(x, z, x, z, 6, 0):
-        h = random.randint(3, 6); box(x, 7, z, x, 6 + h, z, 'quartz_pillar'); put(x, 7 + h, z, 'chiseled_quartz_block')
+    if _free_cells([(x + i, z + j) for i in range(-1, 10) for j in range(-1, 5)]) and all(H.get((x + i, z + j)) == 6 for i in range(0, 9) for j in range(0, 4)): ruins(x, z)
 def lighthouse(x, z):
     y = H[(x, z)]
     for k in range(16):
@@ -497,12 +492,8 @@ def pond(cx, cz, rx, rz):
             elif d <= 1.5: put(cx + i, 0, cz + j, 'sand')
     for i, j in ((1, 0), (-2, 1), (0, -1)): put(cx + i, 1, cz + j, 'waterlily')
 pond(13, wz(-2), 5, 4); pond(-13, wz(-6) + 1, 4, 3)
-# 花畑(色ごとの列。格子にそろえる)
-for (fx, fz, w, d_) in ((-30, wz(-1), 14, 9), (8, wz(-7) + 2, 10, 8), (-30, wz(-7) + 3, 10, 6)):
-    for x in range(fx, fx + w):
-        for z in range(fz, fz + d_):
-            if H.get((x, z)) == 0 and not near_road(x, z, 1) and (x, 1, z) not in V and V.get((x, 0, z)) == 'grass_block':
-                put(x, 1, z, ['red_tulip', 'orange_tulip', 'white_tulip', 'pink_tulip', 'cornflower'][(x // 2) % 5])
+# 花畑(石のふちでかこみ、色ごとの列と砂利の小道)
+for (fx, fz, w, d_) in ((-30, wz(-1), 14, 9), (8, wz(-7) + 2, 10, 8), (-30, wz(-7) + 3, 10, 6)): garden(fx, fz, w, d_)
 # 神殿の屋根のはり(柱の上をつなぐ)と、北のはしの大きな門
 for i in (-7, 7): box(sx + i, 17, sz - 12, sx + i, 17, sz + 12, 'quartz_block')
 for j in (-12, 12): box(sx - 7, 17, sz + j, sx + 7, 17, sz + j, 'quartz_block'); box(sx - 4, 18, sz + j, sx + 4, 18, sz + j, 'quartz_bricks'); box(sx - 2, 19, sz + j, sx + 2, 19, sz + j, 'gold_block')
@@ -514,16 +505,14 @@ for (cx, cz) in ((-40, wz(7)), (-52, wz(5) + 2), (40, wz(8)), (50, wz(6) + 3)):
             if H.get(c) != 6 or near_road(c[0], c[1], 1) or c in RESERVED: continue
             d = math.hypot(i, j)
             if d <= 2.3: put(c[0], 6, c[1], 'water'); put(c[0], 5, c[1], 'calcite')
-            elif d <= 3.4: put(c[0], 6, c[1], 'calcite')
+            elif d <= 3.4:                                     # ふちは石のまぜ + ところどころ岩が立つ + 苔
+                put(c[0], 6, c[1], random.choice(['stone', 'andesite', 'mossy_cobblestone', 'calcite']))
+                if (i * 3 + j) % 4 == 0: put(c[0], 7, c[1], random.choice(['mossy_cobblestone', 'stone', 'moss_block']))
+    if (cx + 4, cz) in H and H.get((cx + 4, cz)) == 6 and not near_road(cx + 4, cz, 1): lamp(cx + 4, cz)
 for i in range(160):
     x, z = random.randint(-58, 56), random.randint(wz(5), wz(10))
     if H.get((x, z)) == 6 and free(x - 2, z - 2, x + 2, z + 2, 6, 0) and vol(x, z) > 5.6: tree_(x, z, 'spruce' if x < 0 else 'birch', big=random.random() < 0.3)
 # 東の台地: 小さいクリスタルの群れ・見はらしの塔
-for i in range(40):
-    x, z = random.randint(22, 58), random.randint(wz(-1.4), wz(5.6))
-    if free(x, z, x, z, 6, 1):
-        h = random.randint(1, 3)
-        for k in range(h): put(x, 7 + k, z, 'amethyst_block' if k < h - 1 or h == 1 else 'purple_stained_glass')
 tx_, tz_ = 54, wz(2)
 if free(tx_ - 2, tz_ - 2, tx_ + 2, tz_ + 2, 6, 0):
     for k in range(12):
@@ -540,40 +529,36 @@ if free(fx0, fz0, fx0 + 12, fz0 + 9, 0, 0):
     box(fx0 + 2, 1, fz0 + 2, fx0 + 3, 2, fz0 + 3, 'hay_block'); put(fx0 + 5, 1, fz0 + 2, 'hay_block'); put(fx0 + 6, 1, fz0 + 6, 'hay_block')
     box(fx0 + 8, 1, fz0 + 5, fx0 + 11, 3, fz0 + 8, 'red_terracotta'); box(fx0 + 9, 1, fz0 + 5, fx0 + 10, 2, fz0 + 5, 'air'); box(fx0 + 7, 4, fz0 + 4, fx0 + 12, 4, fz0 + 9, 'white_concrete'); box(fx0 + 8, 5, fz0 + 5, fx0 + 11, 5, fz0 + 8, 'white_concrete')
 # 浜辺: ヤシ・パラソル・岩
-def palm(x, z):
+def _old_palm(x, z):
     y = H[(x, z)]; hgt = random.randint(5, 7)
     for k in range(hgt): put(x + (1 if k > hgt * 0.6 else 0), y + 1 + k, z, 'jungle_log')
     tx, ty_ = x + 1, y + hgt
     for i, j in ((1, 0), (-1, 0), (0, 1), (0, -1), (2, 0), (-2, 0), (0, 2), (0, -2), (3, -1), (-3, 1), (-1, 3), (1, -3)): put(tx + i, ty_ + (0 if abs(i) + abs(j) < 3 else -1), z + j, leaf('jungle'))
     put(tx, ty_ + 1, z, leaf('jungle'))
-for i in range(600):
+for i in range(600):                                              # ヤシ(作りこみ版)だけ散らす
     x, z = random.randint(-56, 56), random.randint(wz(-11), wz(-3))
     if V.get((x, 0, z)) != 'sand' or (x, 1, z) in V: continue
-    r = random.random()
-    if r < 0.2 and free(x - 2, z - 2, x + 2, z + 2, 0, 0): palm(x, z)
-    elif r < 0.32 and free(x - 1, z - 1, x + 1, z + 1, 0, 1):
-        c = random.choice(['red', 'orange', 'light_blue', 'pink', 'lime'])
-        box(x, 1, z, x, 3, z, 'oak_fence'); box(x - 1, 4, z - 1, x + 1, 4, z + 1, f'{c}_wool'); put(x, 5, z, 'white_wool')
-    elif r < 0.4 and free(x, z, x, z, 0, 1): put(x, 1, z, random.choice(['cobblestone', 'mossy_cobblestone', 'andesite']))
-# 火山のふもと: 黒い岩と枯れ木、北の台地の草むら
-for i in range(120):
-    x, z = random.randint(-56, 52), random.randint(wz(4.8), wz(11))
-    h = H.get((x, z))
-    if h is None or near_road(x, z, 1) or (x, z) in RESERVED or (x, h + 1, z) in V: continue
-    if vol(x, z) < 5.4:
-        if random.random() < 0.4: box(x, h + 1, z, x, h + random.randint(1, 3), z, random.choice(['basalt', 'blackstone', 'magma_block']))
-    elif h == 6 and random.random() < 0.5: put(x, 7, z, leaf('azalea') if random.random() < 0.6 else 'fern')
-# 港: 桟橋のたる・荷物
+    if random.random() < 0.2 and free(x - 3, z - 3, x + 3, z + 3, 0, 0): palm(x, z)
+_um = [('red', 'white'), ('light_blue', 'white'), ('orange', 'yellow'), ('pink', 'white')]   # パラソルと岩は場所を決めて置く
+_k = 0
+for i in range(400):
+    x, z = random.randint(-56, 56), random.randint(wz(-11), wz(-3))
+    if _k >= 6: break
+    cells = [(x + a_, z + b_) for a_ in range(-3, 4) for b_ in range(-3, 4)]
+    if all(V.get((c[0], 0, c[1])) == 'sand' and (c[0], 1, c[1]) not in V and c not in ROAD for c in cells):
+        (umbrella(x, z, *_um[_k % 4]) if _k % 3 != 2 else boulder(x, z, 2)); _k += 1
+# 火山のふもと: 玄武岩の柱の群れと枯れ木(場所を決めて、少しだけ)
+_k = 0
+for i in range(300):
+    x, z = random.randint(-40, 40), random.randint(wz(5.6), wz(11))
+    if _k >= 8: break
+    if (x, z) not in H or H[(x, z)] < 7 or not (3.4 < vol(x, z) < 4.9) or near_road(x, z, 3) or not _free_cells([(x + a_, z + b_) for a_ in range(-2, 3) for b_ in range(-2, 3)]): continue
+    if any((x + a_, y_, z + b_) in V for a_ in range(-2, 3) for b_ in range(-2, 3) for y_ in range(H[(x, z)] + 1, H[(x, z)] + 4)): continue
+    (basalt_cluster(x, z) if _k % 2 == 0 else dead_tree(x, z)); _k += 1
+# 港: 荷物(たる・木箱・麻袋)
 for gz in (-6, -8):
-    x, z = wx(-7) - 3, wz(gz) + 3
-    if free(x, z, x + 1, z, 0, 0): put(x, 1, z, 'barrel'); put(x + 1, 1, z, 'hay_block'); put(x, 2, z, 'barrel')
-
-# 丘の段と野原の花
-for i in range(900):
-    x, z = random.randint(-30, 30), random.randint(wz(-8), wz(5))
-    h = H.get((x, z))
-    if h in (0, 4) and not near_road(x, z, 1) and (x, z) not in RESERVED and V.get((x, h, z)) == 'grass_block' and (x, h + 1, z) not in V:
-        put(x, h + 1, z, random.choice(['poppy', 'dandelion', 'cornflower', 'allium', 'pink_tulip', 'azure_bluet', 'oxeye_daisy', 'short_grass', 'short_grass']))
+    x, z = wx(-7) - 4, wz(gz) + 3
+    if _free_cells([(x + a_, z + b_) for a_ in range(0, 3) for b_ in range(0, 2)]): crates(x, z)
 # ===== v5 大建築(大聖堂・天使・金の輪・火山・回廊・滝・藤・桜)=====
 if not os.environ.get('NO_GRAND'): exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mpl_board_grand.py'), encoding='utf-8').read())
 # ===== コマンドにまとめる =====
@@ -657,7 +642,7 @@ for (x, z) in coast:
     WAVES.append([x, z, yaw])
 print('waves', len(WAVES))
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'island': [X0, YB, 44, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': globals().get('STAGE_Z', wz(-9) - 4.5), 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 18, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
+        'finaleZ': globals().get('STAGE_Z', wz(-9) - 4.5), 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 19, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': wz(-12.6)}, 'to': {'x': wx(-4.5), 'z': wz(-12.6)}, 'plank': {'x': int(wx(-4.5)), 'edge': wz(-11) - 5}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 
