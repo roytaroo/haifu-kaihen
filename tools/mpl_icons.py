@@ -106,10 +106,10 @@ def bag():
 
 ICONS = [star(), coin(), crown(), *[badge(n) for n in range(1, 9)], arrow(), crystal(), dice(), clock(),
          tri(True, ((150, 255, 150), (30, 170, 60))), tri(False, ((255, 150, 150), (200, 30, 40))), heart(), bolt(), bag()]
-page = Image.new('RGBA', (512, 512))
+page = Image.new('RGBA', (256, 256))   # 16px のます(512 にすると画面で倍の大きさになる)
 for i, ic in enumerate(ICONS):
-    sm = ic.resize((26, 26), Image.LANCZOS)
-    page.alpha_composite(sm, ((i % 16) * 32 + 1, (i // 16) * 32 + 30 - 26))
+    sm = ic.resize((12, 12), Image.LANCZOS)
+    page.alpha_composite(sm, ((i % 16) * 16 + 2, (i // 16) * 16 + 14 - 12))
 page.save(OUT)
 prev = Image.new('RGBA', (len(ICONS) * 34, 34), (60, 70, 100, 255))
 for i, ic in enumerate(ICONS): prev.alpha_composite(ic.resize((32, 32), Image.LANCZOS), (i * 34 + 1, 1))

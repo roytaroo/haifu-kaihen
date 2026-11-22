@@ -54,10 +54,10 @@ volc = route([(4, 7, vy(4, 7) + 2, 'volcano'), (4, 8, vy(4, 8), 'volcano')] + [(
 center = route([(0, 5, 6, 'shrine'), (0, 4, 8, 'shrine'), (0, 3, 8, 'shrine'), (0, 2, 8, 'shrine'), (0, 1, 8, 'shrine'), (0, 0, 8, 'shrine'), (0, -1, 6, 'shrine'), (0, -2, 4, 'shrine'), (0, -3, 2, 'meadow'),
                 (0, -4, 0, 'meadow'), (0, -5, 0, 'meadow'), (0, -6, 0, 'meadow'), (0, -7, 0, 'port'), (0, -8, 0, 'port')], at[(0, 6)], at[(0, -9)])
 tree = route([(-8, 1, 5, 'tree'), (-9, 1, 7, 'tree'), (-9, 0, 7, 'tree'), (-9, -1, 7, 'tree'), (-9, -2, 7, 'tree'), (-9, -3, 7, 'tree'), (-8, -3, 5, 'tree')], at[(-7, 1)], at[(-7, -3)])
-# 潮の道(満潮のときだけ開く。浜の外がわ、水びたしの中を進む。宝のマスがある)
-tideway = route([(x, -10, 0, 'beach') for x in range(3, 8)], at[(3, -9)], at[(7, -9)])
+# 沖の桟橋(満潮のときだけ門が開く。浜の外の海の上。宝のマスがある)
+tideway = route([(x, -10, 1, 'beach') for x in range(3, 8)], at[(3, -9)], at[(7, -9)])   # 海の上の木の桟橋(高さ 1。満潮でも沈まない)
 def N(gx, gz): return nodes[at[(gx, gz)]]
-for g, w in {(-5, -9): '浜辺を進む', (-6, -10): '船に乗る', (4, -9): '浜辺を進む', (3, -10): '潮の道(満潮だけ)', (6, -9): '浜辺を進む', (5, -8): 'ドローブリッジをわたる', (3, 6): 'ふもとの道', (4, 7): '火山にのぼる',
+for g, w in {(-5, -9): '浜辺を進む', (-6, -10): '船に乗る', (4, -9): '浜辺を進む', (3, -10): '沖の桟橋(満潮だけ)', (6, -9): '浜辺を進む', (5, -8): 'ドローブリッジをわたる', (3, 6): 'ふもとの道', (4, 7): '火山にのぼる',
              (-1, 6): 'ふもとの道', (0, 5): '神殿の近道', (-7, 0): '森の道', (-8, 1): '木の上の道'}.items(): N(*g)['way'] = w
 N(5, -8)['gate'] = 'bridge'; N(0, 5)['gate'] = 'toll'
 KIND = {'shop': [(7, 2), (-5, 6), (-7, -6)], 'skull': [(0, 8), (-7, -1), (0, -3)], 'lucky': [(-9, -1), (-4, -11), (5, -6), (2, 8), (0, 0), (7, -7)],
@@ -264,6 +264,28 @@ for xx in (-2, 2): box(gx_ + xx, 7, gz_, gx_ + xx, 11, gz_, 'polished_blackstone
 box(gx_ - 2, 12, gz_, gx_ + 2, 12, gz_, 'polished_blackstone_bricks'); box(gx_ - 3, 13, gz_, gx_ + 3, 13, gz_, 'red_nether_brick_slab'); put(gx_, 14, gz_, 'gold_block')
 for xx in (-1, 0, 1): put(gx_ + xx, 11, gz_, 'iron_bars')
 put(gx_ - 2, 9, gz_ - 1, 'lantern'); put(gx_ + 2, 9, gz_ - 1, 'lantern')
+
+# 沖の桟橋(満潮のときだけ通れる道): 浜とのあいだを海にして、木の桟橋を海の上にかける。入口と出口に門(柵はゲームで開け閉め)
+PX0, PX1, PZ = wx(3) - 1, wx(7) + 1, wz(-10)
+for x in range(PX0 - 3, PX1 + 4):
+    for z in range(PZ - 4, PZ + 5):
+        if (x, z) in ROAD or H.get((x, z)) != 0: continue
+        for y in range(1, 6): V.pop((x, y, z), None)
+        put(x, 0, z, 'water'); box(x, -3, z, x, -1, z, 'sand'); del H[(x, z)]
+for x in range(PX0, PX1 + 1):
+    for z in range(PZ - 1, PZ + 2):
+        put(x, 1, z, 'stripped_spruce_log' if z != PZ else 'spruce_planks'); put(x, 0, z, 'water'); box(x, -3, z, x, -1, z, 'sand')
+    for z in (PZ - 2, PZ + 2):                                             # 手すり(外がわ)と柱
+        if (x, z) in ROAD: continue
+        put(x, 1, z, 'spruce_planks'); put(x, 2, z, 'spruce_fence')
+        if x % 4 == 0: box(x, -2, z, x, 0, z, 'spruce_log'); put(x, 3, z, 'lantern')
+TIDEGATE = []
+for gx in (3, 7):                                                          # 門: 太い柱 2 本 + 旗。あいだの柵はゲームで開け閉め
+    cx, z = wx(gx), PZ + 2
+    for s_ in (-2, 2):
+        box(cx + s_, 1, z, cx + s_, 4, z, 'stripped_spruce_log'); put(cx + s_, 5, z, 'lantern')
+        put(cx + s_, 4, z + 1, 'blue_wool'); put(cx + s_, 3, z + 1, 'white_wool')
+    TIDEGATE += [[cx + d, 2, z] for d in (-1, 0, 1)]
 
 def free(x1, z1, x2, z2, y=None, margin=1):
     for x in range(x1 - margin, x2 + margin + 1):
@@ -614,7 +636,7 @@ for (x, z) in coast:
     WAVES.append([x, z, yaw])
 print('waves', len(WAVES))
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'island': [X0, YB, 44, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': STAGE['z'], 'stage': STAGE, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 23, 'tide': TIDE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': SHIP_GHOST_Z}, 'to': {'x': -27, 'z': SHIP_GHOST_Z}, 'plank': {'x': -27, 'edge': SHIP_CZ - SHIP_HW}}}
+        'finaleZ': STAGE['z'], 'stage': STAGE, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 24, 'tide': TIDE, 'tidegate': TIDEGATE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': SHIP_GHOST_Z}, 'to': {'x': -27, 'z': SHIP_GHOST_Z}, 'plank': {'x': -27, 'edge': SHIP_CZ - SHIP_HW}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 

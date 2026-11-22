@@ -107,7 +107,7 @@ EQ = {'x0': DJX - 2, 'y0': Y3 + 1, 'z': DJZ + 1, 'w': 5, 'h': 4}
 # DJ 卓: 鉄の台にターンテーブル 2 つとミキサー、前は光る板
 for x in range(DJX - 2, DJX + 3):
     put(x, Y3, DJZ - 1, 'iron_block' if abs(x - DJX) == 2 else 'black_concrete')
-    put(x, Y3 + 1, DJZ - 1, 'heavy_weighted_pressure_plate' if abs(x - DJX) == 1 else ('amethyst_block' if x == DJX else 'polished_blackstone_slab'))
+    put(x, Y3 + 1, DJZ - 1, 'heavy_weighted_pressure_plate' if abs(x - DJX) == 1 else ('light_weighted_pressure_plate' if x == DJX else 'polished_blackstone_slab'))
 put(DJX, Y3, DJZ - 2, 'pearlescent_froglight')
 # スピーカー(左右): 黒い台の上に、スピーカーの顔(溶鉱炉の前)を 3 段 x 2 列
 for s in (-1, 1):
@@ -117,6 +117,6 @@ for s in (-1, 1):
             put(x, Y3, z, 'black_concrete')
             for y in range(Y3 + 1, Y3 + 5 - (i == 2)): put(x, y, z, 'blast_furnace ["minecraft:cardinal_direction"="north"]' if z == DJZ - 1 else 'black_concrete')
         put(x, Y3 + 5 - (i == 2), DJZ - 1, 'end_rod ["facing_direction"=1]' if i == 1 else 'black_concrete')
-DJ = {'x': DJX + 0.5, 'y': Y3, 'z': DJZ + 0.5, 'cam': {'x': DJX + 0.5, 'y': Y3 + 2.4, 'z': DJZ - 6}}
+DJ = {'x': DJX + 0.5, 'y': Y3, 'z': DJZ + 0.5, 'cam': {'x': DJX + 0.5, 'y': Y3 + 3.2, 'z': DJZ - 6.5}}
 STAGE = {'x': DJX + 0.5, 'y': Y3, 'z': DJZ - 4 + 0.5}          # 人の列(DJ ブースの前)
 SHIP_GHOST_Z = SHIP_CZ - SHIP_HW - 6                            # 幽霊船が止まる z(船の外がわ)
