@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:gull",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/mpl_x/pal"
+   },
+   "geometry": {
+    "default": "geometry.mpl.gull"
+   },
+   "render_controllers": [
+    "controller.render.default"
+   ],
+   "animations": {
+    "a": "animation.mpl.gull"
+   },
+   "scripts": {
+    "animate": [
+     "a"
+    ],
+    "pre_animation": [
+     "v.ph = math.mod(math.abs(q.position(0) * 13 + q.position(2) * 7), 360);",
+     "v.sp = 18 + math.mod(math.abs(q.position(0)), 8);"
+    ]
+   }
+  }
+ }
+}

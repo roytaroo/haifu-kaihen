@@ -1,0 +1,17 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mpl.beam": {
+   "loop": true,
+   "bones": {
+    "b": {
+     "rotation": [
+      0,
+      "q.life_time * 90",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,17 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mpl.waysign": {
+   "loop": true,
+   "bones": {
+    "w": {
+     "position": [
+      0,
+      "math.sin(q.life_time * 180) * 0.4 + 0.4",
+      "math.sin(q.life_time * 240) * 1.2"
+     ]
+    }
+   }
+  }
+ }
+}

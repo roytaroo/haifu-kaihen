@@ -1,0 +1,31 @@
+{
+ "format_version": "1.8.0",
+ "render_controllers": {
+  "controller.render.mpl_waysign": {
+   "arrays": {
+    "textures": {
+     "Array.w": [
+      "Texture.w0",
+      "Texture.w1",
+      "Texture.w2",
+      "Texture.w3",
+      "Texture.w4",
+      "Texture.w5",
+      "Texture.w6",
+      "Texture.w7",
+      "Texture.w8"
+     ]
+    }
+   },
+   "geometry": "Geometry.default",
+   "materials": [
+    {
+     "*": "Material.default"
+    }
+   ],
+   "textures": [
+    "Array.w[q.property('mmgplus:way')]"
+   ]
+  }
+ }
+}

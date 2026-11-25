@@ -319,6 +319,15 @@ for path in ('hud_title_text/title_frame/title_background', 'hud_title_text/subt
     hide(path, [col(T), vis(hasnt(BMARK))])
 hud['item_name_text'] = {'ignored': True}  # アイテムを持ったときの名前・ロックなどの表示を出さない
 hud['hud_actionbar_text'] = {'texture': 'textures/ui/mpl/toast', 'size': ['100%c + 22px', '100%c + 10px']}
+# v55: 右上の HUD(顔の列 + 小さな地図 + ボードのお知らせ)。アクションバーの頭に HUD_MARK がある時だけ右上の箱に出す(ふつうのアクションバーはそのまま)
+HUD_MARK = '§r§h§r§u§r'   # main.js の HUD_MARK と同じ
+AB = '$actionbar_text'
+hud['mpl_ab'] = {'type': 'panel', 'size': ['100%', '100%'], 'controls': [
+    {'normal@hud.hud_actionbar_text': {'bindings': [vis(f"(({AB} - '{HUD_MARK}') = {AB})")]}},
+    {'box': {'type': 'image', 'texture': 'textures/ui/mpl/side', 'size': ['100%c + 8px', '100%c + 6px'], 'anchor_from': 'top_right', 'anchor_to': 'top_right', 'offset': [-4, 4], 'layer': 30,
+             'bindings': [vis(f"(not (({AB} - '{HUD_MARK}') = {AB}))")],
+             'controls': [{'t': {'type': 'label', 'text': AB, 'layer': 31, 'shadow': False, 'localize': False, 'color': [1, 1, 1], 'text_alignment': 'center'}}]}}]}
+hud['root_panel/hud_actionbar_text_area'] = {'factory': {'name': 'hud_actionbar_text_factory', 'control_ids': {'hud_actionbar_text': 'hud_actionbar_text@hud.mpl_ab'}}}
 json.dump(hud, open(os.path.join(UI, 'hud_screen.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
 # サイドバーの背景
@@ -368,10 +377,23 @@ sf['mpl_form'] = {
                 {'buttons': {'type': 'stack_panel', 'orientation': 'vertical', 'size': ['100%', '100%c'], 'layer': 2,
                              'factory': {'name': 'buttons', 'control_ids': {'button': 'server_form.mpl_btn'}}, 'collection_name': 'form_buttons',
                              'bindings': [{'binding_name': '#form_button_contents', 'binding_name_override': '#collection_length'}]}}]}}]}}]}
+# v55: 分かれ道のえらび方(WAY_MARK): 画面をおおわない。下の方に小さく、暗いかげもなし
+WAY_MARK = '§r§w§r§y§r'   # main.js の WAY_MARK と同じ
+sf['mpl_way'] = {
+    'type': 'panel', 'size': ['100%', '100%'], 'layer': 60,
+    'bindings': [{'binding_name': TT}, vis(has(WAY_MARK, TT))],
+    'controls': [{'card': {'type': 'image', 'texture': 'textures/ui/mpl/card', 'size': [190, '100%c + 12px'], 'layer': 1, 'anchor_from': 'bottom_middle', 'anchor_to': 'bottom_middle', 'offset': [0, -30],
+                           'anims': ['@server_form.mpl_form_in'], 'controls': [{'st': {'type': 'stack_panel', 'orientation': 'vertical', 'size': [176, '100%c'], 'controls': [
+        {'t': {'type': 'label', 'text': TT, 'size': ['100%', 'default'], 'text_alignment': 'center', 'layer': 4, 'shadow': True, 'localize': False, 'color': [1, 0.85, 0.35], 'bindings': [{'binding_name': TT}]}},
+        {'pad1': {'type': 'panel', 'size': ['100%', 3]}},
+        {'buttons': {'type': 'stack_panel', 'orientation': 'vertical', 'size': ['100%', '100%c'], 'layer': 2,
+                     'factory': {'name': 'buttons', 'control_ids': {'button': 'server_form.mpl_btn'}}, 'collection_name': 'form_buttons',
+                     'bindings': [{'binding_name': '#form_button_contents', 'binding_name_override': '#collection_length'}]}}]}}]}}]}
 # (スクロール式は動かなかったのでやめた。ボタンが多いメニューは main.js の paged() でページ送りにする)
 lf = sf['long_form']['controls']
-lf[0]['long_form@common_dialogs.main_panel_no_buttons']['bindings'][1] = vis(f"({hasnt(RANK_MARK, TT)} and {hasnt(FORM_MARK, TT)})")
+lf[0]['long_form@common_dialogs.main_panel_no_buttons']['bindings'][1] = vis(f"({hasnt(RANK_MARK, TT)} and {hasnt(FORM_MARK, TT)} and {hasnt(WAY_MARK, TT)})")
 if not any('mpl_form@server_form.mpl_form' in c for c in lf): lf.append({'mpl_form@server_form.mpl_form': {}})
+if not any('mpl_way@server_form.mpl_way' in c for c in lf): lf.append({'mpl_way@server_form.mpl_way': {}})
 json.dump(sf, open(os.path.join(UI, 'server_form.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 open(os.path.join(ROOT, 'mpl', 'banner_keys.txt'), 'w').write('\n'.join(KEYS))
 print('ui ok', len(KEYS))

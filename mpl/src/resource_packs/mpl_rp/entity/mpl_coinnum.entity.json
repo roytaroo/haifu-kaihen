@@ -1,0 +1,73 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:coinnum",
+   "materials": {
+    "default": "entity_alphablend"
+   },
+   "textures": {
+    "plus": "textures/entity/mpl_x/plus",
+    "minus": "textures/entity/mpl_x/minus",
+    "dg0": "textures/entity/mpl_x/dg0",
+    "dr0": "textures/entity/mpl_x/dr0",
+    "cg0": "textures/entity/mpl_x/cg0",
+    "cr0": "textures/entity/mpl_x/cr0",
+    "dg1": "textures/entity/mpl_x/dg1",
+    "dr1": "textures/entity/mpl_x/dr1",
+    "cg1": "textures/entity/mpl_x/cg1",
+    "cr1": "textures/entity/mpl_x/cr1",
+    "dg2": "textures/entity/mpl_x/dg2",
+    "dr2": "textures/entity/mpl_x/dr2",
+    "cg2": "textures/entity/mpl_x/cg2",
+    "cr2": "textures/entity/mpl_x/cr2",
+    "dg3": "textures/entity/mpl_x/dg3",
+    "dr3": "textures/entity/mpl_x/dr3",
+    "cg3": "textures/entity/mpl_x/cg3",
+    "cr3": "textures/entity/mpl_x/cr3",
+    "dg4": "textures/entity/mpl_x/dg4",
+    "dr4": "textures/entity/mpl_x/dr4",
+    "cg4": "textures/entity/mpl_x/cg4",
+    "cr4": "textures/entity/mpl_x/cr4",
+    "dg5": "textures/entity/mpl_x/dg5",
+    "dr5": "textures/entity/mpl_x/dr5",
+    "cg5": "textures/entity/mpl_x/cg5",
+    "cr5": "textures/entity/mpl_x/cr5",
+    "dg6": "textures/entity/mpl_x/dg6",
+    "dr6": "textures/entity/mpl_x/dr6",
+    "cg6": "textures/entity/mpl_x/cg6",
+    "cr6": "textures/entity/mpl_x/cr6",
+    "dg7": "textures/entity/mpl_x/dg7",
+    "dr7": "textures/entity/mpl_x/dr7",
+    "cg7": "textures/entity/mpl_x/cg7",
+    "cr7": "textures/entity/mpl_x/cr7",
+    "dg8": "textures/entity/mpl_x/dg8",
+    "dr8": "textures/entity/mpl_x/dr8",
+    "cg8": "textures/entity/mpl_x/cg8",
+    "cr8": "textures/entity/mpl_x/cr8",
+    "dg9": "textures/entity/mpl_x/dg9",
+    "dr9": "textures/entity/mpl_x/dr9",
+    "cg9": "textures/entity/mpl_x/cg9",
+    "cr9": "textures/entity/mpl_x/cr9"
+   },
+   "geometry": {
+    "s": "geometry.mpl.cn_s",
+    "t": "geometry.mpl.cn_t",
+    "o": "geometry.mpl.cn_o"
+   },
+   "render_controllers": [
+    "controller.render.mpl_cn_s",
+    "controller.render.mpl_cn_t",
+    "controller.render.mpl_cn_o"
+   ],
+   "animations": {
+    "a": "animation.mpl.coinnum"
+   },
+   "scripts": {
+    "animate": [
+     "a"
+    ]
+   }
+  }
+ }
+}

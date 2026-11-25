@@ -3,7 +3,7 @@
 // ミニゲームの共通の約束(下の「ミニゲーム」の部分はこれを使う):
 //   スコアボード game に selectgame(今のミニゲームの番号)・playing(1 = 遊んでいる)・level(むずかしさ 1〜5)
 //   参加している人はタグ playing。脱落はタグ mmgplus_out。BOT はタグ mmgbot(BOT パックがつける)
-import { world, system, GameMode, ItemStack, ItemLockMode, ScreenDisplay, World, Player } from "@minecraft/server";
+import { world, system, GameMode, ItemStack, ItemLockMode, ScreenDisplay, World, Player, MolangVariableMap, EquipmentSlot } from "@minecraft/server";
 import { ActionFormData, ModalFormData, MessageFormData, uiManager } from "@minecraft/server-ui";
 import { BOARD_DATA as BD } from "./board_data.js";
 import { SOUND_IDS } from "./sound_ids.js";
@@ -12,6 +12,7 @@ import { SOUND_IDS } from "./sound_ids.js";
 // 頭の見えない印(§のつづき)はそのまま残して、そのあとを太字にする。色を変えても太字が切れないように §x のあとにも §l
 const boldText = (t) => {
     if (typeof t !== "string") return t;
+    if (t.includes("§r§h§r§u§r")) return t;   // 右上の HUD(顔・地図)は太字にしない(すき間がずれる)
     if (!t.replace(/§./g, "").trim()) return t.includes("§r§b§r§n§r") ? t : "";   // 中身がない文字は空に(黒い箱が出ない)。帯・ロゴの印だけのものは残す
     const m = t.match(/^(?:§.)*/)[0];
     return m + "§l" + t.slice(m.length).replace(/§([0-9a-fr])/g, "§$1§l");
@@ -118,10 +119,10 @@ function clearArena() {
     cmd("kill @e[type=item,x=-24,y=-10,z=-49,dx=49,dy=40,dz=99]"); cmd("kill @e[type=arrow,x=-24,y=-10,z=-49,dx=49,dy=40,dz=99]");
     cmd("tag @a remove mmgplus_out");
 }
-const bar = (p, t) => { try { p.onScreenDisplay.setActionBar(t); } catch {} };
+const bar = (p, t) => { if (onBoardHud(p)) { boardMsg(p, t); return; } try { p.onScreenDisplay.setActionBar(t); } catch {} };
 const toast = (t) => world.getPlayers().forEach((p) => bar(p, t));
 const actionbar = (text, players = playing()) => {
-    players.forEach((p) => p.onScreenDisplay.setActionBar(text));
+    players.forEach((p) => { if (onBoardHud(p)) boardMsg(p, text, 30); else p.onScreenDisplay.setActionBar(text); });
     const m = String(text).match(/残り\s*(\d+)\s*秒/);
     if (m && run.active) { const n = Number(m[1]); if (n <= 5 && n > 0 && n !== lastCd) { lastCd = n; cmd(`execute as @a[tag=playing] at @s run playsound note.hat @s ~ ~ ~ 1 ${n === 1 ? 2 : 1.5}`); } if (n > 5) lastCd = -1; }
 };
@@ -1985,7 +1986,7 @@ const PLAY = {
 // 持ち物を全部消す(左手・よろいも)。BOT も
 function clearItems() {
     cmd("clear @a[tag=playing]");
-    for (const s of ["slot.weapon.offhand 0", "slot.armor.head 0", "slot.armor.chest 0", "slot.armor.legs 0", "slot.armor.feet 0"]) cmd(`replaceitem entity @a[tag=playing${s.includes("head") ? ",tag=!mmgbot" : ""}] ${s} air`); // BOT の頭はスキン(かぶりもの)
+    for (const s of ["slot.weapon.offhand 0", "slot.armor.head 0", "slot.armor.chest 0", "slot.armor.legs 0", "slot.armor.feet 0"]) cmd(`replaceitem entity @a[tag=playing${s.includes("head") ? ",tag=!mmgbot,tag=!mpl_skinned" : ""}] ${s} air`); // BOT の頭はスキン(かぶりもの)
 }
 async function playMinigame(id, players) {
     // 準備: 会場を作り、参加者に playing をつけて会場へ
@@ -1993,14 +1994,14 @@ async function playMinigame(id, players) {
     for (const p of players) { p.addTag("playing"); p.removeTag("mpl_board"); p.setGameMode(ADVENTURE); }
     setScore("game", "selectgame", id); setScore("game", "playing", 1);
     cmd("inputpermission set @a movement enabled"); cmd("inputpermission set @a lateral_movement enabled"); cmd("tag @a remove mpl_lock");
-    clearItems(); cmd("effect @a[tag=playing] clear"); cmd("effect @a[tag=mmgbot] invisibility 99999 0 true");
+    clearItems(); cmd("effect @a[tag=playing] clear"); cmd("effect @a[tag=mmgbot] invisibility 99999 0 true"); cmd("effect @a[tag=mpl_skinned] invisibility 99999 0 true");
     clearArena();
     try { (PREP[id] ?? (() => clearArena()))(); } catch (e) { for (const p of world.getPlayers()) if (isAdmin(p)) p.sendMessage(`§7[MPL] ${MINIGAMES[id]} の会場でエラー: ${e}`); }
     cmd(`tp @a[tag=playing] ${START_AT[id] ?? (id === 30 ? `${raceX(RACE_START - 3) + 0.5} 1 ${RACE_START - 3}` : "0 1 0")}`);
     cmd("effect @a[tag=playing] night_vision 600 0 true");
     banner("card", MG_HOWTO[id] ?? "", 80, players, `§l${MINIGAMES[id]}`);
     soundAll("random.levelup", 1.2);
-    await wait(80);
+    await stageTour(id, 80);   // カメラがステージをぐるっと回る
     // 開始
     Object.assign(run, { id, active: true });
     Object.assign(RK, { score: null, order: null, out: [] });
@@ -2115,7 +2116,7 @@ function bgm(kind) {
     if (!kind || load("bgm_off", false)) return;
     const [snd, len] = BGM[kind];
     bgmNow = snd;
-    const play = () => cmd(`execute as @a at @s run playsound ${snd} @s ~ ~ ~ 0.3 1`);
+    const play = () => cmd(`execute as @a at @s run playsound ${snd} @s ~ ~ ~ 0.3 ${G.spurt && kind === "board" ? 1.12 : 1}`);   // ラストスパートは少し速く
     play(); bgmTimer = system.runInterval(play, len);
 }
 
@@ -2205,6 +2206,7 @@ function coinRain(q, n) {
 function coinFx(name, d) {
     if (!G.on || run.active || !d) return;
     const q = world.getPlayers({ name })[0]; if (!q?.hasTag("mpl_board")) return;
+    numberPop(q, d);
     const l = q.location, n = Math.min(8, Math.abs(d));
     for (let k = 0; k < n; k++) system.runTimeout(async () => {
         const a = Math.random() * Math.PI * 2;
@@ -2345,7 +2347,7 @@ async function chooseWay(p, all) {
     const label = (j) => `${SPACES[j].way ?? "まっすぐ"}${SPACES[j].gate === "toll" ? ` (${I.coin}-${BD.toll})` : ""}`;
     if (isBot(p)) { await wait(30); const d = (j) => { const k = starDist(j); return k < 0 ? 999 : k; }; pick = Math.random() < [0.5, 0.8, 0.95][botStr()] ? [...opts].sort((a, b) => d(a) - d(b))[0] : opts[rand(0, opts.length - 1)]; }
     else {
-        const f = new ActionFormData().title(`${FORM_MARK}§lどっちに行く？`).body("§l分かれ道！");
+        const f = new ActionFormData().title(`${WAY_MARK}§lどっちに行く？`);
         opts.forEach((j) => f.button(`§l${label(j)}`));
         const r = await Promise.race([f.show(p).catch(() => ({ canceled: true })), wait(300).then(() => ({ canceled: true }))]);
         try { uiManager.closeAllForms(p); } catch {}
@@ -2598,7 +2600,7 @@ async function ghostArrive() {
     G.ghost = spawnAt("mmgplus:ghostship", { x: g.from.x, y: 0.2, z: g.from.z }); G.ghostUsed = []; G.ghostTurn = G.turn;
     if (!G.ghost) return;
     try { G.ghost.setRotation({ x: 0, y: -90 }); } catch {}
-    cmd("time set 14200");   // 夕暮れの暗さ
+    cmd("time set 14200"); beamOn();   // 夕暮れの暗さ + 灯台の光
     soundAllPlayers("ambient.cave", 0.8);
     ribbon("purple", "GHOST SHIP!", "霧の向こうから、幽霊船が…", 90);
     const T = 170;
@@ -2626,7 +2628,7 @@ async function ghostArrive() {
     ribbon("purple", "GHOST SHOP OPEN!", "船の上のマスを通ると 1回だけ寄れる（3ターンで出航）", 110);
     await wait(80);
     try { ghostKeeper?.setProperty("mmgplus:act", 0); } catch {}
-    cmd("time set 6000");
+    cmd(`time set ${G.spurt ? 12600 : 6000}`); if (!G.spurt) beamOff();
     await wait(10);
 }
 // 出航: 店主が消えて橋が外れ、霧の中へ
@@ -2700,21 +2702,21 @@ const PLAZA = { pos: { x: STG().x, y: STG().y + 4, z: STG().z - 6 }, look: { x: 
 const G = { on: false, turn: 0, turns: 10, cnt: {}, prevRank: {}, subst: {}, played: [], mgCount: 0, fixRoll: {}, slow: {}, magnet: {}, reverse: {}, crystal: {}, color: {}, bank: 0, ghost: null, ghostUsed: [], ticket: null, sale: 0, rule: null, players: [], star: 0, stars: {}, coins: {}, pos: {}, items: {}, mgWins: {}, coinsGot: {}, now: null };
 const spaceAt = (i) => SPACES[((i % SPACES.length) + SPACES.length) % SPACES.length];
 // マスの丸い台(tools/mpl_spaces.py の KINDS と同じ順番)。台の上の面は 2/16 ブロックの高さ
-const SPACE_KIND = ["blue", "red", "happen", "event", "lucky", "shop", "skull", "bank", "shuffle", "mirror", "start"];
+const SPACE_KIND = ["blue", "red", "happen", "event", "lucky", "shop", "skull", "bank", "shuffle", "mirror", "start", "roulette", "vs"];
 // 岸の波(tools/mpl_waves.py)。場所と向きは BD.waves
 function placeWaves() {
     cmd("kill @e[type=mmgplus:wave]");
     for (const [x, z, yaw] of BD.waves ?? []) { const e = spawnAt("mmgplus:wave", { x: x + 0.5, y: 0, z: z + 0.5 }); try { e?.setRotation({ x: 0, y: yaw }); } catch {} }
 }
 function placeSpaces() {
-    placeWaves();
+    placeWaves(); placeProps();
     cmd("kill @e[type=mmgplus:space]"); spaceHomes = [];
     SPACES.forEach((sp, i) => {
         const k = SPACE_KIND.indexOf(sp.kind === "event" && !sp.ev ? "happen" : sp.kind);
         const home = { x: sp.x + 0.5, y: sp.y + 1, z: sp.z + 0.5 };
         const e = spawnAt("mmgplus:space", home); if (!e) return;
         try { e.setProperty("mmgplus:kind", Math.max(0, k)); } catch {}
-        spaceHomes.push([e, home]);
+        spaceHomes.push([e, home, i]);
     });
 }
 // マスの台は水(満潮)に押されて流れるので、ずれたら元の場所へ戻す
@@ -2751,12 +2753,13 @@ function placeStar(exclude = -1) {
     G.star = i;
     try { starEntity?.remove(); } catch {}
     const s = spaceAt(i);
-    starEntity = spawnAt("mmgplus:star", { x: s.x + 0.5, y: s.y + 2.6, z: s.z + 0.5 });
+    starEntity = spawnAt("mmgplus:star", { x: s.x + 0.5, y: s.y + 40, z: s.z + 0.5 });   // showStar で空から落ちてくる
     return s;
 }
 async function showStar(text) {
     const s = spaceAt(G.star);
     { const { pos } = frontShot({ location: { x: s.x + 0.5, y: s.y + 1, z: s.z + 0.5 } }, 7, 4); cam.to("@a[tag=mpl_board]", pos, { x: s.x + 0.5, y: s.y + 2.5, z: s.z + 0.5 }, 1.2); }
+    await wait(16); await starFall(s);
     banner("starappear", `${text}  ${I.coin}${STAR_PRICE}で買える`, 60); soundAllPlayers("random.levelup", 1.4);
     for (let k = 0; k < 6; k++) { cmd(`particle minecraft:totem_particle ${s.x + 0.5} 3 ${s.z + 0.5}`); await wait(10); }
 }
@@ -2798,7 +2801,7 @@ const unlockAll = () => { cmd("inputpermission set @a lateral_movement enabled")
 
 async function startParty(turns, players, hc = {}) {
     if (G.on) return;
-    Object.assign(G, { on: true, turn: 0, turns, cnt: {}, prevRank: {}, subst: {}, played: [], mgCount: 0, fixRoll: {}, slow: {}, magnet: {}, reverse: {}, crystal: {}, bank: 0, ghost: null, ghostUsed: [], ticket: null, rule: null, sale: rand(3, Math.max(3, turns - 1)), players: players.map((p) => p.name).sort(() => Math.random() - 0.5), stars: {}, coins: {}, pos: {}, items: {}, mgWins: {}, coinsGot: {}, now: null });
+    Object.assign(G, { on: true, spurt: false, skin: {}, starHist: {}, tmpKinds: [], turn: 0, turns, cnt: {}, prevRank: {}, subst: {}, played: [], mgCount: 0, fixRoll: {}, slow: {}, magnet: {}, reverse: {}, crystal: {}, bank: 0, ghost: null, ghostUsed: [], ticket: null, rule: null, sale: rand(3, Math.max(3, turns - 1)), players: players.map((p) => p.name).sort(() => Math.random() - 0.5), stars: {}, coins: {}, pos: {}, items: {}, mgWins: {}, coinsGot: {}, now: null });
     for (const n of G.players) { G.coins[n] = 10; G.stars[n] = 0; G.pos[n] = 0; G.items[n] = []; }
     G.color = Object.fromEntries(G.players.map((n, i) => [n, ["§c", "§9", "§a", "§e", "§d", "§b", "§6", "§5"][i % 8]]));
     for (const n of G.players) { if (hc[n] === 1) G.coins[n] += 20; if (hc[n] === 2) G.stars[n] += 1; }
@@ -2806,6 +2809,7 @@ async function startParty(turns, players, hc = {}) {
     placeSpaces();
     for (const p of gp()) { p.addTag("mpl_board"); p.teleport(spot(0, G.players.indexOf(p.name)), lookCenter); p.setGameMode(ADVENTURE); }
     lockBoard(); hud();
+    await pickCharacters(gp()); balloonOn();
     try {
         // オープニング: 島のまわりをカメラが回る
         bgm("board");
@@ -2822,17 +2826,20 @@ async function startParty(turns, players, hc = {}) {
         await wait(40);
         banner("order", G.players.map((n, i) => `${BADGE(i + 1)}${n}`).join("  "), 60);
         await wait(70);
+        await introduce();
         djSpawn(); await djTalk([`ようこそ VENUS PARTY へ！ 司会のDJトシオだYO！`, `今日は ${turns}ターン勝負！ スターを一番集めた人が優勝だぜ！`], 1);
-        placeStar(); await showStar("スターがあらわれた！"); await wait(20);
+        placeStar(); await showStar("スターがあらわれた！"); starSnap(); await wait(20);
         for (G.turn = 1; G.turn <= G.turns && G.on; G.turn++) {
             const last = G.turn > G.turns - 3;
-            hud();
+            hud(); restoreKinds(); if (!G.spurt) cmd("weather clear");
+            if (last && !G.spurt) await lastSpurt();
             await bridgeTurn(bridgeDown());   // ドローブリッジが上がる / 下がるところから
             cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); await setTide(tideHigh()); if (G.ghost && G.turn - (G.ghostTurn ?? G.turn) >= 3) await ghostLeave();
             banner(last ? "lastspurt" : "turn", (last ? `TURN ${G.turn} / ${G.turns}  青と赤のマスが2倍` : `${G.turn} / ${G.turns}`) + (tideHigh() ? "   §b満潮: 沖の桟橋が開く" : "   §e干潮: 浜の近道が通れる"), 55);
             soundAllPlayers("random.levelup", last ? 0.7 : 0.9);
             await wait(55);
             await turnNews(last);
+            if (!last && G.turn > 1) { if (Math.random() < 0.1) await storm(); else if (Math.random() < 0.08) await nightPrank(); }
             for (let k = 0; k < G.players.length && G.on; k++) {
                 const n = G.players[k], p = world.getPlayers({ name: n })[0];
                 if (p) {
@@ -2843,10 +2850,13 @@ async function startParty(turns, players, hc = {}) {
             G.now = null; hud();
             if (!G.on) break;
             await minigameRound();
+            starSnap();
         }
         if (G.on) await finale();
     } finally {
-        try { djEntity?.remove(); } catch {} ghostCleanup(); setTide(false, false); coolLava(false); cmd("time set 6000");
+        try { djEntity?.remove(); } catch {} ghostCleanup(); setTide(false, false); coolLava(false); cmd("time set 6000"); cmd("weather clear");
+        beamOff(); for (const t of ["airballoon", "coinnum", "tornado", "whale"]) cmd(`kill @e[type=mmgplus:${t}]`); useWindow = null; for (const q of world.getPlayers()) takeUseItems(q);
+        for (const t of G.tmpKinds ?? []) setSpaceKind(t.i, t.kind); G.tmpKinds = [];
         G.on = false; G.now = null;
         bgm(null); unlockAll(); cam.clear();
         for (const p of world.getPlayers()) { p.removeTag("mpl_board"); }
@@ -2864,37 +2874,48 @@ async function takeTurn(p, last, nextName) {
     const name = p.name;
     G.now = name; hud();
     p.teleport(spot(G.pos[name]), lookCenter);
-    follow(p, 1);
+    if (G.spurt) await balloonShot(p); else follow(p, 1);
     const sd = starDist(G.pos[name]);
     banner("yourturn", sd >= 0 ? `${I.star}まで あと ${sd} マス` : "", 40, [p]); ribbon("gold", `${titleOf(name)}${name} の番`, sd >= 0 ? `${I.star}まで あと ${sd} マス` : "", 40, world.getPlayers().filter((q) => q.name !== name));
     botSay(p, "turn", 0.35);
     cmd(`execute as "${name}" at @s run playsound random.levelup @s ~ ~ ~ 1 1.9`); cmd(`execute as "${name}" at @s run playsound note.pling @s ~ ~ ~ 1 2`);
     cmd(`playsound note.pling @a ${p.location.x} ${p.location.y} ${p.location.z} 1 1.8`);
     await wait(30);
-    // アイテム
-    let dice = 1;
-    const used = await useItem(p);
-    if (!G.on) return;
-    if (used === "double") dice = 2; else if (used === "triple") dice = 3;
-    if (used === "pipe" || used === "gold" || used === "glove") { await wait(20); }
+    // アイテム: サイコロを止める前だけ持ち物に入る(右クリックで使う。BOT は少し待ってから使う)
+    const st = { dice: 1, main: null };
+    useQ.set(name, []); useWindow = name; giveUseItems(p);
+    const botUse = isBot(p) ? botItems(p) : [];
     // サイコロ
     let total = 0;
-    for (let d = 0; d < dice && G.on; d++) {
+    for (let d = 0; d < st.dice && G.on; d++) {
         p.teleport(spot(G.pos[name]), lookCenter);   // ほかの人に押されてずれていても、サイコロの真下に戻す
         await wait(1);
         const base = { ...p.location };
         const die = spawnAt("mmgplus:dice", { x: base.x, y: base.y + 2.55, z: base.z });
         die?.setProperty("mmgplus:rolling", 1); try { die?.setProperty("mmgplus:num", 0); } catch {}
-        if (!isBot(p)) p.onScreenDisplay.setActionBar(`${I.dice} §eジャンプして頭でサイコロを叩こう！`);
+        if (!isBot(p)) boardMsg(p, `${I.dice} §eジャンプして頭でサイコロを叩こう！`, 240);
         let hit = false;
         for (let t = 0; t < 240 && G.on; t += 1) {
+            // アイテムを使った(サイコロを止める前だけ)
+            if (d === 0 && isBot(p) && t === 18 && botUse.length) { const q = useQ.get(name) ?? []; q.push(...botUse); useQ.set(name, q); }
+            const uq = useQ.get(name) ?? [];
+            if (d === 0 && uq.length) {
+                const k = uq.shift();
+                try { die?.teleport({ x: 0, y: -60, z: 0 }); } catch {}
+                await applyItem(p, k, st);
+                if (!G.on) break;
+                p.teleport(spot(G.pos[name]), lookCenter); await wait(2);
+                Object.assign(base, p.location); try { die?.teleport({ x: base.x, y: base.y + 2.55, z: base.z }); } catch {}
+                if (!isBot(p)) boardMsg(p, `${I.dice} §eジャンプして頭でサイコロを叩こう！`, 240);
+                t = 0; continue;
+            }
             const l = p.location;
             // サイコロは人について動く(押されてもずれない)。立っている間は地面の高さも取りなおす
             if (p.isOnGround) { base.x = l.x; base.y = l.y; base.z = l.z; try { die?.teleport({ x: l.x, y: l.y + 2.55, z: l.z }); } catch {} }
             else if (Math.hypot(l.x - base.x, l.z - base.z) > 0.3) { base.x = l.x; base.z = l.z; try { die?.teleport({ x: l.x, y: base.y + 2.55, z: l.z }); } catch {} }
             if (l.y - base.y > 0.45) hit = true; // ジャンプで頭が届いた
-            if (isBot(p) && t === 30) cmd(`scriptevent mmgbot:jump ${name}`);
-            if (hit || t >= 239) break;
+            if (isBot(p) && t === (d === 0 && botUse.length ? 60 : 30)) cmd(`scriptevent mmgbot:jump ${name}`);
+            if (hit || t >= 239) { if (d === 0) { useWindow = null; takeUseItems(p); hudMsg[name] = null; } break; }
             if (t % 8 === 0) cmd(`playsound random.click @a ${base.x} ${base.y} ${base.z} 0.5 ${(1 + Math.random()).toFixed(2)}`);
             await wait(1);
         }
@@ -2906,7 +2927,7 @@ async function takeTurn(p, last, nextName) {
         try { die?.setProperty("mmgplus:rolling", 0); die?.setProperty("mmgplus:num", roll); } catch {}
         cmd(`particle minecraft:totem_particle ${base.x} ${base.y + 2.6} ${base.z}`);
         cmd(`playsound random.anvil_land @a ${base.x} ${base.y} ${base.z} 0.5 2`); cmd(`playsound random.levelup @a ${base.x} ${base.y} ${base.z} 1 1.6`);
-        banner(`n${Math.min(30, roll)}`, dice > 1 ? `合計 ${total}` : name, 22);
+        banner(`n${Math.min(30, roll)}`, st.dice > 1 ? `合計 ${total}` : name, 22);
         await wait(25);
         try { die?.remove(); } catch {}
     }
@@ -2932,7 +2953,7 @@ async function takeTurn(p, last, nextName) {
     delete G.magnet[name];
     // 止まったマス: 着地の音 + マスの名前(青・赤はコインの帯がそのかわり)
     const sp = spaceAt(G.pos[name]), mul = last ? 2 : 1;
-    const LAND = { blue: ["random.orb", 1.6], red: ["note.bass", 0.6], event: ["note.chime", 1.2], lucky: ["random.levelup", 1.8], shop: ["note.bell", 1.4], skull: ["note.bass", 0.5], bank: ["note.bell", 0.9], shuffle: ["note.chime", 0.8], mirror: ["note.chime", 0.6] };
+    const LAND = { roulette: ["random.orb", 1.1], vs: ["random.totem", 0.8], blue: ["random.orb", 1.6], red: ["note.bass", 0.6], event: ["note.chime", 1.2], lucky: ["random.levelup", 1.8], shop: ["note.bell", 1.4], skull: ["note.bass", 0.5], bank: ["note.bell", 0.9], shuffle: ["note.chime", 0.8], mirror: ["note.chime", 0.6] };
     if (LAND[sp.kind]) cmd(`execute as @a at @s run playsound ${LAND[sp.kind][0]} @s ~ ~ ~ 1 ${LAND[sp.kind][1]}`);
     // (マスの名前の帯はやめた: どのマスも自分のタイトルを出すので二重になっていた)
     cnt(name, sp.kind);
@@ -2947,9 +2968,10 @@ async function takeTurn(p, last, nextName) {
     else if (sp.kind === "shop") await shop(p);
     else if (sp.kind === "skull") await skull(p);
     else if (sp.kind === "mirror") await mirror(p);
+    else if (sp.kind === "roulette") await rouletteSpace(p);
+    else if (sp.kind === "vs") await vsSpace(p);
     await wait(15);
 }
-// アイテムを使う(サイコロの前)。持っていなければ何もしない
 // 相手を選ぶ(BOT は1位の人。自分も選べるアイテムあり)
 async function pickTarget(p, title, withSelf = false) {
     const list = G.players.filter((n) => withSelf || n !== p.name); if (!list.length) return null;
@@ -2960,51 +2982,7 @@ async function pickTarget(p, title, withSelf = false) {
     try { uiManager.closeAllForms(p); } catch {}
     return r.canceled ? list[0] : list[r.selection] ?? list[0];
 }
-// アイテムを使う(サイコロの前)。コイン磁石はほかのアイテムと一緒に使える → 返すのは「サイコロの数」につながるもの
-async function useItem(p) {
-    const name = p.name, bag = G.items[name] ?? [];
-    let main = null;
-    for (let round = 0; round < 2 && bag.length; round++) {
-        const can = bag.filter((k) => !(main && k !== "magnet") && !(round && G.magnet[name] && k === "magnet"));
-        if (!can.length) break;
-        let pick = null;
-        if (isBot(p)) { const dist = starDist(G.pos[name]); pick = can.includes("magnet") && !G.magnet[name] ? "magnet" : (dist > 10 && can.includes("triple")) ? "triple" : (dist > 6 && can.includes("double")) ? "double" : (dist >= 1 && dist <= 10 && can.includes("fix")) ? "fix" : Math.random() < 0.5 ? can[0] : null; await wait(15); }
-        else {
-            const f = new ActionFormData().title(`${FORM_MARK}§lアイテム`).body(round ? "§lほかのアイテムも使う？" : "§lサイコロの前にアイテムを使う？");
-            can.forEach((k) => f.button(`§l${ICON[k] ?? ""} ${ITEMS[k].name}\n§7${ITEMS[k].desc}`));
-            f.button("§l§7使わない");
-            const r = await Promise.race([f.show(p).catch(() => ({ canceled: true })), wait(240).then(() => ({ canceled: true }))]);
-            try { uiManager.closeAllForms(p); } catch {}
-            if (!r.canceled && r.selection < can.length) pick = can[r.selection];
-        }
-        if (!pick) break;
-        bag.splice(bag.indexOf(pick), 1); hud(); cnt(name, "item");
-        banner("item", `${ITEMS[pick].name}  ${name}`, 35); soundAllPlayers("random.orb", 0.8);
-        const others = G.players.filter((n) => n !== name);
-        if (pick === "magnet") { G.magnet[name] = true; await wait(30); continue; }
-        main = pick;
-        if (pick === "pipe" && others.length) { await wait(30); const t = others[rand(0, others.length - 1)]; [G.pos[name], G.pos[t]] = [G.pos[t], G.pos[name]]; await swapAnim(name, t); }
-        if (pick === "gold") { await wait(30); await warpOut(p); cam.fade("@a", 0.25, 0.3, 0.35); await wait(7); G.pos[name] = prevOf(G.star); p.teleport(spot(G.pos[name]), lookCenter); warpIn(p); await react(p, true, 0.4); }
-        if (pick === "glove" && others.length) { const t = others.sort((a, b) => (G.coins[b] ?? 0) - (G.coins[a] ?? 0))[0], n = Math.min(rand(5, 10), G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n); ribbon("purple", `${t} から ${n}${I.coin} うばった！`, name, 50); await react(p, true); const tp = world.getPlayers({ name: t })[0]; if (tp) await react(tp, false); }
-        if (pick === "fix") {
-            let n = 10;
-            if (isBot(p)) { const d = starDist(G.pos[name]); n = d >= 1 && d <= 10 ? d : 10; }
-            else {
-                const f = new ActionFormData().title(`${FORM_MARK}§l八百長ダイス`).body("§l何マス進む？");
-                for (let k = 1; k <= 10; k++) f.button(`§l${k}`);
-                const r = await Promise.race([f.show(p).catch(() => ({ canceled: true })), wait(300).then(() => ({ canceled: true }))]);
-                try { uiManager.closeAllForms(p); } catch {}
-                if (!r.canceled) n = r.selection + 1;
-            }
-            G.fixRoll[name] = n;
-        }
-        if (pick === "slow") { const t = await pickTarget(p, "スローダイス"); if (t) { G.slow[t] = true; ribbon("blue", `${t} の次のサイコロは 1〜3`, name, 50); await wait(40); } }
-        if (pick === "ticket") { G.ticket = name; ribbon("purple", "次のミニゲームは自分で選べる！", name, 50); await wait(40); }
-        if (pick === "bag") { const t = await pickTarget(p, "ぶんどり袋"); const tb = t ? G.items[t] ?? [] : []; if (tb.length) { const k = tb.splice(rand(0, tb.length - 1), 1)[0]; if (bag.length < 3) bag.push(k); hud(); ribbon("purple", `${t} から ${ITEMS[k].name} をもらった！`, name, 50); await react(p, true); } else { ribbon("gray", `${t ?? "だれか"} は何も持っていなかった…`, name, 45); await wait(40); } }
-        if (pick === "reverse") { const t = await pickTarget(p, "逆さサイコロ", true); if (t) { G.reverse[t] = true; ribbon("red", `${t} は次に後ろへ進む！`, name, 50); await wait(40); } }
-    }
-    return main;
-}
+// (v55: アイテムは持ち物に入れて右クリックで使う → applyItem。前の「使う？」の画面はやめた)
 // ===== 屋台のショップ =====
 // ショップのマスの外側に屋台。手前のカウンターに商品が3つ浮かぶ。止まるとガレージ(シャッター)が下から上へ開いて村人が出てくる。
 // 3つから好きなものを1つ買える。買うか立ち去るとシャッターが閉まる
@@ -3219,7 +3197,11 @@ async function happening(p) {
     const name = p.name, others = G.players.filter((n) => n !== name);
     banner("happening", "", 25); soundAllPlayers("random.orb", 0.6); pose(p, "surprise");
     for (let i = 0; i < 8; i++) { cmd(`particle minecraft:villager_happy ${p.location.x} ${p.location.y + 1.5} ${p.location.z}`); await wait(3); }
-    const ev = rand(1, 7);
+    const ev = rand(1, 9);
+    if (ev >= 8) {   // 竜巻(浜・港)/ クジラ
+        if (ev === 8 && ["beach", "port", "harbor", "meadow"].includes(SPACES[G.pos[name]]?.zone)) await tornado(p); else await whale(p);
+        await wait(15); return;
+    }
     if (ev === 1) { const n = rand(5, 12); addCoins(name, n); ribbon("green", `COIN SHOWER! +${n}${I.coin}`, `${name}`, 50); await react(p, true); }
     else if (ev === 2 && others.length) { const t = others[rand(0, others.length - 1)], n = Math.min(5, G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n); ribbon("purple", `COIN THIEF!`, `${name} が ${t} から ${n}${I.coin}`, 60); await react(p, true); const tp = world.getPlayers({ name: t })[0]; if (tp) await react(tp, false); }
     else if (ev === 3) { ribbon("blue", `WARP!`, `${name} がスターの手前へ`, 70); await warpOut(p); cam.fade("@a", 0.25, 0.3, 0.35); await wait(7); G.pos[name] = prevOf(G.star); p.teleport(spot(G.pos[name]), lookCenter); warpIn(p); await react(p, true, 0.4); }
@@ -3235,7 +3217,7 @@ async function skull(p) {
     const name = p.name;
     cmd(`camera @a fade time 0.2 0.6 0.4 color 80 0 0`); soundAllPlayers("ambient.cave", 1.2); soundAllPlayers("note.bass", 0.5); pose(p, "surprise");
     await wait(20);
-    if ((G.stars[name] ?? 0) > 0 && Math.random() < 0.25) { G.stars[name]--; hud(); banner("skull", `${I.star} を1つ失った…  ${name}`, 70); }
+    if ((G.stars[name] ?? 0) > 0 && Math.random() < 0.25) { await flyStar(name, null); G.stars[name]--; hud(); banner("skull", `${I.star} を1つ失った…  ${name}`, 70); }
     else { const n = Math.floor((G.coins[name] ?? 0) / 2); addCoins(name, -n); banner("skull", `コインが半分… -${n}${I.coin}  ${name}`, 70); }
     await react(p, false, 0.8); pose(p, "fall");
     await wait(40);
@@ -3301,6 +3283,7 @@ async function mirror(p) {
             const n = Math.min(rand(10, 15), G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n);
             ribbon("purple", `COIN THIEF! ${n}${I.coin}`, `${name} が ${t} から ${n}${I.coin} 奪った`, 70); soundAllPlayers("random.orb", 0.7);
         } else {
+            await flyStar(t, name);
             G.stars[t] = Math.max(0, (G.stars[t] ?? 0) - 1); G.stars[name] = (G.stars[name] ?? 0) + 1; hud();
             ribbon("purple", `STAR THIEF! ${I.star}`, `${name} が ${t} からスターを奪った！`, 80); soundAllPlayers("random.totem", 0.7);
         }
@@ -3371,7 +3354,7 @@ async function minigameRound() {
             const n = order[r], q = world.getPlayers({ name: n })[0], c = (PRIZE[r] ?? 1) * (bonus ? 2 : 1);
             addCoins(n, c, true); if (r === 0) G.mgWins[n] = (G.mgWins[n] ?? 0) + 1;
             if (r === 0) banner("win", `${n}  +${c}${I.coin}`, 70); else ribbon(["gold", "blue", "purple", "gray"][Math.min(3, r)], `${n}  +${c}${I.coin}`, "", 26);
-            if (q) coinRain(q, c);
+            if (q) { coinRain(q, c); numberPop(q, c); }
             await wait(r === 0 ? 60 : 22);
         }
         plates.forEach((e) => { try { e.remove(); } catch {} });
@@ -3408,13 +3391,8 @@ async function finale() {
     cam.to("@a[tag=mpl_board]", PLAZA.pos, PLAZA.look, 1.5);
     await wait(70);
     banner("bonus", "", 45); soundAllPlayers("random.levelup", 1.2); await wait(50);
-    for (const [label, m] of [["MINIGAME STAR", G.mgWins], ["COIN STAR", G.coinsGot]]) {
-        const best = Math.max(0, ...G.players.map((n) => m[n] ?? 0)); if (!best) continue;
-        const win = G.players.filter((n) => (m[n] ?? 0) === best);
-        for (const n of win) G.stars[n] = (G.stars[n] ?? 0) + 1;
-        hud(); ribbon("gold", `${I.crown} ${label}`, `${win.join(", ")} に ${I.star}+1`, 60); soundAllPlayers("random.totem", 1.4);
-        await wait(80);
-    }
+    await bonusStars();   // 種類の中からルーレットで 2 つ
+    starSnap();
     const rows = rankRows();
     const winners = rows.filter((r) => r[1] === rows[0][1] && r[2] === rows[0][2]).map((r) => r[0]);
     // 全員を城の前に横一列(順位はまだ秘密)
@@ -3443,8 +3421,11 @@ async function finale() {
     for (const q of gp()) if (!winners.includes(q.name)) pose(q, "sad");
     for (const n of winners) { const q = world.getPlayers({ name: n })[0]; if (q) pose(q, "cheer"); }
     await wait(20);
+    const cleanPodium = await podium();   // 1〜3 位の台がせり上がる
     ribbon("gold", "FINAL RESULTS", rankRows().map(([n, st, co]) => `${BADGE(rankOfName(n))}${n} ${I.star}${st} ${I.coin}${co}`).join("  "), 140);
     await wait(150);
+    cleanPodium();
+    await starGraph();   // スターの数の折れ線 + 数字の成績
     cam.clear();
     const st = load("party_stats", {}); for (const n of winners) st[n] = (st[n] ?? 0) + 1; save("party_stats", st);
     recordParty(winners);
@@ -3525,7 +3506,7 @@ function resetAll() {
     G.on = false; run.active = false; setScore("game", "playing", 0); setScore("game", "selectgame", 0);
     cam.clear(); unlockAll(); bgm(null); cmd("time set 6000");
     setTide(false, false); coolLava(false); ghostCleanup();
-    for (const t of ["mmgplus:dice", "mmgplus:star", "mmgplus:coin", "mmgplus:dj", "mmgplus:ghostship", "mmgplus:mirrorskel", "mmgplus:rankplate", "mmgplus:steve", "mmgplus:cannonball", "mmgplus:fireball"]) cmd(`kill @e[type=${t}]`);
+    for (const t of ["mmgplus:dice", "mmgplus:star", "mmgplus:coin", "mmgplus:dj", "mmgplus:ghostship", "mmgplus:mirrorskel", "mmgplus:rankplate", "mmgplus:steve", "mmgplus:cannonball", "mmgplus:fireball", "mmgplus:airballoon", "mmgplus:coinnum", "mmgplus:tornado", "mmgplus:whale", "mmgplus:beam"]) cmd(`kill @e[type=${t}]`);
     for (let i = 0; i < 6; i++) cmd(`kill @e[type=mmgplus:racehorse${i}]`);
     for (const p of world.getPlayers()) { p.removeTag("mpl_board"); p.removeTag("playing"); p.removeTag("mmgplus_out"); try { p.setGameMode(ADVENTURE); } catch {} p.teleport(LOBBY, lookCenter); }
     toast("§eリセットしました");
@@ -3659,3 +3640,497 @@ system.runInterval(() => {
     if (score("game", "selectgame") !== 51) return;
     for (const p of playing()) { const l = p.location; if (l.x > -2 && l.x < 3 && l.z > -12 && l.z < 2.6 && !isBot(p)) p.teleport({ x: l.x, y: 1, z: 2.7 }); }
 }, 2);
+
+// ===================================================================================================
+// ===== v55: アイデア50 で「やる」になったもの =====
+// ===================================================================================================
+// ---- キャラ(スキン): BOT と同じしくみ(体は透明 + その人のスキンの形のかぶりもの mpl:skin_<名前>)----
+const SKINS = ["jack", "oracle", "shade", "comet", "widow", "jester", "byte", "splash", "humming", "replica"];   // tools/mpl_extras.py と同じ順
+const SKIN_NAME = (s) => s[0].toUpperCase() + s.slice(1);
+const FACE = (i, now = false) => String.fromCharCode(0xe400 + (i == null || i < 0 ? 15 : i) + (now ? 16 : 0));
+const skinOf = (n) => G.skin?.[n] ?? SKINS.indexOf(String(n).toLowerCase());
+// 48. キャラ選び: すごろくの最初に、人はまだだれも選んでいないキャラから 1 人選ぶ(BOT は自分のキャラ)
+async function pickCharacters(players) {
+    G.skin = {};
+    for (const p of players) if (isBot(p)) { const i = SKINS.indexOf(p.name.toLowerCase()); if (i >= 0) G.skin[p.name] = i; }
+    const taken = () => Object.values(G.skin);
+    await Promise.all(players.filter((p) => !isBot(p)).map(async (p) => {
+        for (let tries = 0; tries < 3; tries++) {
+            const free = SKINS.map((_, i) => i).filter((i) => !taken().includes(i)); if (!free.length) return;
+            const f = new ActionFormData().title(`${FORM_MARK}§lキャラを選ぶ`).body("§lすごろくで使う見た目を選んでね");
+            free.forEach((i) => f.button(`§l${FACE(i)} ${SKIN_NAME(SKINS[i])}`));
+            const r = await Promise.race([f.show(p).catch(() => ({ canceled: true })), wait(400).then(() => ({ canceled: true }))]);
+            try { uiManager.closeAllForms(p); } catch {}
+            const want = r.canceled ? free[rand(0, free.length - 1)] : free[r.selection];
+            if (want == null || taken().includes(want)) { bar(p, "§cそのキャラは先に選ばれた！ もう一度"); continue; }
+            G.skin[p.name] = want; cmd(`execute as "${p.name}" at @s run playsound random.levelup @s ~ ~ ~ 1 1.6`); return;
+        }
+    }));
+    wearSkins();
+}
+function wearSkins() {
+    for (const p of world.getPlayers()) {
+        if (isBot(p)) continue;
+        const i = G.on ? G.skin?.[p.name] : undefined;
+        try {
+            const eq = p.getComponent("minecraft:equippable");
+            if (i == null) {
+                if (p.hasTag("mpl_skinned")) { p.removeTag("mpl_skinned"); p.removeEffect("invisibility"); if (eq?.getEquipment(EquipmentSlot.Head)?.typeId?.startsWith("mpl:skin_")) eq.setEquipment(EquipmentSlot.Head); }
+                continue;
+            }
+            p.addTag("mpl_skinned");
+            if (!p.getEffect("invisibility")) p.addEffect("invisibility", 20000000, { showParticles: false });
+            const id = `mpl:skin_${SKINS[i]}`;
+            if (eq && eq.getEquipment(EquipmentSlot.Head)?.typeId !== id) { const it = new ItemStack(id, 1); it.lockMode = ItemLockMode.slot; eq.setEquipment(EquipmentSlot.Head, it); }
+        } catch {}
+    }
+}
+system.runInterval(wearSkins, 10);
+
+// 6. キャラの入場: まわりを暗くして、1 人ずつスポットライト + 名前と称号
+async function introduce() {
+    cmd("time set 18000");
+    for (const n of G.players) {
+        const p = world.getPlayers({ name: n })[0]; if (!p) continue;
+        const l = p.location, { pos } = frontShot(p, 3.8, 1.3);
+        cam.to("@a[tag=mpl_board]", pos, { x: l.x, y: l.y + 1.2, z: l.z }, 0.45);
+        await wait(9);
+        for (let k = 0; k < 14; k++) cmd(`particle minecraft:endrod ${l.x + Math.cos(k) * 0.6} ${l.y + 5 - k * 0.3} ${l.z + Math.sin(k) * 0.6}`);
+        const t = statsOf(n).title;
+        ribbon("gold", `${FACE(skinOf(n))} ${n}`, t ? `§d${t}` : "", 32);
+        soundAllPlayers("random.levelup", 1.3); cmd(`playsound firework.blast @a ${l.x} ${l.y + 2} ${l.z} 1 1.2`);
+        pose(p, "cheer"); botSay(p, "turn", 0.5);
+        await wait(32);
+    }
+    cmd("time set 6000");
+}
+
+// ---- 30・31. 右上の HUD: 顔の列(ターンの順、今の番は金のわく)+ 小さな地図(スターと人の点)+ ボードのお知らせ ----
+const HUD_MARK = "§r§h§r§u§r";   // tools/mpl_ui.py と同じ
+const WAY_MARK = "§r§w§r§y§r";   // tools/mpl_ui.py と同じ(分かれ道など、下に小さく出すフォーム)
+const hudMsg = {};
+function boardMsg(p, t, ticks = 60) { hudMsg[p.name] = [t, system.currentTick + ticks]; try { p.onScreenDisplay.setActionBar(hudText(p)); } catch {} }
+const onBoardHud = (p) => G.on && !run.active && p?.hasTag?.("mpl_board") && !isBot(p);
+function hudText(p) {
+    const faces = G.players.map((n) => FACE(skinOf(n), n === G.now)).join("");
+    const mm = BD.minimap; let rows = [];
+    if (mm) {
+        const cw = (mm.x0 - mm.x1) / mm.cols, ch = (mm.z0 - mm.z1) / mm.rows;
+        const over = mm.tiles.map((r) => [...r].map(() => 0));
+        const cell = (x, z) => [Math.floor((mm.z0 - z) / ch), Math.floor((mm.x0 - x) / cw)];
+        const mark = (x, z, o) => { const [r, c] = cell(x, z); if (r < 0 || c < 0 || r >= mm.rows || c >= mm.cols) return; over[r][c] = over[r][c] && over[r][c] !== o ? 6 : o; };
+        if (G.star != null) { const s = SPACES[G.star]; mark(s.x, s.z, 1); }
+        G.players.forEach((n, k) => { const s = SPACES[G.pos[n]]; if (s) mark(s.x, s.z, 2 + (k % 4)); });
+        rows = mm.tiles.map((r, i) => [...r].map((t, j) => String.fromCharCode(0xe500 + Number(t) * 8 + over[i][j])).join(""));
+    }
+    const m = hudMsg[p.name], msg = m && m[1] > system.currentTick ? m[0] : "";
+    return `${HUD_MARK}§f${faces}\n${rows.join("\n")}${msg ? `\n§f${msg}` : ""}`;
+}
+system.runInterval(() => { if (!G.on || run.active) return; for (const p of world.getPlayers({ tags: ["mpl_board"] })) if (!isBot(p)) { try { p.onScreenDisplay.setActionBar(hudText(p)); } catch {} } }, 10);
+
+// ---- 3. 頭の上のコインの数字(背景なし。カメラの方を向く)----
+function numberPop(q, d) {
+    if (!d || !q?.isValid) return;
+    const l = q.location, e = spawnAt("mmgplus:coinnum", { x: l.x, y: l.y + 2.35, z: l.z }); if (!e) return;
+    try { e.setProperty("mmgplus:n", Math.min(99, Math.abs(d))); e.setProperty("mmgplus:neg", d < 0 ? 1 : 0); } catch {}
+    const c = lastCam?.pos; if (c) { try { e.setRotation({ x: 0, y: (Math.atan2(-(c.x - l.x), c.z - l.z) * 180) / Math.PI }); } catch {} }
+    system.runTimeout(() => { try { e.remove(); } catch {} }, 40);
+}
+
+// ---- 4・11・15. ラスト 3 ターン: 夕焼け + 灯台の光 + BGM を速く + 気球から中継 ----
+let beamE = null;
+function beamOn() { if (beamE?.isValid || !BD.light) return; beamE = spawnAt("mmgplus:beam", BD.light); }
+function beamOff() { try { beamE?.remove(); } catch {} beamE = null; cmd("kill @e[type=mmgplus:beam]"); }
+async function lastSpurt() {
+    G.spurt = true;
+    cmd("time set 12600"); cmd("weather clear");
+    beamOn(); bgm("board");
+    cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1.2); await wait(20);
+    await djTalk(["ラストスパートだYO！ 空も夕焼けに染まってきたぜ！", "ここからは気球の上から中継でお届けするYO！"], 2);
+}
+let balloonE = null, balloonA = 0;
+function balloonOn() { try { balloonE?.remove(); } catch {} cmd("kill @e[type=mmgplus:airballoon]"); balloonE = spawnAt("mmgplus:airballoon", { x: BOARD.x + 70, y: 48, z: BOARD.z }); }
+system.runInterval(() => {
+    if (!G.on || !balloonE?.isValid) return;
+    balloonA += 0.004;
+    try { balloonE.teleport({ x: BOARD.x + Math.cos(balloonA) * 70, y: 48, z: BOARD.z + Math.sin(balloonA) * 62 }); } catch {}
+}, 2);
+async function balloonShot(p) {
+    if (!balloonE?.isValid) return;
+    const b = balloonE.location, l = p.location;
+    cmd(`camera @a[tag=mpl_board,tag=!mpl_mapview] set minecraft:free pos ${b.x} ${b.y - 3} ${b.z} facing ${l.x} ${l.y + 1} ${l.z}`);
+    lastCam = { pos: { x: b.x, y: b.y - 3, z: b.z }, look: { x: l.x, y: l.y + 1, z: l.z } };
+    ribbon("red", "LIVE", "気球から中継", 30);
+    await wait(16);
+    cam.to("@a[tag=mpl_board]", { x: l.x + (b.x - l.x) * 0.25, y: l.y + 14, z: l.z + (b.z - l.z) * 0.25 }, { x: l.x, y: l.y + 1, z: l.z }, 1.4, "in_out_sine");
+    await wait(30);
+}
+
+// ---- 12・14・19. 風車の羽・カモメ・分かれ道の矢印(ボードを置くとき)/ 魚がはねる ----
+function placeProps() {
+    for (const t of ["windmill", "gull", "waysign"]) cmd(`kill @e[type=mmgplus:${t}]`);
+    const w = BD.windmill; if (w) { const e = spawnAt("mmgplus:windmill", w); try { e?.setRotation({ x: 0, y: 180 }); } catch {} }
+    for (const [x, y, z] of BD.gulls ?? []) spawnAt("mmgplus:gull", { x: x + 0.5, y, z: z + 0.5 });
+    for (const [x, y, z, yaw, k] of BD.waysigns ?? []) { const e = spawnAt("mmgplus:waysign", { x, y, z }); try { e?.setRotation({ x: 0, y: yaw }); e?.setProperty("mmgplus:way", k); } catch {} }
+}
+system.runInterval(() => {
+    if (!G.on || run.active || Math.random() < 0.4) return;
+    const W = BD.waves ?? []; if (!W.length) return;
+    const [x, z, yaw] = W[rand(0, W.length - 1)], a = (yaw * Math.PI) / 180, lx = -Math.sin(a), lz = Math.cos(a);
+    const f = spawnAt("minecraft:cod", { x: x + 0.5 - lx * 6, y: -0.2, z: z + 0.5 - lz * 6 }); if (!f) return;
+    try { f.applyImpulse({ x: lx * 0.15, y: 0.75, z: lz * 0.15 }); } catch {}
+    cmd(`particle minecraft:water_splash_particle ${x + 0.5 - lx * 6} 0.4 ${z + 0.5 - lz * 6}`); cmd(`playsound random.splash @a ${x - lx * 6} 0 ${z - lz * 6} 0.5 1.4`);
+    system.runTimeout(() => { try { f.remove(); } catch {} cmd(`particle minecraft:water_splash_particle ${x + 0.5 - lx * 5} 0.4 ${z + 0.5 - lz * 5}`); }, 26);
+}, 70);
+
+// ---- 1. スターが空から落ちてくる(光の柱 → スターが落ちて、マスが金色に光る)----
+async function starFall(s) {
+    const e = starEntity; if (!e?.isValid) return;
+    const top = s.y + 40, bot = s.y + 2.6, x = s.x + 0.5, z = s.z + 0.5;
+    for (let k = 0; k < 18; k++) cmd(`particle minecraft:endrod ${x} ${s.y + 1 + k * 2} ${z}`);
+    soundAllPlayers("beacon.activate", 1.4);
+    for (let t = 1; t <= 26; t++) {
+        const u = t / 26, y = top - (top - bot) * (u * u);
+        try { e.teleport({ x, y, z }); } catch {}
+        cmd(`particle minecraft:endrod ${x} ${y + 1} ${z}`); if (t % 3 === 0) cmd(`particle minecraft:totem_particle ${x} ${y + 0.5} ${z}`);
+        await wait(1);
+    }
+    cmd("camerashake add @a 0.2 0.3 positional"); soundAllPlayers("random.anvil_land", 1.6); soundAllPlayers("random.levelup", 1.5);
+    for (let k = 0; k < 12; k++) { const a = (k / 12) * Math.PI * 2; cmd(`particle minecraft:totem_particle ${x + Math.cos(a) * 1.5} ${s.y + 1.2} ${z + Math.sin(a) * 1.5}`); }
+}
+
+// ---- 10. スターを取られる: 体からスターが飛び出して、くるくる回りながら相手の方へ(to が null なら空へ消える)----
+async function flyStar(from, to) {
+    const a = world.getPlayers({ name: from })[0]; if (!a) return;
+    const b = to ? world.getPlayers({ name: to })[0] : null;
+    const p0 = { x: a.location.x, y: a.location.y + 2.2, z: a.location.z };
+    const p1 = b ? { x: b.location.x, y: b.location.y + 2.2, z: b.location.z } : { x: p0.x, y: p0.y + 14, z: p0.z };
+    const st = spawnAt("mmgplus:star", p0); if (!st) return;
+    soundAllPlayers("mob.endermen.portal", 1.4);
+    const mid = { x: (p0.x + p1.x) / 2, z: (p0.z + p1.z) / 2 }, cpos = { x: mid.x + 6, y: Math.max(p0.y, p1.y) + 5, z: mid.z - 8 };
+    cam.to("@a[tag=mpl_board]", cpos, { x: mid.x, y: Math.max(p0.y, p1.y) + 1, z: mid.z }, 0.6);
+    await wait(10);
+    const T = 26, H = 3 + Math.hypot(p1.x - p0.x, p1.z - p0.z) * 0.15;
+    for (let t = 1; t <= T; t++) {
+        const u = t / T, y = p0.y + (p1.y - p0.y) * u + Math.sin(u * Math.PI) * H;
+        try { st.teleport({ x: p0.x + (p1.x - p0.x) * u, y, z: p0.z + (p1.z - p0.z) * u }); } catch {}
+        if (t % 2 === 0) cmd(`particle minecraft:totem_particle ${st.location.x} ${st.location.y} ${st.location.z}`);
+        await wait(1);
+    }
+    soundAllPlayers(b ? "random.levelup" : "note.bass", b ? 1.6 : 0.6);
+    try { st.remove(); } catch {}
+}
+
+// ---- 7. 表彰台がせり上がる(1 位 金 3 段 / 2 位 鉄 2 段 / 3 位 銅 1 段)----
+async function podium() {
+    const S0 = STG(), X = Math.floor(S0.x), Y = Math.floor(S0.y), Z = Math.floor(S0.z);
+    const top3 = rankRows().slice(0, 3).map(([n]) => n), cols = [[X, 3, "gold_block"], [X - 3, 2, "iron_block"], [X + 3, 1, "waxed_copper_block"]];
+    // ほかの人は両はしへ
+    G.players.filter((n) => !top3.includes(n)).forEach((n, i) => world.getPlayers({ name: n })[0]?.teleport({ x: S0.x + (i % 2 ? 1 : -1) * (6.5 + Math.floor(i / 2) * 1.6), y: Y, z: S0.z }, { facingLocation: { x: S0.x, y: Y + 1, z: S0.z - 10 } }));
+    top3.forEach((n, r) => world.getPlayers({ name: n })[0]?.teleport({ x: cols[r][0] + 0.5, y: Y, z: Z + 0.5 }, { facingLocation: { x: cols[r][0] + 0.5, y: Y + 1, z: Z - 10 } }));
+    cam.to("@a", { x: S0.x, y: Y + 3.5, z: Z - 8.5 }, { x: S0.x, y: Y + 2, z: Z }, 0.8);
+    await wait(18);
+    ribbon("gold", "PODIUM", "", 60);
+    for (let h = 1; h <= 3; h++) {
+        for (let r = 0; r < top3.length; r++) {
+            const [cx, hh, mat] = cols[r]; if (h > hh) continue;
+            cmd(`fill ${cx - 1} ${Y + h - 1} ${Z - 1} ${cx + 1} ${Y + h - 1} ${Z + 1} ${mat}`);
+            world.getPlayers({ name: top3[r] })[0]?.teleport({ x: cx + 0.5, y: Y + h, z: Z + 0.5 }, { facingLocation: { x: cx + 0.5, y: Y + h + 1, z: Z - 10 } });
+        }
+        soundAllPlayers("tile.piston.out", 0.8 + h * 0.1); cmd("camerashake add @a 0.15 0.3 positional");
+        for (let k = 0; k < 6; k++) cmd(`particle minecraft:villager_happy ${X + rand(-4, 4) + 0.5} ${Y + h} ${Z - 1.6}`);
+        await wait(12);
+    }
+    top3.forEach((n, r) => { const q = world.getPlayers({ name: n })[0]; if (q) pose(q, r === 0 ? "cheer" : "clap"); });
+    soundAllPlayers("random.totem", 1.1);
+    await wait(60);
+    return () => { for (const [cx] of cols) cmd(`fill ${cx - 1} ${Y} ${Z - 1} ${cx + 1} ${Y + 2} ${Z + 1} air`); };
+}
+
+// ---- 8. ボーナススター: 種類の中からルーレットで 2 つ ----
+const BONUS = [
+    ["MINIGAME STAR", "ミニゲームでいちばん勝った", (n) => G.mgWins[n] ?? 0],
+    ["COIN STAR", "コインをいちばん集めた", (n) => G.coinsGot[n] ?? 0],
+    ["HAPPENING STAR", "イベントマスにいちばん止まった", (n) => G.cnt[n]?.event ?? 0],
+    ["RUNNER STAR", "いちばん多く歩いた", (n) => G.cnt[n]?.steps ?? 0],
+    ["SLOW STAR", "いちばん歩かなかった", (n) => -(G.cnt[n]?.steps ?? 0), true],
+    ["RED STAR", "赤マスにいちばん止まった", (n) => G.cnt[n]?.red ?? 0],
+    ["BLUE STAR", "青マスにいちばん止まった", (n) => G.cnt[n]?.blue ?? 0],
+    ["ITEM STAR", "アイテムをいちばん使った", (n) => G.cnt[n]?.item ?? 0],
+    ["SHOPPING STAR", "ショップにいちばん止まった", (n) => G.cnt[n]?.shop ?? 0],
+    ["LUCKY STAR", "ラッキーマスにいちばん止まった", (n) => G.cnt[n]?.lucky ?? 0],
+];
+async function bonusStars() {
+    const pool = [...BONUS].sort(() => Math.random() - 0.5);
+    const picks = [];
+    for (const b of pool) { if (picks.length >= 2) break; const v = G.players.map(b[2]), best = Math.max(...v); if (b[3] ? v.some((x) => x !== best) : best > 0) picks.push(b); }
+    for (const b of picks) {
+        ribbon("gold", "BONUS STAR", "", 160); await wait(4);
+        for (let i = 0; i < 16; i++) { subAll(`§f${BONUS[rand(0, BONUS.length - 1)][0]}`); soundAllPlayers("random.click", 1 + i * 0.04); await wait(2 + Math.floor(i / 4)); }
+        subAll(`§e§l${b[0]}`); soundAllPlayers("random.levelup", 1.2); await wait(30);
+        const best = Math.max(...G.players.map(b[2])), win = G.players.filter((n) => b[2](n) === best);
+        for (const n of win) G.stars[n] = (G.stars[n] ?? 0) + 1;
+        hud(); ribbon("gold", `${I.crown} ${b[0]}`, `${b[1]}: ${win.join(", ")} に ${I.star}+1`, 70); soundAllPlayers("random.totem", 1.4);
+        for (const n of win) { const q = world.getPlayers({ name: n })[0]; if (q) pose(q, "cheer"); }
+        await wait(80);
+    }
+}
+
+// ---- 35. 最後のグラフ: スターの数のうつりかわりを人ごとの折れ線で(DJ ブースの前の空中に光の点で描く)+ 数字の成績 ----
+const LINE_RGB = [[1, 0.3, 0.3], [0.35, 0.55, 1], [0.35, 0.95, 0.4], [1, 0.9, 0.25], [1, 0.45, 0.9], [0.3, 0.95, 1], [1, 0.65, 0.2], [0.7, 0.4, 1]];
+function starSnap() { G.starHist ??= {}; for (const n of G.players) (G.starHist[n] ??= []).push(G.stars[n] ?? 0); }
+function dot(x, y, z, rgb) { try { const m = new MolangVariableMap(); m.setColorRGB("variable.color", { red: rgb[0], green: rgb[1], blue: rgb[2] }); dim().spawnParticle("mpl:dot", { x, y, z }, m); } catch {} }
+async function starGraph() {
+    const S0 = STG(), H = G.starHist ?? {}, T = Math.max(1, ...G.players.map((n) => (H[n]?.length ?? 1) - 1));
+    const maxS = Math.max(1, ...G.players.map((n) => Math.max(0, ...(H[n] ?? [0]))));
+    const W = 14, HT = 6, ox = S0.x + W / 2, oy = S0.y + 3, oz = S0.z + 2.6;
+    const P = (t, s) => ({ x: ox - (W * t) / T, y: oy + (HT * s) / maxS });
+    const labels = [];
+    const lab = (x, y, t) => { const e = spawnAt("mmgplus:board", { x, y, z: oz - 0.2 }); if (e) { e.nameTag = t; labels.push(e); } };
+    lab(ox, oy - 0.9, "§fTURN 1"); lab(ox - W, oy - 0.9, `§fTURN ${T}`); lab(ox + 1.2, oy + HT, `§e${I.star}${maxS}`); lab(ox + 1.2, oy, `§e${I.star}0`);
+    for (const q of gp()) q.teleport({ x: q.location.x, y: S0.y, z: S0.z - 1.5 });
+    cam.to("@a", { x: S0.x, y: oy + HT / 2 + 0.5, z: oz - 11 }, { x: S0.x, y: oy + HT / 2, z: oz }, 0.9);
+    ribbon("purple", `${I.star} の数のうつりかわり`, G.players.map((n, k) => `${["§c", "§9", "§a", "§e", "§d", "§b", "§6", "§5"][k % 8]}${n}`).join("  "), 230);
+    await wait(14);
+    for (let rep = 0; rep < 11; rep++) {
+        for (let x = 0; x <= W; x += 0.25) dot(ox - x, oy, oz, [1, 1, 1]);
+        for (let y = 0; y <= HT; y += 0.25) dot(ox, oy + y, oz, [1, 1, 1]);
+        for (let s = 1; s <= maxS; s++) for (let x = 0.5; x <= W; x += 1) dot(ox - x, P(0, s).y, oz + 0.05, [0.45, 0.45, 0.5]);
+        G.players.forEach((n, k) => {
+            const h = H[n] ?? [0], rgb = LINE_RGB[k % 8], off = (k - (G.players.length - 1) / 2) * 0.06;
+            const upto = Math.min(h.length - 1, Math.ceil(((rep + 1) / 4) * (h.length - 1)));   // 最初の数回は左からのびていく
+            for (let t = 0; t < upto; t++) {
+                const a = P(t, h[t]), b = P(t + 1, h[t + 1]), len = Math.hypot(b.x - a.x, b.y - a.y), steps = Math.max(2, Math.ceil(len / 0.16));
+                for (let i = 0; i <= steps; i++) dot(a.x + ((b.x - a.x) * i) / steps, a.y + ((b.y - a.y) * i) / steps + off, oz - 0.05 * k, rgb);
+            }
+        });
+        if (rep < 4) soundAllPlayers("random.click", 1.2 + rep * 0.1);
+        await wait(20);
+    }
+    labels.forEach((e) => { try { e.remove(); } catch {} });
+    // 数字の成績(コイン・ミニゲーム・イベントマス)
+    const rowsTxt = rankRows().map(([n]) => `§f${FACE(skinOf(n))} §l${n}§r  §6${I.coin}${G.coinsGot[n] ?? 0}  §bミニゲーム ${G.mgWins[n] ?? 0}勝  §aイベント ${G.cnt[n]?.event ?? 0}回`).join("\n");
+    for (const p of world.getPlayers()) { if (isBot(p)) continue; new ActionFormData().title(`${FORM_MARK}§l成績`).body(rowsTxt).button("§lOK").show(p).catch(() => {}); }
+    await wait(160);
+    world.getPlayers().forEach((p) => { try { uiManager.closeAllForms(p); } catch {} });
+}
+
+// ---- 39. ルーレットマス ----
+async function rouletteSpace(p) {
+    const name = p.name, others = G.players.filter((n) => n !== name);
+    const OPT = [
+        [`+10${I.coin}`, () => addCoins(name, 10), true], [`+20${I.coin}`, () => addCoins(name, 20), true],
+        ["アイテムを1つ", () => { const ks = Object.keys(ITEMS), k = ks[rand(0, ks.length - 1)]; if ((G.items[name] ?? []).length < 3) { G.items[name].push(k); hud(); } }, true],
+        [`みんなから 3${I.coin}`, () => { for (const n of others) { const c = Math.min(3, G.coins[n] ?? 0); addCoins(n, -c); addCoins(name, c); } }, true],
+        [`-10${I.coin}`, () => addCoins(name, -10), false], ["はずれ", () => {}, false],
+    ];
+    ribbon("gold", "ROULETTE!", "", 160); soundAllPlayers("random.orb", 1); await wait(4);
+    let k = 0;
+    for (let i = 0; i < 20; i++) { k = rand(0, OPT.length - 1); subAll(`§f${OPT[k][0]}`); soundAllPlayers("random.click", 1 + i * 0.04); await wait(2 + Math.floor(i / 4)); }
+    subAll(`§e§l${OPT[k][0]}`); soundAllPlayers(OPT[k][2] ? "random.levelup" : "note.bass", OPT[k][2] ? 1.3 : 0.6);
+    await wait(20);
+    OPT[k][1]();
+    await react(p, OPT[k][2]);
+    await wait(10);
+}
+
+// ---- 40. VS マス: 全員 10 コインずつ出して、ミニゲームで勝った人が総取り ----
+async function vsSpace(p) {
+    const name = p.name;
+    const list = mgOn(); if (!list.length || G.players.length < 2) return;
+    let pot = 0; for (const n of G.players) { const c = Math.min(10, G.coins[n] ?? 0); addCoins(n, -c, true); pot += c; }
+    hud(); banner("vs", `全員 10${I.coin} ずつ出して勝負！ 勝った人が ${pot}${I.coin} 総取り`, 70); soundAllPlayers("random.totem", 0.9);
+    await wait(75);
+    const id = list[rand(0, list.length - 1)];
+    ribbon("purple", "VS", MINIGAMES[id], 50); await wait(50);
+    cam.fade(); await wait(8); cam.clear(); unlockAll(); bgm("minigame");
+    const players = gp();
+    await playMinigame(id, players);
+    bgm("board");
+    cam.fade(); await wait(8);
+    for (const q of gp()) { q.addTag("mpl_board"); q.teleport(spot(G.pos[q.name], G.players.indexOf(q.name)), lookCenter); }
+    lockBoard();
+    const groups = lastRank.length ? lastRank : [];
+    const win = groups.length ? (await breakTies([groups[0]])) .slice(0, 1) : [name];
+    const w = win[0] ?? name, wp = world.getPlayers({ name: w })[0];
+    addCoins(w, pot, true); if (wp) { coinRain(wp, pot); numberPop(wp, pot); follow(wp, 0.6); }
+    banner("win", `${w}  +${pot}${I.coin}`, 70); soundAllPlayers("random.levelup", 1.2);
+    await wait(60);
+    follow(p, 0.6);
+}
+
+// ---- 22. 竜巻(浜・港): 近づいてきて、巻きこまれた人はどこかのマスへ飛ばされる ----
+async function tornado(p) {
+    const name = p.name, l = p.location, a = Math.random() * Math.PI * 2;
+    const from = { x: l.x + Math.cos(a) * 16, y: l.y - 0.5, z: l.z + Math.sin(a) * 16 };
+    const e = spawnAt("mmgplus:tornado", from); if (!e) return;
+    cam.to("@a[tag=mpl_board]", { x: l.x - Math.cos(a) * 9 + 4, y: l.y + 7, z: l.z - Math.sin(a) * 9 - 6 }, { x: (l.x + from.x) / 2, y: l.y + 3, z: (l.z + from.z) / 2 }, 0.8);
+    ribbon("gray", "TORNADO!", "竜巻が来た！", 70);
+    for (let t = 1; t <= 50; t++) {
+        const u = t / 50;
+        try { e.teleport({ x: from.x + (l.x - from.x) * u + Math.sin(t * 0.5) * 0.6, y: from.y, z: from.z + (l.z - from.z) * u + Math.cos(t * 0.5) * 0.6 }); } catch {}
+        if (t % 4 === 0) { soundAllPlayers("elytra.loop", 0.6); cmd(`particle minecraft:large_explosion ${e.location.x} ${l.y + rand(0, 4)} ${e.location.z}`); }
+        await wait(1);
+    }
+    pose(p, "surprise");
+    for (let t = 1; t <= 20; t++) { try { p.teleport({ x: l.x + Math.cos(t * 0.8) * 1.2, y: l.y + t * 0.45, z: l.z + Math.sin(t * 0.8) * 1.2 }); } catch {} await wait(1); }
+    cam.fade("@a", 0.25, 0.3, 0.35); await wait(7);
+    let i; do { i = rand(1, SPACES.length - 1); } while (["start", "shop"].includes(SPACES[i].kind) || i === G.pos[name]);
+    G.pos[name] = i; p.teleport(spot(i), lookCenter); warpIn(p);
+    try { e.remove(); } catch {}
+    follow(p, 0.6); await wait(14);
+    ribbon("gray", "BLOWN AWAY", `${name} は ${SPACES[i].zone === "volcano" ? "火山" : "どこか"}へ飛ばされた！`, 50); await react(p, false, 0.5);
+}
+
+// ---- 23. クジラ: 沖に出てきて潮をふく。近くの人にコイン ----
+async function whale(p) {
+    const W = BD.waves ?? []; if (!W.length) return happening(p);
+    const l = p.location;
+    const [wx0, wz0, yaw] = [...W].sort((a, b) => Math.hypot(a[0] - l.x, a[1] - l.z) - Math.hypot(b[0] - l.x, b[1] - l.z))[0];
+    const r = (yaw * Math.PI) / 180, lx = -Math.sin(r), lz = Math.cos(r), at = { x: wx0 + 0.5 - lx * 12, z: wz0 + 0.5 - lz * 12 };
+    const e = spawnAt("mmgplus:whale", { x: at.x, y: -5, z: at.z }); if (!e) return;
+    try { e.setRotation({ x: 0, y: yaw + 90 }); } catch {}
+    cam.to("@a[tag=mpl_board]", { x: at.x + lx * 14 - lz * 8, y: 7, z: at.z + lz * 14 + lx * 8 }, { x: at.x, y: 1, z: at.z }, 0.9);
+    await wait(16);
+    ribbon("blue", "WHALE!", "沖にクジラが…！", 80); soundAllPlayers("mob.dolphin.blowhole", 0.6);
+    for (let t = 1; t <= 24; t++) { try { e.teleport({ x: at.x, y: -5 + (4.4 * t) / 24, z: at.z }); } catch {} await wait(1); }
+    for (let t = 0; t < 30; t++) {
+        for (let k = 0; k < 3; k++) cmd(`particle minecraft:water_splash_particle ${at.x + rand(-1, 1) * 0.4} ${1 + t * 0.12 + k * 0.6} ${at.z + rand(-1, 1) * 0.4}`);
+        if (t % 6 === 0) soundAllPlayers("random.splash", 0.8);
+        await wait(1);
+    }
+    const near = G.players.filter((n) => { const s = SPACES[G.pos[n]]; return Math.hypot(s.x - at.x, s.z - at.z) < 30; });
+    for (const n of near.length ? near : [p.name]) { addCoins(n, 5); const q = world.getPlayers({ name: n })[0]; if (q) numberPop(q, 5); }
+    ribbon("blue", `WHALE BONUS +5${I.coin}`, `近くにいた ${(near.length ? near : [p.name]).join(", ")}`, 60);
+    await wait(40);
+    for (let t = 1; t <= 24; t++) { try { e.teleport({ x: at.x, y: -0.6 - (4.4 * t) / 24, z: at.z }); } catch {} await wait(1); }
+    try { e.remove(); } catch {}
+    follow(p, 0.6); await wait(10);
+}
+
+// ---- 27・28. 雷雨 / 夜のいたずら(たまに): マスを何ターンか別の種類にする ----
+G.tmpKinds = [];
+function setSpaceKind(i, kind) {
+    SPACES[i].kind = kind;
+    for (const [e, , j] of spaceHomes) if (j === i) { try { e.setProperty("mmgplus:kind", Math.max(0, SPACE_KIND.indexOf(kind))); } catch {} }
+}
+function restoreKinds() {
+    G.tmpKinds = (G.tmpKinds ?? []).filter((t) => { if (G.turn < t.until) return true; setSpaceKind(t.i, t.kind); return false; });
+}
+const freeBlues = (n) => SPACES.map((s, i) => i).filter((i) => SPACES[i].kind === "blue" && i !== G.star && !G.players.some((m) => Math.hypot(SPACES[G.pos[m]].x - SPACES[i].x, SPACES[G.pos[m]].z - SPACES[i].z) < 8)).sort(() => Math.random() - 0.5).slice(0, n);
+async function storm() {
+    cmd("gamerule dofiretick false"); cmd("weather thunder");
+    cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1); await wait(20);
+    ribbon("gray", "THUNDERSTORM!", "雷が落ちたマスは 2ターンのあいだドクロマスに！", 90); soundAllPlayers("ambient.weather.thunder", 1);
+    for (const i of freeBlues(2)) {
+        const s = SPACES[i];
+        cam.to("@a[tag=mpl_board]", { x: s.x + 6, y: s.y + 8, z: s.z - 9 }, { x: s.x + 0.5, y: s.y + 1, z: s.z + 0.5 }, 0.7); await wait(18);
+        cmd(`summon lightning_bolt ${s.x + 0.5} ${s.y + 1} ${s.z + 0.5}`); cmd("camerashake add @a 0.4 0.4 positional");
+        G.tmpKinds.push({ i, kind: s.kind, until: G.turn + 2 }); setSpaceKind(i, "skull");
+        await wait(30);
+    }
+    cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1); await wait(20);
+}
+async function nightPrank() {
+    cmd("time set 18000");
+    cam.to("@a[tag=mpl_board]", VIEW.pos, VIEW.look, 1); await wait(20);
+    ribbon("purple", "NIGHT PRANK!", "夜のあいだに、鏡のガイコツがいたずら…", 90); soundAllPlayers("mob.skeleton.say", 0.7);
+    const sk = spawnAt("mmgplus:mirrorskel", { x: SPACES[0].x + 0.5, y: SPACES[0].y + 1, z: SPACES[0].z + 0.5 });
+    for (const i of freeBlues(3)) {
+        const s = SPACES[i], to = { x: s.x + 0.5, y: s.y + 1, z: s.z + 0.5 };
+        cam.to("@a[tag=mpl_board]", { x: to.x + 5, y: to.y + 4, z: to.z - 7 }, to, 0.6); await wait(10);
+        try { sk?.teleport(to); } catch {}
+        cmd(`particle minecraft:soul_particle ${to.x} ${to.y + 1} ${to.z}`); soundAllPlayers("mob.skeleton.step", 0.8);
+        try { sk?.setProperty("mmgplus:act", 1); } catch {}
+        await wait(14);
+        G.tmpKinds.push({ i, kind: s.kind, until: G.turn + 2 }); setSpaceKind(i, "red"); soundAllPlayers("mob.zombie.unfect", 1.4);
+        await wait(16);
+    }
+    try { sk?.remove(); } catch {}
+    ribbon("red", "青マスが赤マスに…", "2ターンでもとにもどる", 60);
+    await wait(50);
+    cmd(`time set ${G.spurt ? 12600 : 6000}`);
+}
+
+// ---- 33. アイテム: 自分の番のサイコロを止める前だけ持ち物に入る。右クリックで使う(確認なし)→ 頭の上に掲げる ----
+const useQ = new Map();
+let useWindow = null;
+function giveUseItems(p) {
+    if (isBot(p)) return;
+    const inv = p.getComponent("minecraft:inventory")?.container; if (!inv) return;
+    (G.items[p.name] ?? []).slice(0, 3).forEach((k, i) => { const it = new ItemStack(`mpl:use_${k}`, 1); it.lockMode = ItemLockMode.inventory; inv.setItem(i, it); });
+    if ((G.items[p.name] ?? []).length) boardMsg(p, "§eアイテムは今だけ使える(持って右クリック)", 80);
+}
+function takeUseItems(p) {
+    const inv = p?.getComponent?.("minecraft:inventory")?.container; if (!inv) return;
+    for (let i = 0; i < inv.size; i++) if (inv.getItem(i)?.typeId?.startsWith("mpl:use_")) inv.setItem(i);
+}
+world.afterEvents.itemUse.subscribe((ev) => {
+    const id = ev.itemStack?.typeId; if (!id?.startsWith("mpl:use_")) return;
+    const p = ev.source;
+    if (useWindow !== p.name) { bar(p, "§7アイテムは自分の番の、サイコロを止める前だけ使える"); return; }
+    const q = useQ.get(p.name) ?? []; q.push(id.slice(8)); useQ.set(p.name, q);
+});
+system.runInterval(() => { for (const p of world.getPlayers()) if (p.name !== useWindow) takeUseItems(p); }, 40);
+// 使う: 持ち物から消して、頭の上に掲げる → 効き目。返すのは true(使った)/ false(使えなかった)
+async function applyItem(p, k, st) {
+    const name = p.name, bag = G.items[name] ?? [];
+    if (!bag.includes(k)) return false;
+    if (k !== "magnet" && st.main) { boardMsg(p, "§7サイコロのアイテムは1ターンに1つだけ", 50); return false; }
+    if (k === "magnet" && G.magnet[name]) return false;
+    bag.splice(bag.indexOf(k), 1); hud(); cnt(name, "item"); takeUseItems(p); giveUseItems(p);
+    const l = p.location;
+    pose(p, "cheer");
+    const show = spawnAt(`mpl:item_${k}`, { x: l.x, y: l.y + 2.4, z: l.z }) ?? spawnAt("mmgplus:board", { x: l.x, y: l.y + 2.6, z: l.z });
+    if (show?.typeId === "mmgplus:board") show.nameTag = `${ICON[k] ?? ""}`;
+    const tag = spawnAt("mmgplus:board", { x: l.x, y: l.y + 3.3, z: l.z }); if (tag) tag.nameTag = `§e§l${ITEMS[k].name}`;
+    soundAllPlayers("random.orb", 0.8); cmd(`particle minecraft:totem_particle ${l.x} ${l.y + 2.4} ${l.z}`);
+    await wait(30);
+    try { show?.remove(); } catch {} try { tag?.remove(); } catch {}
+    const others = G.players.filter((n) => n !== name);
+    if (k === "magnet") { G.magnet[name] = true; return true; }
+    st.main = k;
+    if (k === "double") st.dice = 2;
+    if (k === "triple") st.dice = 3;
+    if (k === "pipe" && others.length) { const t = others[rand(0, others.length - 1)]; [G.pos[name], G.pos[t]] = [G.pos[t], G.pos[name]]; await swapAnim(name, t); }
+    if (k === "gold") { await warpOut(p); cam.fade("@a", 0.25, 0.3, 0.35); await wait(7); G.pos[name] = prevOf(G.star); p.teleport(spot(G.pos[name]), lookCenter); warpIn(p); await react(p, true, 0.4); }
+    if (k === "glove" && others.length) { const t = others.sort((a, b) => (G.coins[b] ?? 0) - (G.coins[a] ?? 0))[0], n = Math.min(rand(5, 10), G.coins[t] ?? 0); addCoins(t, -n); addCoins(name, n); ribbon("purple", `${t} から ${n}${I.coin} うばった！`, name, 50); await react(p, true); const tp = world.getPlayers({ name: t })[0]; if (tp) await react(tp, false); }
+    if (k === "fix") {
+        let n = 10;
+        if (isBot(p)) { const d = starDist(G.pos[name]); n = d >= 1 && d <= 10 ? d : 10; }
+        else {
+            const f = new ActionFormData().title(`${WAY_MARK}§l八百長ダイス: 何マス進む？`);
+            for (let j = 1; j <= 10; j++) f.button(`§l${j}`);
+            const r = await Promise.race([f.show(p).catch(() => ({ canceled: true })), wait(300).then(() => ({ canceled: true }))]);
+            try { uiManager.closeAllForms(p); } catch {}
+            if (!r.canceled) n = r.selection + 1;
+        }
+        G.fixRoll[name] = n;
+    }
+    if (k === "slow") { const t = await pickTarget(p, "スローダイス"); if (t) { G.slow[t] = true; ribbon("blue", `${t} の次のサイコロは 1〜3`, name, 50); await wait(40); } }
+    if (k === "ticket") { G.ticket = name; ribbon("purple", "次のミニゲームは自分で選べる！", name, 50); await wait(40); }
+    if (k === "bag") { const t = await pickTarget(p, "ぶんどり袋"); const tb = t ? G.items[t] ?? [] : []; if (tb.length) { const kk = tb.splice(rand(0, tb.length - 1), 1)[0]; if (bag.length < 3) bag.push(kk); hud(); ribbon("purple", `${t} から ${ITEMS[kk].name} をもらった！`, name, 50); await react(p, true); } else { ribbon("gray", `${t ?? "だれか"} は何も持っていなかった…`, name, 45); await wait(40); } }
+    if (k === "reverse") { const t = await pickTarget(p, "逆さサイコロ", true); if (t) { G.reverse[t] = true; ribbon("red", `${t} は次に後ろへ進む！`, name, 50); await wait(40); } }
+    follow(p, 0.6);
+    return true;
+}
+// BOT のアイテム(前と同じ考え方)
+function botItems(p) {
+    const name = p.name, bag = G.items[name] ?? [], dist = starDist(G.pos[name]), out = [];
+    if (bag.includes("magnet")) out.push("magnet");
+    const main = (dist > 10 && bag.includes("triple")) ? "triple" : (dist > 6 && bag.includes("double")) ? "double" : (dist >= 1 && dist <= 10 && bag.includes("fix")) ? "fix" : (Math.random() < 0.4 ? bag.find((k) => k !== "magnet") : null);
+    if (main) out.push(main);
+    return out;
+}
+
+// ---- 44. ミニゲームの前: カメラがステージをぐるっと回る ----
+async function stageTour(id, ticks) {
+    const c = (START_AT[id] ?? "0 1 0").split(" ").map(Number), ctr = { x: c[0] + 0.5, y: Math.max(1, c[1]), z: c[2] + 0.5 };
+    const N = 4, per = Math.floor(ticks / N);
+    for (let k = 0; k < N; k++) {
+        const a = (k / N) * Math.PI * 2 + 0.6;
+        cmd(`camera @a[tag=playing] set minecraft:free ease ${(per / 20).toFixed(2)} in_out_sine pos ${ctr.x + Math.cos(a) * 18} ${ctr.y + 10} ${ctr.z + Math.sin(a) * 18} facing ${ctr.x} ${ctr.y} ${ctr.z}`);
+        await wait(per);
+    }
+    cmd("camera @a[tag=playing] clear");
+}

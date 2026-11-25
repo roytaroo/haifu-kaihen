@@ -1,0 +1,36 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "mmgplus:waysign",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "w0": "textures/entity/mpl_x/way0",
+    "w1": "textures/entity/mpl_x/way1",
+    "w2": "textures/entity/mpl_x/way2",
+    "w3": "textures/entity/mpl_x/way3",
+    "w4": "textures/entity/mpl_x/way4",
+    "w5": "textures/entity/mpl_x/way5",
+    "w6": "textures/entity/mpl_x/way6",
+    "w7": "textures/entity/mpl_x/way7",
+    "w8": "textures/entity/mpl_x/way8"
+   },
+   "geometry": {
+    "default": "geometry.mpl.waysign"
+   },
+   "render_controllers": [
+    "controller.render.mpl_waysign"
+   ],
+   "animations": {
+    "a": "animation.mpl.waysign"
+   },
+   "scripts": {
+    "animate": [
+     "a"
+    ]
+   }
+  }
+ }
+}

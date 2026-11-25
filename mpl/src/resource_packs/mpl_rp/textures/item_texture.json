@@ -22,6 +22,39 @@
   },
   "mpl_map": {
    "textures": "textures/items/mpl_map"
+  },
+  "mpl_use_double": {
+   "textures": "textures/items/mpl_use_double"
+  },
+  "mpl_use_triple": {
+   "textures": "textures/items/mpl_use_triple"
+  },
+  "mpl_use_pipe": {
+   "textures": "textures/items/mpl_use_pipe"
+  },
+  "mpl_use_gold": {
+   "textures": "textures/items/mpl_use_gold"
+  },
+  "mpl_use_glove": {
+   "textures": "textures/items/mpl_use_glove"
+  },
+  "mpl_use_fix": {
+   "textures": "textures/items/mpl_use_fix"
+  },
+  "mpl_use_slow": {
+   "textures": "textures/items/mpl_use_slow"
+  },
+  "mpl_use_magnet": {
+   "textures": "textures/items/mpl_use_magnet"
+  },
+  "mpl_use_ticket": {
+   "textures": "textures/items/mpl_use_ticket"
+  },
+  "mpl_use_bag": {
+   "textures": "textures/items/mpl_use_bag"
+  },
+  "mpl_use_reverse": {
+   "textures": "textures/items/mpl_use_reverse"
   }
  }
 }

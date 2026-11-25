@@ -12,6 +12,7 @@ KINDS = [  # 名前, 色, マーク
     ('blue', (70, 150, 255), 'plus'), ('red', (240, 70, 70), 'minus'), ('happen', (70, 200, 90), '?'), ('event', (255, 150, 40), '!'),
     ('lucky', (255, 205, 50), 'star'), ('shop', (180, 95, 235), 'bag'), ('skull', (70, 58, 86), 'skull'), ('bank', (40, 195, 205), 'coin'),
     ('shuffle', (255, 115, 195), 'shuffle'), ('mirror', (135, 75, 210), 'mirror'), ('start', (250, 250, 252), 'GO'),
+    ('roulette', (255, 160, 40), 'roulette'), ('vs', (225, 45, 80), 'VS'),
 ]
 R = 20; TH = 2; SEG = 32
 N = 512; C = N / 2   # 上の面の絵は 512 で描いて 128 に
@@ -35,8 +36,8 @@ def top(col, mark):
         outl(lambda d, c, e: (d.rounded_rectangle((C - 34 - e, C - 120 - e, C + 34 + e, C + 120 + e), 26 + e, fill=c), d.rounded_rectangle((C - 120 - e, C - 34 - e, C + 120 + e, C + 34 + e), 26 + e, fill=c)))
     elif mark == 'minus':
         outl(lambda d, c, e: d.rounded_rectangle((C - 120 - e, C - 34 - e, C + 120 + e, C + 34 + e), 26 + e, fill=c))
-    elif mark in ('?', '!', 'GO'):
-        f = ImageFont.truetype(FONT, 300 if mark != 'GO' else 210)
+    elif mark in ('?', '!', 'GO', 'VS'):
+        f = ImageFont.truetype(FONT, 300 if mark not in ('GO', 'VS') else 210)
         d.text((C, C + 10), mark, font=f, anchor='mm', fill=(230, 40, 60, 255) if mark == 'GO' else WHITE, stroke_width=14, stroke_fill=OUT if mark != 'GO' else (255, 255, 255, 255))
     elif mark == 'star':
         pts = lambda r1, r2: [(C + math.cos(math.radians(-90 + i * 36)) * (r1 if i % 2 == 0 else r2), C + 14 + math.sin(math.radians(-90 + i * 36)) * (r1 if i % 2 == 0 else r2)) for i in range(10)]
@@ -57,6 +58,10 @@ def top(col, mark):
             d.rounded_rectangle((C - 110 * s - e if s > 0 else C - 40 - e, y - 22 - e, C + 40 + e if s > 0 else C + 110 + e, y + 22 + e), 18 + e, fill=c)
             d.polygon([(C + 20 * s - e * s, y - 72 - e), (C + 140 * s + e * s, y), (C + 20 * s - e * s, y + 72 + e)], fill=c)
         for e, c in ((14, OUT), (0, WHITE)): arrow(d, c, e, C - 62, 1); arrow(d, c, e, C + 62, -1)
+    elif mark == 'roulette':   # 6 つに分けた円 + まんなかのじく + 上の針
+        d.ellipse((C - 150, C - 150, C + 150, C + 150), fill=OUT)
+        for k in range(6): d.pieslice((C - 136, C - 136, C + 136, C + 136), k * 60 - 90, k * 60 - 30, fill=[WHITE, (255, 215, 80, 255)][k % 2])
+        d.ellipse((C - 30, C - 30, C + 30, C + 30), fill=OUT); d.polygon([(C - 26, C - 176), (C + 26, C - 176), (C, C - 116)], fill=OUT); d.polygon([(C - 16, C - 168), (C + 16, C - 168), (C, C - 128)], fill=(230, 40, 60, 255))
     elif mark == 'mirror':
         d.ellipse((C - 100, C - 150, C + 100, C + 150), fill=OUT); d.ellipse((C - 86, C - 136, C + 86, C + 136), fill=(255, 210, 80, 255))
         d.ellipse((C - 64, C - 112, C + 64, C + 112), fill=(190, 230, 255, 255)); d.polygon([(C - 30, C - 80), (C + 10, C - 80), (C - 40, C + 20), (C - 60, C + 20)], fill=(255, 255, 255, 220))

@@ -15,7 +15,9 @@
       "Texture.bank",
       "Texture.shuffle",
       "Texture.mirror",
-      "Texture.start"
+      "Texture.start",
+      "Texture.roulette",
+      "Texture.vs"
      ]
     }
    },

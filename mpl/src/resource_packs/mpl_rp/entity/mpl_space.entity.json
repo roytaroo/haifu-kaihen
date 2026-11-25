@@ -17,7 +17,9 @@
     "bank": "textures/entity/mpl_space/bank",
     "shuffle": "textures/entity/mpl_space/shuffle",
     "mirror": "textures/entity/mpl_space/mirror",
-    "start": "textures/entity/mpl_space/start"
+    "start": "textures/entity/mpl_space/start",
+    "roulette": "textures/entity/mpl_space/roulette",
+    "vs": "textures/entity/mpl_space/vs"
    },
    "geometry": {
     "default": "geometry.mpl.space"

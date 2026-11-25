@@ -1,0 +1,103 @@
+{
+ "format_version": "1.8.0",
+ "render_controllers": {
+  "controller.render.mpl_cn_s": {
+   "arrays": {
+    "textures": {
+     "Array.s": [
+      "Texture.plus",
+      "Texture.minus"
+     ]
+    }
+   },
+   "geometry": "Geometry.s",
+   "materials": [
+    {
+     "*": "Material.default"
+    }
+   ],
+   "textures": [
+    "Array.s[q.property('mmgplus:neg')]"
+   ]
+  },
+  "controller.render.mpl_cn_t": {
+   "arrays": {
+    "textures": {
+     "Array.t": [
+      "Texture.dg0",
+      "Texture.dg1",
+      "Texture.dg2",
+      "Texture.dg3",
+      "Texture.dg4",
+      "Texture.dg5",
+      "Texture.dg6",
+      "Texture.dg7",
+      "Texture.dg8",
+      "Texture.dg9",
+      "Texture.dr0",
+      "Texture.dr1",
+      "Texture.dr2",
+      "Texture.dr3",
+      "Texture.dr4",
+      "Texture.dr5",
+      "Texture.dr6",
+      "Texture.dr7",
+      "Texture.dr8",
+      "Texture.dr9"
+     ]
+    }
+   },
+   "geometry": "Geometry.t",
+   "materials": [
+    {
+     "*": "Material.default"
+    }
+   ],
+   "textures": [
+    "Array.t[math.floor(q.property('mmgplus:n') / 10) + q.property('mmgplus:neg') * 10]"
+   ],
+   "part_visibility": [
+    {
+     "*": "q.property('mmgplus:n') >= 10"
+    }
+   ]
+  },
+  "controller.render.mpl_cn_o": {
+   "arrays": {
+    "textures": {
+     "Array.o": [
+      "Texture.cg0",
+      "Texture.cg1",
+      "Texture.cg2",
+      "Texture.cg3",
+      "Texture.cg4",
+      "Texture.cg5",
+      "Texture.cg6",
+      "Texture.cg7",
+      "Texture.cg8",
+      "Texture.cg9",
+      "Texture.cr0",
+      "Texture.cr1",
+      "Texture.cr2",
+      "Texture.cr3",
+      "Texture.cr4",
+      "Texture.cr5",
+      "Texture.cr6",
+      "Texture.cr7",
+      "Texture.cr8",
+      "Texture.cr9"
+     ]
+    }
+   },
+   "geometry": "Geometry.o",
+   "materials": [
+    {
+     "*": "Material.default"
+    }
+   ],
+   "textures": [
+    "Array.o[math.mod(q.property('mmgplus:n'), 10) + q.property('mmgplus:neg') * 10]"
+   ]
+  }
+ }
+}

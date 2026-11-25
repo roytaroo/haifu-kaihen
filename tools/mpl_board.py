@@ -76,6 +76,8 @@ for g in [(1, 8), (-3, 8)]: N(*g)['kind'] = 'lucky'
 N(-5, -9)['gate'] = 'tide'
 N(3, -10)['gate'] = 'tidehigh'
 for g in [(4, -10), (6, -10)]: N(*g)['kind'] = 'lucky'
+for g in [(7, -1), (-3, 6), (-7, -4)]: N(*g)['kind'] = 'roulette'   # v55: ルーレットマス・VS マス
+for g in [(7, 3), (-3, -9)]: N(*g)['kind'] = 'vs'
 N(7, 2)['n'] = [1, 0]; N(-5, 6)['n'] = [0, 1]; N(-7, -6)['n'] = [-1, 0]
 
 # 道のセル: (x,z) → 高さ。マスは 3x3、マスの間 3セルで高さをつなぐ
@@ -213,7 +215,7 @@ clear(fx - 1, 0, fz - 1, fx + 1, 6, fz - 1)
 # ===== 道をしく =====
 ROADMAT = {'port': 'smooth_sandstone', 'beach': 'smooth_sandstone', 'harbor': 'spruce_planks', 'cliff': 'polished_andesite', 'crystal': 'polished_andesite', 'foot': 'polished_deepslate',
            'forest': 'packed_mud', 'tree': 'spruce_planks', 'ship': 'spruce_planks', 'volcano': 'polished_blackstone_bricks', 'shrine': 'quartz_bricks', 'meadow': 'smooth_sandstone'}
-COL = {'shuffle': 'pink_concrete', 'bank': 'cyan_concrete', 'start': 'white_concrete', 'blue': 'light_blue_concrete', 'red': 'red_concrete', 'event': 'lime_concrete', 'lucky': 'yellow_concrete', 'shop': 'purple_concrete', 'skull': 'black_concrete', 'mirror': 'amethyst_block'}
+COL = {'shuffle': 'pink_concrete', 'roulette': 'orange_concrete', 'vs': 'red_concrete', 'bank': 'cyan_concrete', 'start': 'white_concrete', 'blue': 'light_blue_concrete', 'red': 'red_concrete', 'event': 'lime_concrete', 'lucky': 'yellow_concrete', 'shop': 'purple_concrete', 'skull': 'black_concrete', 'mirror': 'amethyst_block'}
 BRIDGE_BOX = None
 for (x, z), y in ROAD.items():
     g = H.get((x, z))
@@ -555,6 +557,7 @@ for gz in (-6, -8):
     if _free_cells([(x + a_, z + b_) for a_ in range(0, 3) for b_ in range(0, 2)]): crates(x, z)
 # ===== v5 大建築(大聖堂・天使・金の輪・火山・回廊・滝・藤・桜)=====
 if not os.environ.get('NO_GRAND'): exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mpl_board_grand.py'), encoding='utf-8').read())
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mpl_board_extra.py'), encoding='utf-8').read())
 # ===== コマンドにまとめる =====
 def merge():
     by = {}
@@ -635,8 +638,27 @@ for (x, z) in coast:
     yaw = round(math.degrees(math.atan2(-vx, vz)))   # 陸の方を向く(Bedrock の向き)
     WAVES.append([x, z, yaw])
 print('waves', len(WAVES))
+# ===== 小さな地図(右上): 14 x 12 ます。上が北(z 大)、左が東(x 大)= 全体のカメラと同じ向き。ます = 海0 砂1 草2 岩3 道4 =====
+MAP = {'x0': X1, 'x1': X0, 'z0': Z1, 'z1': 44, 'cols': 14, 'rows': 12}
+_cw, _ch = (MAP['x0'] - MAP['x1']) / MAP['cols'], (MAP['z0'] - MAP['z1']) / MAP['rows']
+_rows = []
+for r in range(MAP['rows']):
+    line = ''
+    for c in range(MAP['cols']):
+        xa, za = MAP['x0'] - c * _cw, MAP['z0'] - r * _ch
+        cells = [(round(xa - i * _cw / 4), round(za - j * _ch / 4)) for i in range(4) for j in range(4)]
+        land = [cc for cc in cells if cc in H and H[cc] >= 0]
+        if any(xa - _cw < nd['x'] <= xa and za - _ch < nd['z'] <= za for nd in nodes): t = 4
+        elif len(land) < 8: t = 0
+        elif sum(1 for cc in land if H[cc] >= 9) > len(land) / 2: t = 3
+        elif sum(1 for cc in land if V.get((cc[0], H[cc], cc[1]), '').startswith('sand')) > len(land) / 2: t = 1
+        else: t = 2
+        line += str(t)
+    _rows.append(line)
+MAP['tiles'] = _rows
+print('\n'.join(_rows))
 data = {'spaces': out_nodes, 'cmds': cmds, 'area': [X0, YB, Z0, X1, YT, Z1], 'island': [X0, YB, 44, X1, YT, Z1], 'center': {'x': 0.5, 'z': ZC + 6.5}, 'lobby': {'x': 0.5, 'y': 1, 'z': wz(-9) - 4.5},
-        'finaleZ': STAGE['z'], 'stage': STAGE, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 24, 'tide': TIDE, 'tidegate': TIDEGATE, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': SHIP_GHOST_Z}, 'to': {'x': -27, 'z': SHIP_GHOST_Z}, 'plank': {'x': -27, 'edge': SHIP_CZ - SHIP_HW}}}
+        'finaleZ': STAGE['z'], 'stage': STAGE, 'bridge': BRIDGE_BOX, 'crater': {'x': 0.5, 'y': RIM - 3, 'z': wz(9.8)}, 'volcanoFoot': at[(4, 6)], 'toll': 10, 'version': 25, 'tide': TIDE, 'tidegate': TIDEGATE, 'light': LIGHT, 'windmill': WINDMILL, 'waysigns': WAYSIGNS, 'gulls': GULLS, 'minimap': MAP, 'waves': WAVES, 'flood': FLOOD, 'volc': VOLC, 'dj': dict(DJ, eq=EQ), 'ghost': {'from': {'x': X0 + 3, 'z': SHIP_GHOST_Z}, 'to': {'x': -27, 'z': SHIP_GHOST_Z}, 'plank': {'x': -27, 'edge': SHIP_CZ - SHIP_HW}}}
 open(OUT_JS, 'w', encoding='utf-8').write('// tools/mpl_board.py で作ったボード「女神の島」のデータ(手で書きかえない)\nexport const BOARD_DATA = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
 print('spaces', len(nodes), 'junctions', sum(1 for n in nodes if len(n['next']) > 1), 'cmds', len(cmds), 'kb', os.path.getsize(OUT_JS) // 1024)
 

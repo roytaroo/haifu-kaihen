@@ -15,6 +15,11 @@
     "binding_type": "view",
     "source_property_name": "((#text - '§r§b§r§n§r') = #text)",
     "target_property_name": "#visible"
+   },
+   {
+    "binding_type": "view",
+    "source_property_name": "((#text - '§r§b§r§n§r') = #text)",
+    "target_property_name": "#visible"
    }
   ],
   "font_type": "unicode"
@@ -25,6 +30,15 @@
     "binding_name": "#hud_subtitle_text_string",
     "binding_type": "global",
     "binding_name_override": "#text"
+   },
+   {
+    "binding_name": "#hud_title_text_string",
+    "binding_type": "global"
+   },
+   {
+    "binding_type": "view",
+    "source_property_name": "((#hud_title_text_string - '§r§b§r§n§r') = #hud_title_text_string)",
+    "target_property_name": "#visible"
    },
    {
     "binding_name": "#hud_title_text_string",
@@ -5446,11 +5460,29 @@
     "binding_type": "view",
     "source_property_name": "((#hud_title_text_string - '§r§b§r§n§r') = #hud_title_text_string)",
     "target_property_name": "#visible"
+   },
+   {
+    "binding_name": "#hud_title_text_string",
+    "binding_type": "global"
+   },
+   {
+    "binding_type": "view",
+    "source_property_name": "((#hud_title_text_string - '§r§b§r§n§r') = #hud_title_text_string)",
+    "target_property_name": "#visible"
    }
   ]
  },
  "hud_title_text/subtitle_frame/subtitle_background": {
   "bindings": [
+   {
+    "binding_name": "#hud_title_text_string",
+    "binding_type": "global"
+   },
+   {
+    "binding_type": "view",
+    "source_property_name": "((#hud_title_text_string - '§r§b§r§n§r') = #hud_title_text_string)",
+    "target_property_name": "#visible"
+   },
    {
     "binding_name": "#hud_title_text_string",
     "binding_type": "global"
@@ -5471,5 +5503,75 @@
    "100%c + 22px",
    "100%c + 10px"
   ]
+ },
+ "mpl_ab": {
+  "type": "panel",
+  "size": [
+   "100%",
+   "100%"
+  ],
+  "controls": [
+   {
+    "normal@hud.hud_actionbar_text": {
+     "bindings": [
+      {
+       "binding_type": "view",
+       "source_property_name": "(($actionbar_text - '§r§h§r§u§r') = $actionbar_text)",
+       "target_property_name": "#visible"
+      }
+     ]
+    }
+   },
+   {
+    "box": {
+     "type": "image",
+     "texture": "textures/ui/mpl/side",
+     "size": [
+      "100%c + 8px",
+      "100%c + 6px"
+     ],
+     "anchor_from": "top_right",
+     "anchor_to": "top_right",
+     "offset": [
+      -4,
+      4
+     ],
+     "layer": 30,
+     "bindings": [
+      {
+       "binding_type": "view",
+       "source_property_name": "(not (($actionbar_text - '§r§h§r§u§r') = $actionbar_text))",
+       "target_property_name": "#visible"
+      }
+     ],
+     "controls": [
+      {
+       "t": {
+        "type": "label",
+        "text": "$actionbar_text",
+        "layer": 31,
+        "shadow": false,
+        "localize": false,
+        "color": [
+         1,
+         1,
+         1
+        ],
+        "text_alignment": "center",
+        "font_type": "unicode"
+       }
+      }
+     ]
+    }
+   }
+  ]
+ },
+ "root_panel/hud_actionbar_text_area": {
+  "factory": {
+   "name": "hud_actionbar_text_factory",
+   "control_ids": {
+    "hud_actionbar_text": "hud_actionbar_text@hud.mpl_ab"
+   }
+  }
  }
 }
