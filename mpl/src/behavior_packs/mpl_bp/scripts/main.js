@@ -2800,8 +2800,23 @@ const lockBoard = () => { cmd("inputpermission set @a[tag=mpl_board] lateral_mov
 const unlockAll = () => { cmd("inputpermission set @a lateral_movement enabled"); cmd("inputpermission set @a movement enabled"); cmd("tag @a remove mpl_lock"); };
 
 async function startParty(turns, players, hc = {}) {
-    if (G.on) return;
-    Object.assign(G, { on: true, spurt: false, skin: {}, starHist: {}, tmpKinds: [], turn: 0, turns, cnt: {}, prevRank: {}, subst: {}, played: [], mgCount: 0, fixRoll: {}, slow: {}, magnet: {}, reverse: {}, crystal: {}, bank: 0, ghost: null, ghostUsed: [], ticket: null, rule: null, sale: rand(3, Math.max(3, turns - 1)), players: players.map((p) => p.name).sort(() => Math.random() - 0.5), stars: {}, coins: {}, pos: {}, items: {}, mgWins: {}, coinsGot: {}, now: null });
+    if (G.on || G.starting) return;
+    // キャラ選び → 4人に足りなければ、選ばれていないキャラの BOT をランダムに足す
+    G.starting = true;
+    let skins = {}, added = [];
+    try {
+        await pickCharacters(players); skins = G.skin;
+        const free = SKINS.map((_, i) => i).filter((i) => !Object.values(skins).includes(i)).sort(() => Math.random() - 0.5);
+        const need = Math.max(0, 4 - players.length);
+        for (const i of free.slice(0, need)) { const n = SKIN_NAME(SKINS[i]); cmd(`scriptevent mmgbot:spawnas ${n}`); added.push(n); skins[n] = i; }
+        if (added.length) {
+            ribbon("purple", "BOT が参加！", added.join("  "), 50);
+            for (let t = 0; t < 60 && !added.every((n) => world.getPlayers({ name: n })[0]); t++) await wait(1);
+            players = [...players, ...added.map((n) => world.getPlayers({ name: n })[0]).filter(Boolean)];
+        }
+    } finally { G.starting = false; }
+    G.addedBots = added;
+    Object.assign(G, { on: true, spurt: false, skin: skins, starHist: {}, tmpKinds: [], turn: 0, turns, cnt: {}, prevRank: {}, subst: {}, played: [], mgCount: 0, fixRoll: {}, slow: {}, magnet: {}, reverse: {}, crystal: {}, bank: 0, ghost: null, ghostUsed: [], ticket: null, rule: null, sale: rand(3, Math.max(3, turns - 1)), players: players.map((p) => p.name).sort(() => Math.random() - 0.5), stars: {}, coins: {}, pos: {}, items: {}, mgWins: {}, coinsGot: {}, now: null });
     for (const n of G.players) { G.coins[n] = 10; G.stars[n] = 0; G.pos[n] = 0; G.items[n] = []; }
     G.color = Object.fromEntries(G.players.map((n, i) => [n, ["§c", "§9", "§a", "§e", "§d", "§b", "§6", "§5"][i % 8]]));
     for (const n of G.players) { if (hc[n] === 1) G.coins[n] += 20; if (hc[n] === 2) G.stars[n] += 1; }
@@ -2809,7 +2824,7 @@ async function startParty(turns, players, hc = {}) {
     placeSpaces();
     for (const p of gp()) { p.addTag("mpl_board"); p.teleport(spot(0, G.players.indexOf(p.name)), lookCenter); p.setGameMode(ADVENTURE); }
     lockBoard(); hud();
-    await pickCharacters(gp()); balloonOn();
+    wearSkins(); balloonOn();
     try {
         // オープニング: 島のまわりをカメラが回る
         bgm("board");
@@ -2864,6 +2879,8 @@ async function startParty(turns, players, hc = {}) {
         cmd("kill @e[type=mmgplus:dice]");
         cmd("kill @e[type=villager_v2,tag=mpl_shopkeeper]"); for (const k of Object.keys(ITEMS)) cmd(`kill @e[type=mpl:item_${k}]`);
         try { world.scoreboard.removeObjective("mpl_hud"); } catch {}
+        for (const n of G.addedBots ?? []) cmd(`scriptevent mmgbot:remove ${n}`);   // このゲームのために足した BOT は帰す
+        G.addedBots = [];
         for (const p of world.getPlayers()) { p.teleport(LOBBY); titleScreen(p); }
     }
 }
@@ -3651,7 +3668,7 @@ const FACE = (i, now = false) => String.fromCharCode(0xe400 + (i == null || i < 
 const skinOf = (n) => G.skin?.[n] ?? SKINS.indexOf(String(n).toLowerCase());
 // 48. キャラ選び: すごろくの最初に、人はまだだれも選んでいないキャラから 1 人選ぶ(BOT は自分のキャラ)
 async function pickCharacters(players) {
-    G.skin = {};
+    G.skin = {};   // startParty の前に呼ぶ(G.on はまだ false)
     for (const p of players) if (isBot(p)) { const i = SKINS.indexOf(p.name.toLowerCase()); if (i >= 0) G.skin[p.name] = i; }
     const taken = () => Object.values(G.skin);
     await Promise.all(players.filter((p) => !isBot(p)).map(async (p) => {

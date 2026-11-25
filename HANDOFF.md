@@ -415,3 +415,6 @@
 - 44 ミニゲームの前にカメラがステージを回る(説明はもとから全部あった)
 - 46 チーム戦: 案 20 個のページ https://claude.ai/artifact/C7TaB5s7gTG2L1RRM5H5Yo (collection team20)。だいきが選んでから作る
 - ボード version 25。保留(17・18・26・29・37・49)とやらないは手をつけていない
+
+## v56 4人に足りないときは BOT を足す
+- startParty: 先にキャラ選び(pickCharacters)→ 人数が 4 人より少なければ、だれも選んでいないキャラからランダムに BOT を足す(scriptevent mmgbot:spawnas <名前>)。足した BOT はゲームが終わったら帰す(mmgbot:remove、G.addedBots)。未確認
